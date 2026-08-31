@@ -1,0 +1,11 @@
+Initial F-Droid release.
+
+* Flat, multi-column app grid Home replacement for Android TV / Google TV.
+* Top bar: clock, Wi-Fi status, system settings, launcher settings.
+* Theme (system/light/dark) and background gradient presets.
+* Per-app show/hide and reordering.
+* Menu button on a focused app icon opens that app's System App Info page.
+* Backup and restore of launcher settings, with multiple timestamped
+  backups to choose from.
+* Detects waking from standby and restores the launcher to the
+  foreground if something else took over in the meantime.

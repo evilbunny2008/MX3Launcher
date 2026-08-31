@@ -1,7 +1,9 @@
 # MX3 Launcher
 
-A minimal Google TV launcher that shows a flat grid of
-apps and nothing else.
+A minimal Google TV launcher: a flat grid of apps and nothing else.
+Built as a lighter alternative to full-featured TV launchers (no
+live-TV integration, no content recommendation rows, no search/voice)
+for anyone who just wants a fast app grid.
 
 ## Features
 
@@ -28,6 +30,13 @@ apps and nothing else.
   launcher takes over the screen after waking from standby (which can
   happen if Android frees up the launcher's memory while the screen was
   off), this brings MX3 Launcher back to the front on its own.
+
+## Screen Shots
+
+![Home Screen](metadata/en-US/images/tvScreenShots/1.png){width=500px}
+![Settings Screen 1](metadata/en-US/images/tvScreenShots/2.png){width=500px}<br>
+![Settings Screen 2](metadata/en-US/images/tvScreenShots/3.png){width=500px}
+![App Display Setting Screen](metadata/en-US/images/tvScreenShots/4.png){width=500px}
 
 ## Installing
 

@@ -1,0 +1,1 @@
+* Tweaked the F-Droid build process
