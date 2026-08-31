@@ -1,0 +1,31 @@
+<svg width="1024" height="500" viewBox="0 0 1024 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2B2F77"/>
+      <stop offset="100%" stop-color="#5B4FE0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background - same gradient as the app icon, for consistent branding -->
+  <rect x="0" y="0" width="1024" height="500" fill="url(#bg)"/>
+
+  <!-- 3x3 app grid motif, same design as the app icon itself, scaled up
+       and placed on the left third of the banner -->
+  <g transform="translate(80,101) scale(0.9)">
+    <rect x="0"   y="0"   width="90" height="90" rx="22" fill="#1D1E24"/>
+    <rect x="120" y="0"   width="90" height="90" rx="22" fill="#1D1E24"/>
+    <rect x="240" y="0"   width="90" height="90" rx="22" fill="#1D1E24"/>
+
+    <rect x="0"   y="120" width="90" height="90" rx="22" fill="#1D1E24"/>
+    <rect x="120" y="120" width="90" height="90" rx="22" fill="#5CE1E6"/>
+    <rect x="240" y="120" width="90" height="90" rx="22" fill="#1D1E24"/>
+
+    <rect x="0"   y="240" width="90" height="90" rx="22" fill="#1D1E24"/>
+    <rect x="120" y="240" width="90" height="90" rx="22" fill="#1D1E24"/>
+    <rect x="240" y="240" width="90" height="90" rx="22" fill="#1D1E24"/>
+  </g>
+
+  <!-- Title + tagline on the right -->
+  <text x="410" y="245" font-family="DejaVu Sans" font-weight="bold" font-size="71" fill="#FFFFFF">MX3 Launcher</text>
+  <text x="410" y="300" font-family="DejaVu Sans" font-size="34" fill="#C9CCF5">A minimal launcher for Google TV</text>
+</svg>
