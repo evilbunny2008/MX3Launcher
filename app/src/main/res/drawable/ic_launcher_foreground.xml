@@ -6,8 +6,8 @@
 
     <!--
       Content is centered at (256,256) in the original 512-canvas design,
-      so this is a straight scale-around-center: pivot = content center,
-      translate = (54,54) minus that same center after scaling collapses
+      so this is a straight scale-around-centre: pivot = content centre,
+      translate = (54,54) minus that same centre after scaling collapses
       to zero offset. Scale 0.14 keeps the grid's corner tiles safely
       within the ~66dp safe-zone circle that survives every launcher
       mask shape - verified empirically against a circle-mask preview
@@ -31,7 +31,7 @@
         <!-- Row 2 -->
         <path android:pathData="M113,211 H159 A22,22 0 0 1 181,233 V279 A22,22 0 0 1 159,301 H113 A22,22 0 0 1 91,279 V233 A22,22 0 0 1 113,211 Z" android:fillColor="#1D1E24" />
         <!-- Accent tile - ties to the cyan highlight used throughout
-             the sibling Button Mapper icon (sensor dot, d-pad center,
+             the sibling Button Mapper icon (sensor dot, d-pad centre,
              motion arcs) -->
         <path android:pathData="M233,211 H279 A22,22 0 0 1 301,233 V279 A22,22 0 0 1 279,301 H233 A22,22 0 0 1 211,279 V233 A22,22 0 0 1 233,211 Z" android:fillColor="#5CE1E6" />
         <path android:pathData="M353,211 H399 A22,22 0 0 1 421,233 V279 A22,22 0 0 1 399,301 H353 A22,22 0 0 1 331,279 V233 A22,22 0 0 1 353,211 Z" android:fillColor="#1D1E24" />

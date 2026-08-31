@@ -19,8 +19,7 @@ android {
 
     defaultConfig {
         applicationId = "com.odiousapps.mx3launcher"
-        // Android 14 (API 34).
-        minSdk = 26
+        minSdk = 29
         targetSdk = 37
         versionCode = 40
         versionName = "0.0.40"
