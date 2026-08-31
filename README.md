@@ -61,4 +61,4 @@ Backup, restore, and reset-to-defaults are in the same screen, under
 
 ## License
 
-GPL-3.0-or-later. See `LICENSE`.
+Unlicense (public domain). See `LICENSE`.

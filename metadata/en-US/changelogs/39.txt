@@ -1,1 +1,1 @@
-* Added metatdata/en-US/images/icon.png
+* Added metadata/en-US/images/icon.png

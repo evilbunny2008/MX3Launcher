@@ -1,0 +1,2 @@
+* Added a monochrome adaptive icon layer, for Android 13+ themed icon
+  support (Settings -> Wallpaper & style -> Themed icons).
