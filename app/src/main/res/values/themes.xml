@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Platform-only parent theme - this project has no AppCompat or
+      Material Components library dependency (MainActivity is a plain
+      ComponentActivity, all UI is Compose via LauncherTheme.kt), so the
+      manifest theme only needs to set window-level basics, not provide
+      any widget styling.
+    -->
+    <style name="Theme.MX3Launcher" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+</resources>

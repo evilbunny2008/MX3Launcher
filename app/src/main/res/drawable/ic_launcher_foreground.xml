@@ -1,0 +1,44 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!--
+      Content is centered at (256,256) in the original 512-canvas design,
+      so this is a straight scale-around-center: pivot = content center,
+      translate = (54,54) minus that same center after scaling collapses
+      to zero offset. Scale 0.14 keeps the grid's corner tiles safely
+      within the ~66dp safe-zone circle that survives every launcher
+      mask shape - verified empirically against a circle-mask preview
+      rather than trusting the arithmetic alone (an earlier 0.172 value
+      sat right at the edge with no real margin).
+    -->
+    <group
+        android:name="content"
+        android:pivotX="256"
+        android:pivotY="256"
+        android:scaleX="0.14"
+        android:scaleY="0.14"
+        android:translateX="-202"
+        android:translateY="-202">
+
+        <!-- Row 1 -->
+        <path android:pathData="M113,91 H159 A22,22 0 0 1 181,113 V159 A22,22 0 0 1 159,181 H113 A22,22 0 0 1 91,159 V113 A22,22 0 0 1 113,91 Z" android:fillColor="#1D1E24" />
+        <path android:pathData="M233,91 H279 A22,22 0 0 1 301,113 V159 A22,22 0 0 1 279,181 H233 A22,22 0 0 1 211,159 V113 A22,22 0 0 1 233,91 Z" android:fillColor="#1D1E24" />
+        <path android:pathData="M353,91 H399 A22,22 0 0 1 421,113 V159 A22,22 0 0 1 399,181 H353 A22,22 0 0 1 331,159 V113 A22,22 0 0 1 353,91 Z" android:fillColor="#1D1E24" />
+
+        <!-- Row 2 -->
+        <path android:pathData="M113,211 H159 A22,22 0 0 1 181,233 V279 A22,22 0 0 1 159,301 H113 A22,22 0 0 1 91,279 V233 A22,22 0 0 1 113,211 Z" android:fillColor="#1D1E24" />
+        <!-- Accent tile - ties to the cyan highlight used throughout
+             the sibling Button Mapper icon (sensor dot, d-pad center,
+             motion arcs) -->
+        <path android:pathData="M233,211 H279 A22,22 0 0 1 301,233 V279 A22,22 0 0 1 279,301 H233 A22,22 0 0 1 211,279 V233 A22,22 0 0 1 233,211 Z" android:fillColor="#5CE1E6" />
+        <path android:pathData="M353,211 H399 A22,22 0 0 1 421,233 V279 A22,22 0 0 1 399,301 H353 A22,22 0 0 1 331,279 V233 A22,22 0 0 1 353,211 Z" android:fillColor="#1D1E24" />
+
+        <!-- Row 3 -->
+        <path android:pathData="M113,331 H159 A22,22 0 0 1 181,353 V399 A22,22 0 0 1 159,421 H113 A22,22 0 0 1 91,399 V353 A22,22 0 0 1 113,331 Z" android:fillColor="#1D1E24" />
+        <path android:pathData="M233,331 H279 A22,22 0 0 1 301,353 V399 A22,22 0 0 1 279,421 H233 A22,22 0 0 1 211,399 V353 A22,22 0 0 1 233,331 Z" android:fillColor="#1D1E24" />
+        <path android:pathData="M353,331 H399 A22,22 0 0 1 421,353 V399 A22,22 0 0 1 399,421 H353 A22,22 0 0 1 331,399 V353 A22,22 0 0 1 353,331 Z" android:fillColor="#1D1E24" />
+    </group>
+</vector>

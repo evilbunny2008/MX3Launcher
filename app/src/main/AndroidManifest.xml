@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- For the soundbar-wake HTTP call in AppGridScreen.kt -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"
+        tools:ignore="ForegroundServicesPolicy" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!--
+      Backs the full-screen-intent fallback in ScreenWakeGuardService.kt.
+      On Android 14+ this is no longer auto-granted to most apps the way
+      it used to be - if the wake-guard feature doesn't work, check
+      Settings -> Apps -> MX3 Launcher -> "Full screen notifications"
+      (naming varies by OEM) and confirm it's actually granted.
+    -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"
+        tools:ignore="FullScreenIntentPolicy" />
+
+    <!--
+      A launcher needs to see EVERY installed app. This is the correct,
+      Play-Store-compliant way to do that on API 30+ (package-visibility
+      filtering) - matching by intent-filter signature via &lt;queries&gt;,
+      rather than requesting the much more heavily gated
+      QUERY_ALL_PACKAGES permission. Without this,
+      PackageManager.queryIntentActivities() silently returns nothing for
+      any app outside this one's own package.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+        </intent>
+    </queries>
+
+    <application
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:banner="@android:drawable/sym_def_app_icon"
+        android:theme="@style/Theme.MX3Launcher"
+        android:supportsRtl="true">
+
+        <!--
+          This is what makes the app selectable as a Home/launcher
+          replacement. CATEGORY_LEANBACK_LAUNCHER additionally marks it as
+          TV-optimized, so Android TV/Google TV recognizes and prioritizes
+          it as such over a generic phone-style launcher.
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+          Foreground service type is required as of Android 14 - none of
+          the specific FGS types (location, camera, mediaPlayback, etc.)
+          describe "watch for screen-on and bring the launcher back", so
+          this uses specialUse with a justification property, same
+          pattern as Button Mapper's StatusForegroundService.
+        -->
+        <service
+            android:name=".ScreenWakeGuardService"
+            android:foregroundServiceType="specialUse"
+            android:exported="false">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Detects device wake from standby and restores the Home launcher, since Android may kill the launcher's own process while the screen is off" />
+        </service>
+
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>

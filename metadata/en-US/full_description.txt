@@ -1,0 +1,30 @@
+A minimal Google TV launcher: a flat grid of apps and nothing else.
+Built as a lighter alternative to full-featured TV launchers (no
+live-TV integration, no content recommendation rows, no search/voice)
+for anyone who just wants a fast app grid.
+
+Features:
+
+* Flat app grid, 5, 6, or 7 columns (your choice), showing every
+  installed launchable app.
+* Top bar with a live clock, a Wi-Fi status icon that jumps straight to
+  system network settings, a system settings shortcut, and the
+  launcher's own settings shortcut.
+* Theme: follow system, light, or dark, with a choice of background
+  gradient presets.
+* Per-app show/hide and reordering, via move-up/move-down controls
+  rather than drag-and-drop, since drag gestures do not have a sane
+  D-pad equivalent.
+* Press Menu while an app icon has D-pad focus to jump straight to that
+  app's system "App info" page (permissions, storage, uninstall), the
+  standard "long-press an icon" destination on touch launchers, reached
+  here without needing a touch-only gesture.
+* Backup and restore settings (theme, gradient, columns, app order and
+  visibility) to the public Downloads folder, with timestamped backups
+  you can pick from when restoring, plus a one-tap reset to defaults.
+* A background service detects the device waking from standby and
+  brings the launcher back to the foreground if something else (such as
+  the device's own built-in launcher) took over during that time.
+
+MX3 Launcher does not itself favour, require, or bundle any particular
+third-party app -- it simply lists whatever is already installed.
