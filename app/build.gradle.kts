@@ -15,14 +15,25 @@ plugins {
 
 android {
     namespace = "com.odiousapps.mx3launcher"
-    compileSdk = 37
+    compileSdk {
+        version = release(37)
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
 
     defaultConfig {
         applicationId = "com.odiousapps.mx3launcher"
         minSdk = 29
         targetSdk = 37
-        versionCode = 40
-        versionName = "0.0.40"
+        versionCode = 41
+        versionName = "0.0.41"
     }
 
     buildTypes {
