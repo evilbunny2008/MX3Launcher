@@ -53,7 +53,7 @@ to switch manually later). Pick MX3 Launcher.
 
 ## Settings
 
-Everything customizable lives in the launcher's own Settings screen
+Everything customisable lives in the launcher's own Settings screen
 (reachable from the gear icon in the top bar): theme, background
 gradient, number of columns, and which apps show up and in what order.
 Backup, restore, and reset-to-defaults are in the same screen, under

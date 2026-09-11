@@ -58,7 +58,7 @@
         <!--
           This is what makes the app selectable as a Home/launcher
           replacement. CATEGORY_LEANBACK_LAUNCHER additionally marks it as
-          TV-optimized, so Android TV/Google TV recognizes and prioritizes
+          TV-optimised, so Android TV/Google TV recognises and prioritises
           it as such over a generic phone-style launcher.
         -->
         <activity
