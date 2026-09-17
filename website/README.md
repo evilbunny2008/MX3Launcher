@@ -59,7 +59,9 @@ folded into the one generic relay.
    their email (`verify_email.php`), and logs in (`login.php`).
 2. On `manage_credentials.php`, they add one or more named presets —
    an app name (e.g. "MX3Launcher" or "Z2M Dash"), a label (e.g. "Living
-   room TV"), and its fields as plain "Key: Value" lines. Apps that
+   room TV"), and its fields as key/value row pairs (add/remove rows
+   freely, or pick a template to pre-fill every field a known app might
+   use). Apps that
    consume these fields automatically via pull mode (rather than a
    human just reading them off a push-mode reveal page) look up
    specific key names, so they need to match exactly - `manage_credentials.php`

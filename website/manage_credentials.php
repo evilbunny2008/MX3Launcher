@@ -10,13 +10,17 @@
  * needed. Replaces the old dashboard.php/edit_pairing_url.php, which
  * only ever managed a fixed {url, secret} pair.
  *
- * Fields are entered as one "Key: Value" line per field rather than a
- * dynamic add-row form, to avoid needing any client-side JS - for an
- * app that a receiving app parses programmatically (rather than a
- * human just reading credential_view.php's reveal page), the exact key
- * names it looks for need to match what that app expects: MX3 Launcher
- * looks for exactly "URL" and "Secret" (see that project's own
- * SoundbarPairing.kt).
+ * Fields are entered as dynamic key/value row pairs (add a row, remove
+ * a row, or load every field a known app might use via the template
+ * picker) - the exact key names an app looks up programmatically
+ * (rather than a human just reading credential_view.php's reveal page)
+ * need to match what that app expects exactly, so $KNOWN_APP_FIELDS
+ * below is the single source of truth this page renders both the
+ * reference list and the template picker's data from, to keep the two
+ * from drifting apart from each other (though it can still drift from
+ * what each app's own code actually reads, being a separate repo -
+ * MX3 Launcher's SoundbarPairing.kt and Z2M Dash's
+ * AddEditBrokerScreen.kt/applyImportedFields are the real ground truth).
  */
 
 require_once __DIR__ . "/auth_helper.php";
@@ -29,24 +33,58 @@ const MAX_KEY_LENGTH = 64;
 // base64-encoded self-signed certificate (a few KB), not just short strings.
 const MAX_VALUE_LENGTH = 8192;
 
-/** Parses "Key: Value" lines into an assoc array, or returns an error string. */
-function parse_fields_text(string $text)
+// Every field a known app looks up by name, used to render both the
+// human-readable reference below the form and the template picker's
+// pre-fill data (as JSON, further down). "required" only affects the
+// reference text - every field is still optional to actually submit,
+// since credential_start.php's own field-presence check is what really
+// enforces requiredness for e.g. Z2M Dash's "Hostname".
+$KNOWN_APP_FIELDS = [
+    "MX3Launcher" => [
+        ["key" => "URL", "required" => true],
+        ["key" => "Secret", "required" => true],
+    ],
+    "Z2M Dash" => [
+        ["key" => "Hostname", "required" => true],
+        ["key" => "Protocol", "required" => false, "hint" => "one of MQTT, MQTTS, WS, WSS"],
+        ["key" => "Port", "required" => false, "hint" => "a number, default 1883"],
+        ["key" => "Username", "required" => false, "hint" => "default blank, no auth"],
+        ["key" => "Password", "required" => false, "hint" => "default blank, no auth"],
+        ["key" => "Name", "required" => false, "hint" => "the broker's display name in the app"],
+        ["key" => "BaseTopic", "required" => false, "hint" => "default zigbee2mqtt"],
+        ["key" => "WebSocketPath", "required" => false, "hint" => "only relevant for WS/WSS, default /mqtt"],
+        ["key" => "ClientId", "required" => false, "hint" => "default a randomly generated one"],
+        ["key" => "SelfSignedCert", "required" => false, "hint" => "true/false, default false"],
+        ["key" => "SelfSignedCertBase64", "required" => false, "hint" => "the certificate's raw bytes, base64-encoded"],
+        ["key" => "CleanSession", "required" => false, "hint" => "true/false, default false"],
+        ["key" => "KeepAliveSeconds", "required" => false, "hint" => "a number, default 60"],
+        ["key" => "ConnectionTimeoutSeconds", "required" => false, "hint" => "a number, default 30"],
+        ["key" => "AutoConnect", "required" => false, "hint" => "true/false, default true"],
+        ["key" => "ShowReconnectionStatus", "required" => false, "hint" => "true/false, default true"],
+        [
+            "key" => "AutoAccept", "required" => false,
+            "hint" => "true/false, default false - auto-adds newly-seen devices instead of prompting"
+        ],
+    ],
+];
+
+/** Builds an assoc array from parallel field_keys[]/field_values[] arrays, or returns an error string. */
+function parse_fields_arrays(array $keys, array $values)
 {
     $fields = [];
-    foreach(preg_split("/\r\n|\r|\n/", $text) as $line)
+    $count = min(count($keys), count($values));
+    for($i = 0; $i < $count; $i++)
     {
-        $line = trim($line);
-        if($line === "")
+        // A row with no key is just skipped rather than treated as an
+        // error - lets a template's unused optional rows be left alone
+        // rather than needing to individually delete each one.
+        $key = trim((string)$keys[$i]);
+        if($key === "")
             continue;
 
-        $separatorIndex = strpos($line, ":");
-        if($separatorIndex === false)
-            return "Each field needs a colon, like \"URL: https://...\" - couldn't read: \"$line\"";
-
-        $key = trim(substr($line, 0, $separatorIndex));
-        $value = trim(substr($line, $separatorIndex + 1));
-        if($key === "" || strlen($key) > MAX_KEY_LENGTH || strlen($value) > MAX_VALUE_LENGTH)
-            return "Each field's key must be 1-" . MAX_KEY_LENGTH . " chars and its value at most " . MAX_VALUE_LENGTH . " chars.";
+        $value = trim((string)$values[$i]);
+        if(strlen($key) > MAX_KEY_LENGTH || strlen($value) > MAX_VALUE_LENGTH)
+            return "\"$key\": key must be 1-" . MAX_KEY_LENGTH . " chars, value at most " . MAX_VALUE_LENGTH . " chars.";
 
         $fields[$key] = $value;
     }
@@ -59,21 +97,16 @@ function parse_fields_text(string $text)
     return $fields;
 }
 
-function fields_to_text(array $fields): string
-{
-    $lines = [];
-    foreach($fields as $key => $value)
-        $lines[] = "$key: $value";
-    return implode("\n", $lines);
-}
-
 $error = "";
 $success = "";
 // Prefilled on validation failure (so a mistake doesn't wipe out what
-// was being typed) or when editing an existing entry.
+// was being typed) or when editing an existing entry. $formFields is a
+// list of [key, value] pairs (not an assoc array) so a row with a
+// blank or duplicate key submitted by mistake still redisplays exactly
+// as typed, rather than silently collapsing.
 $formApp = "";
 $formLabel = "";
-$formFieldsText = "";
+$formFields = [];
 $editingId = 0;
 
 if($_SERVER["REQUEST_METHOD"] === "POST")
@@ -89,7 +122,10 @@ if($_SERVER["REQUEST_METHOD"] === "POST")
             $editingId = intval($_POST["id"] ?? 0);
             $formApp = trim($_POST["app"] ?? "");
             $formLabel = trim($_POST["label"] ?? "");
-            $formFieldsText = (string)($_POST["fields_text"] ?? "");
+            $postedKeys = is_array($_POST["field_keys"] ?? null) ? $_POST["field_keys"] : [];
+            $postedValues = is_array($_POST["field_values"] ?? null) ? $_POST["field_values"] : [];
+            foreach($postedKeys as $i => $k)
+                $formFields[] = [(string)$k, (string)($postedValues[$i] ?? "")];
 
             if($formApp === "" || strlen($formApp) > 64)
             {
@@ -97,7 +133,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST")
             } elseif($formLabel === "" || strlen($formLabel) > 128) {
                 $error = "Label is required (max 128 chars).";
             } else {
-                $parsed = parse_fields_text($formFieldsText);
+                $parsed = parse_fields_arrays($postedKeys, $postedValues);
                 if(is_string($parsed))
                 {
                     $error = $parsed;
@@ -125,7 +161,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST")
                     $editingId = 0;
                     $formApp = "";
                     $formLabel = "";
-                    $formFieldsText = "";
+                    $formFields = [];
                 }
             }
         } elseif($action === "delete") {
@@ -151,7 +187,7 @@ if($_SERVER["REQUEST_METHOD"] === "GET" && intval($_GET["edit"] ?? 0) > 0)
         $formApp = $row["app_name"];
         $formLabel = $row["label"];
         $decoded = json_decode($row["fields_json"], true);
-        $formFieldsText = is_array($decoded) ? fields_to_text($decoded) : "";
+        $formFields = is_array($decoded) ? array_map(null, array_keys($decoded), array_values($decoded)) : [];
     }
 }
 
@@ -171,11 +207,7 @@ $csrfToken = generate_csrf_token();
     <title>Your saved credentials</title>
     <style>
         body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 16px; }
-        input, textarea { font-size: 16px; width: 100%; padding: 10px; margin-bottom: 12px; box-sizing: border-box; font-family: inherit; }
-        textarea { font-family: monospace; height: 100px; }
-        details { margin-bottom: 12px; }
-        details ul { margin: 8px 0 0; padding-left: 20px; }
-        details li { margin-bottom: 4px; }
+        input, select { font-size: 16px; width: 100%; padding: 10px; margin-bottom: 12px; box-sizing: border-box; font-family: inherit; }
         button, .btn {
             font-family: inherit; font-size: 16px; line-height: 1.2; padding: 10px;
             display: inline-block; text-align: center; text-decoration: none; color: inherit;
@@ -188,6 +220,19 @@ $csrfToken = generate_csrf_token();
         .hint { color: #666; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         td, th { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+        details { margin-bottom: 12px; }
+        details ul { margin: 8px 0 0; padding-left: 20px; }
+        details li { margin-bottom: 4px; }
+        #fields-container { margin-bottom: 12px; }
+        .field-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+        .field-row input { margin-bottom: 0; }
+        .field-row input[name="field_keys[]"] { flex: 0 0 40%; }
+        .field-row input[name="field_values[]"] { flex: 1; min-width: 0; }
+        .remove-row {
+            flex-shrink: 0; width: 40px; height: 40px; min-width: 0; margin: 0; padding: 0;
+            background: #fdd; color: #c00; font-size: 20px; line-height: 1;
+        }
+        #add-field-btn { margin-bottom: 12px; }
     </style>
 </head>
 <body>
@@ -216,61 +261,114 @@ $csrfToken = generate_csrf_token();
     </table>
 
     <h3><?= $editingId > 0 ? "Edit entry" : "Add a new one" ?></h3>
-    <form method="post">
+    <form method="post" id="credential-form">
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
         <input type="hidden" name="action" value="save">
         <input type="hidden" name="id" value="<?= $editingId ?>">
-        <input type="text" name="app" placeholder="App (e.g. MX3Launcher)" list="known-apps"
+
+        <select id="template-select">
+            <option value="">Load a template for...</option>
+            <?php foreach(array_keys($KNOWN_APP_FIELDS) as $appName): ?>
+                <option value="<?= htmlspecialchars($appName) ?>"><?= htmlspecialchars($appName) ?></option>
+            <?php endforeach; ?>
+        </select>
+
+        <input type="text" name="app" id="app-input" placeholder="App (e.g. MX3Launcher)" list="known-apps"
                value="<?= htmlspecialchars($formApp) ?>" required>
         <datalist id="known-apps">
-            <option value="MX3Launcher"><option value="Z2M Dash">
+            <?php foreach(array_keys($KNOWN_APP_FIELDS) as $appName): ?>
+                <option value="<?= htmlspecialchars($appName) ?>">
+            <?php endforeach; ?>
         </datalist>
         <input type="text" name="label" placeholder="Label (e.g. Living room TV)"
                value="<?= htmlspecialchars($formLabel) ?>" required>
-        <textarea name="fields_text" placeholder="One per line, Key: Value&#10;URL: https://your-lan-endpoint.example.com/script.php&#10;Secret: your shared secret"
-                  required><?= htmlspecialchars($formFieldsText) ?></textarea>
+
+        <div id="fields-container"></div>
+        <button type="button" id="add-field-btn">+ Add field</button>
+
         <p class="hint">
             Apps that consume these fields automatically (rather than a human just reading them off
-            credential_view.php) look up specific key names, so they need to match exactly - see below
-            for the apps that currently do this. Any other app can use whatever field names make sense.
+            credential_view.php) look up specific key names, so they need to match exactly - use the
+            template picker above, or see below for the apps that currently do this. Any other app can
+            use whatever field names make sense.
         </p>
-        <details>
-            <summary>MX3Launcher field names</summary>
-            <ul class="hint">
-                <li><code>URL</code> - required</li>
-                <li><code>Secret</code> - required</li>
-            </ul>
-        </details>
-        <details>
-            <summary>Z2M Dash field names</summary>
-            <p class="hint">
-                Only <code>Hostname</code> is required - anything else missing leaves whatever the
-                broker draft already had (usually the value shown here in parentheses) unchanged.
-            </p>
-            <ul class="hint">
-                <li><code>Hostname</code> - required</li>
-                <li><code>Protocol</code> - one of <code>MQTT</code>, <code>MQTTS</code>, <code>WS</code>, <code>WSS</code></li>
-                <li><code>Port</code> - a number (default 1883)</li>
-                <li><code>Username</code> / <code>Password</code> (default blank, no auth)</li>
-                <li><code>Name</code> - the broker's display name in the app</li>
-                <li><code>BaseTopic</code> (default <code>zigbee2mqtt</code>)</li>
-                <li><code>WebSocketPath</code> - only relevant for WS/WSS (default <code>/mqtt</code>)</li>
-                <li><code>ClientId</code> (default a randomly generated one)</li>
-                <li><code>SelfSignedCert</code> - <code>true</code>/<code>false</code> (default <code>false</code>)</li>
-                <li><code>SelfSignedCertBase64</code> - the certificate's raw bytes, base64-encoded</li>
-                <li><code>CleanSession</code> - <code>true</code>/<code>false</code> (default <code>false</code>)</li>
-                <li><code>KeepAliveSeconds</code> - a number (default 60)</li>
-                <li><code>ConnectionTimeoutSeconds</code> - a number (default 30)</li>
-                <li><code>AutoConnect</code> - <code>true</code>/<code>false</code> (default <code>true</code>)</li>
-                <li><code>ShowReconnectionStatus</code> - <code>true</code>/<code>false</code> (default <code>true</code>)</li>
-                <li>
-                    <code>AutoAccept</code> - <code>true</code>/<code>false</code> (default <code>false</code>) -
-                    auto-adds newly-seen devices on that broker instead of prompting to accept each one
-                </li>
-            </ul>
-        </details>
+        <?php foreach($KNOWN_APP_FIELDS as $appName => $appFields): ?>
+            <details>
+                <summary><?= htmlspecialchars($appName) ?> field names</summary>
+                <ul class="hint">
+                    <?php foreach($appFields as $field): ?>
+                        <li>
+                            <code><?= htmlspecialchars($field["key"]) ?></code>
+                            <?= $field["required"] ? "- required" : "" ?>
+                            <?= isset($field["hint"]) ? "- " . htmlspecialchars($field["hint"]) : "" ?>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </details>
+        <?php endforeach; ?>
+
         <button type="submit"><?= $editingId > 0 ? "Save" : "Add" ?></button>
         <?php if($editingId > 0): ?><a class="btn" href="/manage_credentials.php">Cancel</a><?php endif; ?>
     </form>
+
+    <script>
+        // Pre-fill data for the template picker, and this entry's existing
+        // fields (edit mode) or a submitted-but-invalid attempt (so a
+        // validation error doesn't wipe out what was being typed) - both
+        // rendered server-side above into $KNOWN_APP_FIELDS/$formFields.
+        var KNOWN_APP_FIELDS = <?= json_encode($KNOWN_APP_FIELDS, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+        var INITIAL_FIELDS = <?= json_encode($formFields, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+
+        function addFieldRow(key, value) {
+            var row = document.createElement("div");
+            row.className = "field-row";
+
+            var keyInput = document.createElement("input");
+            keyInput.type = "text";
+            keyInput.name = "field_keys[]";
+            keyInput.placeholder = "Key";
+            keyInput.value = key || "";
+
+            var valueInput = document.createElement("input");
+            valueInput.type = "text";
+            valueInput.name = "field_values[]";
+            valueInput.placeholder = "Value";
+            valueInput.value = value || "";
+
+            var removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.className = "remove-row";
+            removeBtn.setAttribute("aria-label", "Remove field");
+            removeBtn.textContent = "×";
+            removeBtn.addEventListener("click", function () { row.remove(); });
+
+            row.appendChild(keyInput);
+            row.appendChild(valueInput);
+            row.appendChild(removeBtn);
+            document.getElementById("fields-container").appendChild(row);
+        }
+
+        document.getElementById("add-field-btn").addEventListener("click", function () {
+            addFieldRow("", "");
+        });
+
+        document.getElementById("template-select").addEventListener("change", function () {
+            var appName = this.value;
+            this.value = ""; // reset so picking the same template again still re-fires "change"
+            if (!appName || !KNOWN_APP_FIELDS[appName]) return;
+
+            document.getElementById("app-input").value = appName;
+            document.getElementById("fields-container").innerHTML = "";
+            KNOWN_APP_FIELDS[appName].forEach(function (field) {
+                addFieldRow(field.key, "");
+            });
+        });
+
+        if (INITIAL_FIELDS.length > 0) {
+            INITIAL_FIELDS.forEach(function (pair) { addFieldRow(pair[0], pair[1]); });
+        } else {
+            addFieldRow("", "");
+        }
+    </script>
 </body>
 </html>
