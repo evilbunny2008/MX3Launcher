@@ -65,8 +65,9 @@ folded into the one generic relay.
    specific key names, so they need to match exactly: **MX3 Launcher**
    looks for `URL` and `Secret` (see its own `SoundbarPairing.kt`);
    **Z2M Dash** looks for `Hostname`, and optionally `Protocol` (one of
-   `MQTT`/`MQTTS`/`WS`/`WSS`) and `Username`/`Password`. Any other
-   app's fields are free-form.
+   `MQTT`/`MQTTS`/`WS`/`WSS`), `Username`/`Password`, and `AutoAccept`
+   (`true`/`false` - auto-adds newly-seen devices on that broker instead
+   of prompting to accept each one). Any other app's fields are free-form.
 3. **Pull** (e.g. a TV pairing for the first time, or Z2M Dash setting
    up a new broker):
    - The device calls `credential_start.php` with just `{"app": "...",

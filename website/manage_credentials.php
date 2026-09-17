@@ -229,9 +229,11 @@ $csrfToken = generate_csrf_token();
             credential_view.php) look up specific key names, so they need to match exactly:
             <code>MX3Launcher</code> looks for <code>URL</code> and <code>Secret</code>;
             <code>Z2M Dash</code> looks for <code>Hostname</code>, and optionally <code>Protocol</code>
-            (one of <code>MQTT</code>, <code>MQTTS</code>, <code>WS</code>, <code>WSS</code> - defaults to
-            whatever the broker draft already had if omitted) and <code>Username</code>/<code>Password</code>.
-            Any other app can use whatever field names make sense.
+            (one of <code>MQTT</code>, <code>MQTTS</code>, <code>WS</code>, <code>WSS</code>),
+            <code>Username</code>/<code>Password</code>, and <code>AutoAccept</code>
+            (<code>true</code>/<code>false</code> - auto-adds newly-seen devices on that broker instead of
+            prompting to accept each one). Any missing optional field leaves whatever the broker draft
+            already had. Any other app can use whatever field names make sense.
         </p>
         <button type="submit"><?= $editingId > 0 ? "Save" : "Add" ?></button>
         <?php if($editingId > 0): ?><a class="btn" href="/manage_credentials.php">Cancel</a><?php endif; ?>
