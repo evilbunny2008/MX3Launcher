@@ -5,11 +5,12 @@ presets (e.g. a TV's pairing URL/secret, or any other app's fields).
 One generic system backs two flows:
 
 - **"Pull"**: a device with nothing of its own (e.g. an MX3 Launcher TV
-  pairing for the first time) asks to *receive* credentials for a named
-  app; the logged-in account holder picks which saved preset to send it.
-- **"Push"**: an app that already has data of its own (e.g. Z2M Dash
-  sharing one of its configured MQTT broker's hostname/username/
-  password) hands it over directly for a human to read/copy elsewhere.
+  pairing for the first time, or Z2M Dash setting up a new broker) asks
+  to *receive* credentials for a named app; the logged-in account holder
+  picks which saved preset to send it.
+- **"Push"**: an app that already has data of its own hands it over
+  directly for a human to read/copy elsewhere - available to any app
+  that wants it, though nothing currently uses this mode.
 
 This replaces both the original flat-file pairing system
 (`pairing_helper.php`) and the later multi-account `pairing_urls`/
@@ -57,14 +58,17 @@ folded into the one generic relay.
 1. Someone lands on `index.php`, signs up (`register.php`), verifies
    their email (`verify_email.php`), and logs in (`login.php`).
 2. On `manage_credentials.php`, they add one or more named presets —
-   an app name (e.g. "MX3Launcher"), a label (e.g. "Living room TV"),
-   and its fields as plain "Key: Value" lines. **For MX3 Launcher
-   specifically**, the fields must be named exactly `URL` and `Secret`
-   — that app looks those keys up by name (see its own
-   `SoundbarPairing.kt`); any other app's fields are free-form, since a
-   human reads them off a push-mode reveal page rather than code
-   consuming them automatically.
-3. **Pull** (e.g. a TV pairing for the first time):
+   an app name (e.g. "MX3Launcher" or "Z2M Dash"), a label (e.g. "Living
+   room TV"), and its fields as plain "Key: Value" lines. Apps that
+   consume these fields automatically via pull mode (rather than a
+   human just reading them off a push-mode reveal page) look up
+   specific key names, so they need to match exactly: **MX3 Launcher**
+   looks for `URL` and `Secret` (see its own `SoundbarPairing.kt`);
+   **Z2M Dash** looks for `Hostname`, and optionally `Protocol` (one of
+   `MQTT`/`MQTTS`/`WS`/`WSS`) and `Username`/`Password`. Any other
+   app's fields are free-form.
+3. **Pull** (e.g. a TV pairing for the first time, or Z2M Dash setting
+   up a new broker):
    - The device calls `credential_start.php` with just `{"app": "...",
      "label": "..."}` (no `fields`) — no auth, it has no account of its
      own. Gets back `{code, token, expires_in}` and shows the code/QR
@@ -74,7 +78,8 @@ folded into the one generic relay.
      lets them pick one to send.
    - The device's own poll of `credential_status.php?token=...`
      receives the resolved fields once that happens.
-4. **Push** (e.g. Z2M Dash sharing a broker's credentials):
+4. **Push** (available to any app that wants it, though nothing
+   currently uses this mode):
    - The sending app calls `credential_start.php` with `{"app": "...",
      "label": "...", "fields": {...}}` included up front. Gets back the
      same `{code, token, expires_in}` shape and shows the code/QR.

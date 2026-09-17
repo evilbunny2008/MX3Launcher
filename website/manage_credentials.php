@@ -217,14 +217,21 @@ $csrfToken = generate_csrf_token();
         <input type="hidden" name="id" value="<?= $editingId ?>">
         <input type="text" name="app" placeholder="App (e.g. MX3Launcher)" list="known-apps"
                value="<?= htmlspecialchars($formApp) ?>" required>
-        <datalist id="known-apps"><option value="MX3Launcher"></datalist>
+        <datalist id="known-apps">
+            <option value="MX3Launcher"><option value="Z2M Dash">
+        </datalist>
         <input type="text" name="label" placeholder="Label (e.g. Living room TV)"
                value="<?= htmlspecialchars($formLabel) ?>" required>
         <textarea name="fields_text" placeholder="One per line, Key: Value&#10;URL: https://your-lan-endpoint.example.com/script.php&#10;Secret: your shared secret"
                   required><?= htmlspecialchars($formFieldsText) ?></textarea>
         <p class="hint">
-            For MX3Launcher, name the fields exactly <code>URL</code> and <code>Secret</code> -
-            that app looks those keys up by name. Any other app can use whatever field names make sense.
+            Apps that consume these fields automatically (rather than a human just reading them off
+            credential_view.php) look up specific key names, so they need to match exactly:
+            <code>MX3Launcher</code> looks for <code>URL</code> and <code>Secret</code>;
+            <code>Z2M Dash</code> looks for <code>Hostname</code>, and optionally <code>Protocol</code>
+            (one of <code>MQTT</code>, <code>MQTTS</code>, <code>WS</code>, <code>WSS</code> - defaults to
+            whatever the broker draft already had if omitted) and <code>Username</code>/<code>Password</code>.
+            Any other app can use whatever field names make sense.
         </p>
         <button type="submit"><?= $editingId > 0 ? "Save" : "Add" ?></button>
         <?php if($editingId > 0): ?><a class="btn" href="/manage_credentials.php">Cancel</a><?php endif; ?>
