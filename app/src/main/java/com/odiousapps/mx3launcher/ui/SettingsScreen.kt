@@ -294,7 +294,7 @@ private fun SoundbarPairingSection(
                         )
                         return@launch
                     }
-                    val approveUrl = "https://mx3launcher.odiousapps.com/pair_approve.php?code=${session.code}"
+                    val approveUrl = "https://mx3launcher.odiousapps.com/credential_view.php?code=${session.code}"
                     val qrBitmap = withContext(Dispatchers.Default) { generateQrCodeBitmap(approveUrl) }
                     pairingState = PairingUiState.ShowingCode(session.code, session.token, qrBitmap)
 
@@ -345,7 +345,7 @@ private fun SoundbarPairingSection(
                 // path entirely rather than showing a broken state.
                 Text(text = "On your phone, go to:")
             }
-            Text(text = "mx3launcher.odiousapps.com/pair_approve.php")
+            Text(text = "mx3launcher.odiousapps.com/credential_view.php")
             Text(text = "and enter this code:")
             Text(text = state.code)
         }

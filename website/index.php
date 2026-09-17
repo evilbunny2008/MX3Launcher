@@ -12,7 +12,7 @@ auth_start_session();
 
 if(current_user_id() !== null)
 {
-    header("Location: /dashboard.php");
+    header("Location: /manage_credentials.php");
     exit;
 }
 ?>

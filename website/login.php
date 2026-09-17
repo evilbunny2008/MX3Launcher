@@ -10,7 +10,7 @@ auth_start_session();
 
 if(current_user_id() !== null)
 {
-    header("Location: /dashboard.php");
+    header("Location: /manage_credentials.php");
     exit;
 }
 
@@ -44,7 +44,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST")
             // session).
             session_regenerate_id(true);
             $_SESSION["user_id"] = $user["id"];
-            header("Location: /dashboard.php");
+            header("Location: /manage_credentials.php");
             exit;
         }
     }

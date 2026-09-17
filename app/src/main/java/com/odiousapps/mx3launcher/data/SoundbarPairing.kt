@@ -3,6 +3,7 @@ package com.odiousapps.mx3launcher.data
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import java.nio.charset.StandardCharsets
 
 /**
  * OAuth-device-flow-style pairing, scaled down for a personal setup:
@@ -14,6 +15,14 @@ import java.net.URL
  * since text-edit mode captures D-pad input for cursor movement rather
  * than surfacing it for inter-component navigation).
  *
+ * Talks to mx3launcher.odiousapps.com's generic credential relay in
+ * "pull" mode -- this device has no credentials of its own, so it asks
+ * to receive some for app "MX3Launcher", and the account holder picks
+ * one of their own saved presets for it at credential_view.php. See
+ * that project's website/README.md for the full protocol; the fields
+ * this looks for by name below ("URL", "Secret") are the convention
+ * documented there for anyone setting up a preset for this app.
+ *
  * All functions here perform blocking network I/O -- callers must run
  * them off the main thread (a coroutine on Dispatchers.IO, in
  * SettingsScreen.kt's usage).
@@ -21,10 +30,12 @@ import java.net.URL
 object SoundbarPairing {
 
     // mx3launcher.odiousapps.com is the self-service pairing site
-    // (accounts + multiple named pairing URLs per account) -- a
+    // (accounts + named saved-credential presets per account) -- a
     // separate domain from any individual user's own home server.
-    private const val PAIR_START_URL = "https://mx3launcher.odiousapps.com/pair_start.php"
-    private const val PAIR_POLL_URL = "https://mx3launcher.odiousapps.com/pair_poll.php"
+    private const val START_URL = "https://mx3launcher.odiousapps.com/credential_start.php"
+    private const val STATUS_URL = "https://mx3launcher.odiousapps.com/credential_status.php"
+
+    private const val APP_NAME = "MX3Launcher"
 
     data class PairingSession(val code: String, val token: String, val expiresInSeconds: Int)
 
@@ -37,7 +48,10 @@ object SoundbarPairing {
 
     fun startPairing(): PairingSession? {
         return try {
-            val response = httpGet(PAIR_START_URL) ?: return null
+            // No "fields" - this is a pull-mode request, asking to
+            // RECEIVE credentials rather than offering any of its own.
+            val body = JSONObject().put("app", APP_NAME)
+            val response = httpPost(START_URL, body.toString()) ?: return null
             val json = JSONObject(response)
             if (!json.optBoolean("ok", false)) return null
             PairingSession(
@@ -53,14 +67,23 @@ object SoundbarPairing {
     fun pollPairing(token: String): PollResult {
         return try {
             val encodedToken = java.net.URLEncoder.encode(token, "UTF-8")
-            val response = httpGet("$PAIR_POLL_URL?token=$encodedToken")
+            val response = httpGet("$STATUS_URL?token=$encodedToken")
                 ?: return PollResult.Error("No response")
             val json = JSONObject(response)
             when (json.optString("status")) {
-                "approved" -> PollResult.Approved(
-                    url = json.getString("url"),
-                    secret = json.getString("secret"),
-                )
+                "viewed" -> {
+                    val fields = json.optJSONObject("fields") ?: JSONObject()
+                    val url = fields.optString("URL")
+                    val secret = fields.optString("Secret")
+                    if (url.isBlank() || secret.isBlank()) {
+                        // The chosen preset didn't have both expected keys -
+                        // report it plainly rather than silently pairing
+                        // with a blank URL/secret.
+                        PollResult.Error("Saved preset is missing a URL or Secret field")
+                    } else {
+                        PollResult.Approved(url = url, secret = secret)
+                    }
+                }
                 "pending" -> PollResult.Pending
                 "expired" -> PollResult.Expired
                 else -> PollResult.Error(json.optString("error", "Unknown error"))
@@ -75,6 +98,21 @@ object SoundbarPairing {
         connection.connectTimeout = 5000
         connection.readTimeout = 5000
         connection.requestMethod = "GET"
+        return try {
+            connection.inputStream.bufferedReader().use { it.readText() }
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun httpPost(url: String, body: String): String? {
+        val connection = URL(url).openConnection() as HttpURLConnection
+        connection.connectTimeout = 5000
+        connection.readTimeout = 5000
+        connection.requestMethod = "POST"
+        connection.doOutput = true
+        connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+        connection.outputStream.use { it.write(body.toByteArray(StandardCharsets.UTF_8)) }
         return try {
             connection.inputStream.bufferedReader().use { it.readText() }
         } finally {

@@ -1,15 +1,35 @@
 # MX3 Launcher self-service pairing site
 
-Multi-user accounts, each with one or more registered pairing URL/secret
-entries. Replaces the earlier flat-file, single-fixed-URL pairing system
-entirely.
+Multi-user accounts, each with one or more named "saved credentials"
+presets (e.g. a TV's pairing URL/secret, or any other app's fields).
+One generic system backs two flows:
+
+- **"Pull"**: a device with nothing of its own (e.g. an MX3 Launcher TV
+  pairing for the first time) asks to *receive* credentials for a named
+  app; the logged-in account holder picks which saved preset to send it.
+- **"Push"**: an app that already has data of its own (e.g. Z2M Dash
+  sharing one of its configured MQTT broker's hostname/username/
+  password) hands it over directly for a human to read/copy elsewhere.
+
+This replaces both the original flat-file pairing system
+(`pairing_helper.php`) and the later multi-account `pairing_urls`/
+`device_pairings` version (`pair_start.php`/`pair_approve.php`/
+`pair_poll.php`/`dashboard.php`/`edit_pairing_url.php`) — all gone now,
+folded into the one generic relay.
 
 ## Setup
 
-1. **Database**: create a MariaDB database, then run `schema.sql` against it:
+1. **Database**: create a MariaDB database, then run, in order:
    ```
    mysql -u root -p your_database_name < schema.sql
+   mysql -u root -p your_database_name < credential_shares.schema.sql
+   mysql -u root -p your_database_name < saved_credentials.schema.sql
    ```
+   (A fresh install only needs those three. If you're upgrading a
+   deployment that already had `credential_shares.schema.sql` applied
+   from before pull-mode existed, run
+   `credential_shares_pull_mode.migration.sql` instead of re-running
+   `credential_shares.schema.sql`.)
 
 2. **`db.php`**: fill in the `TODO_*` constants with your real MariaDB
    host/database name/username/password.
@@ -25,56 +45,71 @@ entirely.
    marked `secure`, meaning it will silently **not** work at all served
    over plain HTTP. Deploy this behind HTTPS only.
 
-5. **Cron cleanup (optional but recommended)**: expired pairing attempts
-   are already ignored by every query, but nothing deletes them without
+5. **Cron cleanup (optional but recommended)**: expired shares are
+   already ignored by every query, but nothing deletes them without
    this running periodically:
    ```
-   0 * * * * php /path/to/cleanup_expired_pairings.php
+   0 * * * * php /path/to/cleanup_expired_credential_shares.php
    ```
-
-## Replacing the old pairing system
-
-This entirely replaces the earlier flat-file version
-(`pairing_helper.php`, and the old `pair_start.php`/`pair_approve.php`/
-`pair_poll.php` that read from a fixed `PAIRING_GRANTED_URL`/
-`PAIRING_GRANTED_SECRET` pair). Once this is deployed:
-
-- Delete the old `pairing_helper.php` and the `/tmp/mx3launcher_pairing/`
-  session files it used.
-- The **Android app needs no changes** — `pair_poll.php`'s JSON response
-  shape (`{ok, status, url, secret}` with the same `pending`/`expired`/
-  `approved` status values) is deliberately unchanged from the old
-  version, and the QR code still encodes `pair_approve.php?code=...`
-  exactly as before.
 
 ## How it works
 
-1. Someone lands on `index.php` (the site's landing page, explaining
-   what this is for), then signs up (`register.php`), verifies their
-   email (`verify_email.php`), and logs in (`login.php`).
-2. On `dashboard.php`, they register one or more pairing URL/secret
-   pairs — whatever their own home server's wake-endpoint URL and
-   shared secret are.
-3. On the TV, MX3 Launcher calls `pair_start.php` (no auth — the TV
-   doesn't have an account of its own) and shows the resulting code/QR.
-4. The person scans the QR (or types the code) on their phone, which
-   opens `pair_approve.php` — now requiring login. They pick *which* of
-   their registered pairing URLs this particular TV should use, and
-   approve.
-5. The TV's next poll to `pair_poll.php` receives that specific URL and
-   secret, saves them locally, and stops polling.
+1. Someone lands on `index.php`, signs up (`register.php`), verifies
+   their email (`verify_email.php`), and logs in (`login.php`).
+2. On `manage_credentials.php`, they add one or more named presets —
+   an app name (e.g. "MX3Launcher"), a label (e.g. "Living room TV"),
+   and its fields as plain "Key: Value" lines. **For MX3 Launcher
+   specifically**, the fields must be named exactly `URL` and `Secret`
+   — that app looks those keys up by name (see its own
+   `SoundbarPairing.kt`); any other app's fields are free-form, since a
+   human reads them off a push-mode reveal page rather than code
+   consuming them automatically.
+3. **Pull** (e.g. a TV pairing for the first time):
+   - The device calls `credential_start.php` with just `{"app": "...",
+     "label": "..."}` (no `fields`) — no auth, it has no account of its
+     own. Gets back `{code, token, expires_in}` and shows the code/QR
+     (linking to `credential_view.php?code=...`).
+   - Someone opens that link — requires login. Since this share has no
+     data yet, the page shows their own saved presets for that app and
+     lets them pick one to send.
+   - The device's own poll of `credential_status.php?token=...`
+     receives the resolved fields once that happens.
+4. **Push** (e.g. Z2M Dash sharing a broker's credentials):
+   - The sending app calls `credential_start.php` with `{"app": "...",
+     "label": "...", "fields": {...}}` included up front. Gets back the
+     same `{code, token, expires_in}` shape and shows the code/QR.
+   - Someone opens `credential_view.php?code=...` — requires login.
+     Since this share already has data, confirming the code does a
+     one-time reveal of the fields as plain text to copy elsewhere. A
+     second visit with the same code shows nothing.
+   - The sending app can still poll `credential_status.php?token=...`
+     to show "waiting..." / "picked up", using only `status` and
+     ignoring the `fields` the response happens to also carry (it
+     already has its own copy).
+5. Either way, once resolved, `credential_status.php` hands the
+   resolved fields to whoever holds the token exactly once, then
+   deletes the row.
 
 ## Known limitations, disclosed rather than silently glossed over
 
-- **Secrets are stored in plaintext** in the `pairing_urls` table,
-  protected only by normal database access controls — not encrypted at
-  rest. Encrypting them would need a server-side key, which itself needs
-  careful handling (not committed to version control, ideally not just
-  sitting in a config file readable by the same process that could be
-  compromised). Worth revisiting if this ever handles anything more
-  sensitive than a home-automation wake signal.
-- **No rate limiting** on login attempts, registration, or pairing
-  approval attempts. Fine for a small personal/friends-and-family scale
-  service; worth adding if this is ever exposed more broadly.
+- **Secrets are stored in plaintext** in the `saved_credentials` and
+  `credential_shares` tables, protected only by normal database access
+  controls — not encrypted at rest. Encrypting them would need a
+  server-side key, which itself needs careful handling (not committed
+  to version control, ideally not just sitting in a config file
+  readable by the same process that could be compromised). Worth
+  revisiting if this ever handles anything more sensitive than a
+  home-automation wake signal or a home MQTT broker's password.
+- **No rate limiting** on login attempts, registration, or
+  credential-share attempts. Fine for a small personal/friends-and-
+  family scale service; worth adding if this is ever exposed more
+  broadly.
 - **No password reset flow** — not asked for, so not built. A locked-out
   user currently has no self-service way back in.
+- **Deployment ordering matters**: the old `pair_start.php`/
+  `pair_approve.php`/`pair_poll.php` endpoints are gone as of this
+  version. Any MX3 Launcher install still running the old pairing code
+  will get 404s until it's updated to call `credential_start.php`/
+  `credential_status.php` instead. Don't run
+  `drop_old_pairing_system.migration.sql` until every install that
+  matters has been updated.
