@@ -25,7 +25,9 @@ $userId = require_login();
 
 const MAX_FIELDS = 20;
 const MAX_KEY_LENGTH = 64;
-const MAX_VALUE_LENGTH = 512;
+// Generous enough for a full set of broker settings including a
+// base64-encoded self-signed certificate (a few KB), not just short strings.
+const MAX_VALUE_LENGTH = 8192;
 
 /** Parses "Key: Value" lines into an assoc array, or returns an error string. */
 function parse_fields_text(string $text)
@@ -171,6 +173,9 @@ $csrfToken = generate_csrf_token();
         body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 16px; }
         input, textarea { font-size: 16px; width: 100%; padding: 10px; margin-bottom: 12px; box-sizing: border-box; font-family: inherit; }
         textarea { font-family: monospace; height: 100px; }
+        details { margin-bottom: 12px; }
+        details ul { margin: 8px 0 0; padding-left: 20px; }
+        details li { margin-bottom: 4px; }
         button, .btn {
             font-family: inherit; font-size: 16px; line-height: 1.2; padding: 10px;
             display: inline-block; text-align: center; text-decoration: none; color: inherit;
@@ -226,15 +231,44 @@ $csrfToken = generate_csrf_token();
                   required><?= htmlspecialchars($formFieldsText) ?></textarea>
         <p class="hint">
             Apps that consume these fields automatically (rather than a human just reading them off
-            credential_view.php) look up specific key names, so they need to match exactly:
-            <code>MX3Launcher</code> looks for <code>URL</code> and <code>Secret</code>;
-            <code>Z2M Dash</code> looks for <code>Hostname</code>, and optionally <code>Protocol</code>
-            (one of <code>MQTT</code>, <code>MQTTS</code>, <code>WS</code>, <code>WSS</code>),
-            <code>Username</code>/<code>Password</code>, and <code>AutoAccept</code>
-            (<code>true</code>/<code>false</code> - auto-adds newly-seen devices on that broker instead of
-            prompting to accept each one). Any missing optional field leaves whatever the broker draft
-            already had. Any other app can use whatever field names make sense.
+            credential_view.php) look up specific key names, so they need to match exactly - see below
+            for the apps that currently do this. Any other app can use whatever field names make sense.
         </p>
+        <details>
+            <summary>MX3Launcher field names</summary>
+            <ul class="hint">
+                <li><code>URL</code> - required</li>
+                <li><code>Secret</code> - required</li>
+            </ul>
+        </details>
+        <details>
+            <summary>Z2M Dash field names</summary>
+            <p class="hint">
+                Only <code>Hostname</code> is required - anything else missing leaves whatever the
+                broker draft already had (usually the value shown here in parentheses) unchanged.
+            </p>
+            <ul class="hint">
+                <li><code>Hostname</code> - required</li>
+                <li><code>Protocol</code> - one of <code>MQTT</code>, <code>MQTTS</code>, <code>WS</code>, <code>WSS</code></li>
+                <li><code>Port</code> - a number (default 1883)</li>
+                <li><code>Username</code> / <code>Password</code> (default blank, no auth)</li>
+                <li><code>Name</code> - the broker's display name in the app</li>
+                <li><code>BaseTopic</code> (default <code>zigbee2mqtt</code>)</li>
+                <li><code>WebSocketPath</code> - only relevant for WS/WSS (default <code>/mqtt</code>)</li>
+                <li><code>ClientId</code> (default a randomly generated one)</li>
+                <li><code>SelfSignedCert</code> - <code>true</code>/<code>false</code> (default <code>false</code>)</li>
+                <li><code>SelfSignedCertBase64</code> - the certificate's raw bytes, base64-encoded</li>
+                <li><code>CleanSession</code> - <code>true</code>/<code>false</code> (default <code>false</code>)</li>
+                <li><code>KeepAliveSeconds</code> - a number (default 60)</li>
+                <li><code>ConnectionTimeoutSeconds</code> - a number (default 30)</li>
+                <li><code>AutoConnect</code> - <code>true</code>/<code>false</code> (default <code>true</code>)</li>
+                <li><code>ShowReconnectionStatus</code> - <code>true</code>/<code>false</code> (default <code>true</code>)</li>
+                <li>
+                    <code>AutoAccept</code> - <code>true</code>/<code>false</code> (default <code>false</code>) -
+                    auto-adds newly-seen devices on that broker instead of prompting to accept each one
+                </li>
+            </ul>
+        </details>
         <button type="submit"><?= $editingId > 0 ? "Save" : "Add" ?></button>
         <?php if($editingId > 0): ?><a class="btn" href="/manage_credentials.php">Cancel</a><?php endif; ?>
     </form>

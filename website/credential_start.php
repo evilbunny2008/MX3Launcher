@@ -40,8 +40,10 @@ if($_SERVER["REQUEST_METHOD"] !== "POST")
 
 // php.ini's post_max_size already caps what PHP will even parse into
 // php://input - this is just a cheap extra sanity check before
-// json_decode does real work on it.
-$raw = file_get_contents("php://input", false, null, 0, 65536);
+// json_decode does real work on it. Sized generously enough for a full
+// set of broker settings including a base64-encoded self-signed
+// certificate (a few KB), not just short strings.
+$raw = file_get_contents("php://input", false, null, 0, 262144);
 $body = json_decode($raw !== false ? $raw : "", true);
 if(!is_array($body))
     bad_request("Invalid JSON body");
@@ -70,8 +72,8 @@ if($fieldsProvided)
     {
         $key = trim((string)$key);
         $value = (string)$value;
-        if($key === "" || strlen($key) > 64 || strlen($value) > 512)
-            bad_request("Each field key must be 1-64 chars and its value at most 512 chars");
+        if($key === "" || strlen($key) > 64 || strlen($value) > 8192)
+            bad_request("Each field key must be 1-64 chars and its value at most 8192 chars");
         $cleanFields[$key] = $value;
     }
     $payloadJson = json_encode(["app" => $app, "label" => $label, "fields" => $cleanFields]);

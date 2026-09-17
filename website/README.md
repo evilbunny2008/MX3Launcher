@@ -62,12 +62,18 @@ folded into the one generic relay.
    room TV"), and its fields as plain "Key: Value" lines. Apps that
    consume these fields automatically via pull mode (rather than a
    human just reading them off a push-mode reveal page) look up
-   specific key names, so they need to match exactly: **MX3 Launcher**
-   looks for `URL` and `Secret` (see its own `SoundbarPairing.kt`);
-   **Z2M Dash** looks for `Hostname`, and optionally `Protocol` (one of
-   `MQTT`/`MQTTS`/`WS`/`WSS`), `Username`/`Password`, and `AutoAccept`
-   (`true`/`false` - auto-adds newly-seen devices on that broker instead
-   of prompting to accept each one). Any other app's fields are free-form.
+   specific key names, so they need to match exactly - `manage_credentials.php`
+   itself has the full, current field list per app (it's the single
+   source of truth, so it doesn't drift from what each app's code
+   actually reads); in short, **MX3 Launcher** looks for `URL` and
+   `Secret` (see its own `SoundbarPairing.kt`), and **Z2M Dash** looks
+   for `Hostname` (everything else - `Protocol`, `Port`, `Username`/
+   `Password`, `Name`, `BaseTopic`, `WebSocketPath`, `ClientId`,
+   `SelfSignedCert`/`SelfSignedCertBase64`, `CleanSession`,
+   `KeepAliveSeconds`, `ConnectionTimeoutSeconds`, `AutoConnect`,
+   `ShowReconnectionStatus`, `AutoAccept` - is optional, defaulting to
+   whatever the broker draft already had). Any other app's fields are
+   free-form.
 3. **Pull** (e.g. a TV pairing for the first time, or Z2M Dash setting
    up a new broker):
    - The device calls `credential_start.php` with just `{"app": "...",
