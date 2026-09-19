@@ -1,6 +1,5 @@
-// Suppresses the @Incubating warning for the AGP Variant API members used
-// below (outputFileName, artifacts.get, onVariants/selector) - works today,
-// API may still change.
+// Suppresses the @Incubating warning for the AGP Variant API used below
+// (outputFileName, artifacts.get, onVariants/selector).
 @file:Suppress("UnstableApiUsage")
 
 import com.android.build.api.artifact.SingleArtifact
@@ -69,19 +68,12 @@ android {
     }
 }
 
-// Copies the release .aab to app/dist/<appName>-<versionName>.aab (gitignored),
-// outside build/ so it survives a clean build. Don't switch this back to
-// app/release/ — that path collides with Android Studio's own "Generate
-// Signed Bundle" wizard, which writes its own app-release.aab there too.
-// Must run after AGP's "produce...BundleIdeListingFile" task, which declares
-// the bundle at its default location as an input — touching it earlier fails
-// that task's input validation.
-//
-// A typed task class with Provider/Property inputs, not a doLast{} closure:
-// capturing the AGP `variant` object in a closure holds live references
-// (Project, Configuration, JavaCompile, ...) the configuration cache can't
-// serialize. Wiring bundleFile from variant.artifacts.get(...) at
-// configuration time captures only the resolved path.
+// Copies the release .aab to app/dist/ (gitignored, survives clean builds),
+// not app/release/ (which collides with Android Studio's "Generate Signed
+// Bundle" wizard). Must run after produce...BundleIdeListingFile, which needs
+// the bundle at its default location first. Uses a typed task, not doLast{},
+// since capturing the AGP `variant` object in a closure breaks
+// configuration-cache serialization.
 abstract class RenameBundleTask : DefaultTask() {
     @get:InputFile
     abstract val bundleFile: RegularFileProperty
@@ -111,13 +103,10 @@ abstract class RenameBundleTask : DefaultTask() {
     }
 }
 
-// Copies the release APK(s) to app/dist/ too, alongside the bundle above.
-// Unlike RenameBundleTask, doesn't delete the originals — no known
-// collision to avoid there.
-//
-// SingleArtifact.APK resolves to a directory (a variant can produce more
-// than one APK, e.g. per-ABI splits), so this copies every .apk file found
-// rather than special-casing one vs. many.
+// Copies the release APK(s) to app/dist/ too. Unlike RenameBundleTask,
+// keeps the originals — no collision to avoid here. SingleArtifact.APK is a
+// directory (a variant can produce multiple APKs, e.g. per-ABI splits), so
+// this copies every .apk found rather than assuming just one.
 abstract class CopyApkTask : DefaultTask() {
     @get:InputFiles
     abstract val apkDirectory: DirectoryProperty
@@ -169,8 +158,7 @@ androidComponents {
             destinationDirectory.set(layout.projectDirectory.dir("dist"))
         }
 
-        // Hooked onto the standard task graphs so both also run from Android
-        // Studio's Build menu, not just when run explicitly by name.
+        // Hooked into the standard task graph so both also run from Android Studio's Build menu.
         afterEvaluate {
             tasks.named("bundle$variantNameCapitalized") {
                 finalizedBy(renameBundle)
@@ -189,10 +177,9 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.runtime)
-    // Pinned to the BOM explicitly, not left to tv-material's transitive
-    // version — tv-material is outside the compose-bom platform, so without
-    // this two compose-foundation versions can end up on the classpath,
-    // producing "internal in file" errors on classes like RowColumnParentData.
+    // Pinned explicitly: tv-material is outside the compose-bom platform, so
+    // its transitive version can conflict with the BOM's, producing
+    // "internal in file" errors on classes like RowColumnParentData.
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)

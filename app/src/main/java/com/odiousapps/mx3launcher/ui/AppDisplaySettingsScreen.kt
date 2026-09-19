@@ -29,10 +29,9 @@ import androidx.tv.material3.Text
 import com.odiousapps.mx3launcher.data.AppEntry
 
 /**
- * Reordering here is move-up/move-down buttons rather than drag-and-drop.
- * Drag gestures don't have a sane D-pad equivalent — this way every
- * action maps directly to a single remote press, no touch/pointer input
- * assumed anywhere.
+ * Reordering uses move-up/move-down buttons, not drag-and-drop: drag
+ * gestures have no sane D-pad equivalent, so every action maps to a single
+ * remote press instead.
  */
 @Composable
 fun AppDisplaySettingsScreen(

@@ -105,9 +105,7 @@ fun SettingsScreen(
             }
         }
 
-        // URL/secret for waking a soundbar that auto-enters standby; kept
-        // configurable rather than hardcoded. See wakeSoundbarIfNeeded() in
-        // AppGridScreen.kt.
+        // See checkSoundbarWake() in AppGridScreen.kt.
         SettingsSection(title = "Soundbar wake") {
             Button(onClick = { onSoundbarWakeEnabledChange(!settings.soundbarWakeEnabled) }) {
                 Text(text = if (settings.soundbarWakeEnabled) "Enabled ✓" else "Disabled")
@@ -120,9 +118,7 @@ fun SettingsScreen(
             )
         }
 
-        // Uses MediaStore's Downloads collection directly rather than a SAF
-        // picker, which this device has no handler for. See LauncherBackup.kt.
-        // Each backup is timestamped rather than overwriting one fixed file.
+        // See LauncherBackup.kt for why MediaStore (not SAF) and per-backup timestamps.
         SettingsSection(title = "Backup & restore") {
             var availableBackups by remember { mutableStateOf(LauncherBackup.listBackups(context)) }
             var showRestoreList by remember { mutableStateOf(false) }
@@ -237,12 +233,11 @@ private sealed class PairingUiState {
 }
 
 /**
- * Device-code-style pairing UI — replaces raw text-entry fields
- * entirely. The TV only ever displays a short code and polls in the
- * background; the real URL+secret get typed nowhere on the TV, which
- * also sidesteps the D-pad navigation trap plain TextFields hit here
- * (focused text-edit mode captures Down for cursor movement instead of
- * surfacing it for moving focus to whatever's below the field).
+ * Device-code-style pairing UI: the TV only ever shows a short code and
+ * polls in the background, with the real URL+secret typed on a phone
+ * instead. This also avoids the D-pad trap of on-screen TextFields, where
+ * focused text-edit mode captures Down for cursor movement rather than
+ * moving focus to whatever's below.
  */
 @Composable
 private fun SoundbarPairingSection(

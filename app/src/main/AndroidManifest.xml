@@ -18,9 +18,8 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!--
-      Backs the full-screen-intent fallback in ScreenWakeGuardService.kt. Not
-      auto-granted on Android 14+ — if wake-guard doesn't work, check
-      Settings -> Apps -> MX3 Launcher -> "Full screen notifications".
+      Backs the full-screen-intent fallback in ScreenWakeGuardService.kt
+      (see bringLauncherToFront() there for the Android 14+ grant caveat).
     -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"
         tools:ignore="FullScreenIntentPolicy" />
@@ -28,8 +27,8 @@
     <!--
       A launcher needs to see every installed app. &lt;queries&gt; is the
       Play-Store-compliant way to do that on API 30+, vs. the more heavily
-      gated QUERY_ALL_PACKAGES. Without it, queryIntentActivities() silently
-      returns nothing for other packages.
+      gated QUERY_ALL_PACKAGES; without it, queryIntentActivities() returns
+      nothing for other packages.
     -->
     <queries>
         <intent>

@@ -5,14 +5,11 @@
     android:viewportHeight="108">
 
     <!--
-      Content is centered at (256,256) in the original 512-canvas design,
-      so this is a straight scale-around-centre: pivot = content centre,
-      translate = (54,54) minus that same centre after scaling collapses
-      to zero offset. Scale 0.14 keeps the grid's corner tiles safely
-      within the ~66dp safe-zone circle that survives every launcher
-      mask shape - verified empirically against a circle-mask preview
-      rather than trusting the arithmetic alone (an earlier 0.172 value
-      sat right at the edge with no real margin).
+      Content is centred at (256,256) in the original 512-canvas design, so
+      this is a straight scale-around-centre. Scale 0.14 was verified
+      empirically (not just computed) to keep the grid's corner tiles inside
+      the ~66dp safe-zone circle across every launcher mask shape — an
+      earlier 0.172 sat right at the edge with no real margin.
     -->
     <group
         android:name="content"

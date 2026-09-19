@@ -1,0 +1,3 @@
+* Reworked soundbar-wake pairing to approve by picking one of your
+  saved credential presets on the pairing site, instead of a single
+  fixed pairing URL.

@@ -174,10 +174,9 @@ private fun AppTile(
             modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Preserves the drawable's natural aspect ratio; forcing a fixed
-            // square size squishes non-square icons. Falls back to a fixed
-            // size only when intrinsic size is invalid (some adaptive icons
-            // report -1).
+            // Preserves the drawable's natural aspect ratio (a fixed square
+            // would squish non-square icons); falls back to a fixed size only
+            // when the intrinsic size is invalid (some adaptive icons report -1).
             val bitmap = remember(app.packageName) {
                 val hasValidIntrinsicSize = app.icon.intrinsicWidth > 0 && app.icon.intrinsicHeight > 0
                 if (hasValidIntrinsicSize) {
@@ -227,16 +226,13 @@ private fun launchAppIntent(context: Context, app: AppEntry) {
 private const val TAG = "SoundbarWake"
 
 // Hardware limitation, not a bug: the soundbar auto-enters standby with no
-// way to disable that. An AudioManager volume nudge didn't wake it (that
-// only adjusts a volume setting, no real audio session). This instead calls
-// a server-side script (URL/secret from Settings) that checks a
-// power-monitoring smart socket and, only if the soundbar is actually in
-// standby, sends a Zigbee IR power-toggle — toggle, not a dedicated "on"
-// command, so firing it blindly would turn an already-on soundbar off.
-//
-// Blocking, not fire-and-forget: the caller awaits this (via
-// withContext(Dispatchers.IO)) before deciding whether to show a dialog or
-// launch. Returns null on success, or a human-readable failure otherwise.
+// disable option, and an AudioManager volume nudge doesn't wake it. Instead
+// this calls a server-side script (URL/secret from Settings) that checks a
+// power-monitoring smart socket and sends a Zigbee IR power-toggle only if
+// the soundbar is actually in standby (it's a toggle, not "on", so firing it
+// blindly could turn an already-on soundbar off). Blocking (awaited via
+// Dispatchers.IO) so the caller can decide whether to show a dialog or
+// launch; returns null on success, else a failure message.
 private fun checkSoundbarWake(url: String, secret: String): String? {
     val fullUrl = if (secret.isBlank()) {
         url

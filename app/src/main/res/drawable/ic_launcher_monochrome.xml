@@ -6,12 +6,10 @@
 
     <!--
       Monochrome layer for Android 13+ themed icons (Settings -> Wallpaper
-      & style -> Themed icons). The system re-tints whatever's drawn here
-      to match the user's chosen theme colour, so the literal fill colour
-      below doesn't matter - only the silhouette/shape does. Same
-      geometry and transform as ic_launcher_foreground.xml, collapsed to
-      a single colour - the cyan accent tile has no special treatment
-      here since a monochrome silhouette doesn't carry colour accents.
+      & style -> Themed icons): the system re-tints this, so only the
+      silhouette matters, not the fill colour. Same geometry/transform as
+      ic_launcher_foreground.xml, collapsed to one colour with no special
+      treatment for the accent tile.
     -->
     <group
         android:name="content"

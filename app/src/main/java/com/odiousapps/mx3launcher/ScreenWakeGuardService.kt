@@ -14,19 +14,15 @@ import android.os.IBinder
 import android.util.Log
 
 /**
- * Persistent foreground service whose only job is catching screen-on events
- * and forcing MX3 Launcher back to the foreground, including when its own
- * Activity/Compose UI isn't alive.
+ * Persistent foreground service that catches screen-on events and brings
+ * MX3 Launcher back to the foreground, even when its own UI isn't alive.
  *
- * Needs to be a foreground service, not a receiver tied to MainActivity's
- * lifecycle: Android can kill MX3 Launcher's process under memory pressure
- * while the screen is off (symptom: the system's Google launcher shows on
- * wake instead), leaving no Activity to host a lifecycle-bound receiver. A
- * foreground service survives that.
- *
- * SCREEN_ON can't be a static manifest receiver (unlike BOOT_COMPLETED, see
- * BootReceiver.kt) — it must be registered dynamically via
- * Context.registerReceiver(), hence needing a persistent component to host it.
+ * Must be a foreground service, not a MainActivity-lifecycle receiver:
+ * Android can kill the process under memory pressure while the screen is
+ * off, leaving no Activity to host the receiver — a foreground service
+ * survives that. SCREEN_ON also can't be a static manifest receiver (unlike
+ * BOOT_COMPLETED, see BootReceiver.kt); it must be registered dynamically
+ * via Context.registerReceiver(), which needs a persistent host.
  */
 class ScreenWakeGuardService : Service() {
 
@@ -69,20 +65,16 @@ class ScreenWakeGuardService : Service() {
     }
 
     /**
-     * Tries a direct startActivity() first — cheap, and works fine in a
-     * lot of real-world cases despite the theoretical background-launch
-     * restriction risk. Falls back to a full-screen-intent notification,
-     * the Android-sanctioned mechanism for forcing an activity to the
-     * foreground from a background trigger (the same one alarm and
-     * incoming-call apps use), which is specifically exempted from those
-     * restrictions when delivered this way.
+     * Tries a direct startActivity() first (cheap, and usually works despite
+     * the theoretical background-launch restriction risk), falling back to a
+     * full-screen-intent notification — the Android-sanctioned way to force
+     * an activity to the foreground from a background trigger, exempted from
+     * those restrictions.
      *
-     * Needs android.permission.USE_FULL_SCREEN_INTENT declared in the
-     * manifest. On Android 14+ this permission is no longer
-     * auto-granted for most apps the way it used to be. If the
-     * fallback doesn't work either, check Settings -> Apps -> MX3
-     * Launcher -> "Full screen notifications" (naming varies by OEM) and
-     * confirm it's actually granted.
+     * Needs USE_FULL_SCREEN_INTENT in the manifest, which isn't auto-granted
+     * on Android 14+; if the fallback fails too, check Settings -> Apps ->
+     * MX3 Launcher -> "Full screen notifications" (naming varies by OEM) is
+     * actually granted.
      */
     @SuppressLint("FullScreenIntentPolicy")
     private fun bringLauncherToFront() {

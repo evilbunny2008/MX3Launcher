@@ -14,19 +14,16 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Uses org.json (built into the SDK) rather than adding a JSON dependency,
- * given this project's existing Compose/tv-material dependency friction.
+ * Uses org.json (built-in) rather than adding a JSON dependency, given this
+ * project's existing Compose/tv-material dependency friction.
  *
- * Writes to the public Downloads collection via MediaStore rather than:
- *  - SAF's picker, which fails with "you don't have an app that can do
- *    this" on TV boxes lacking a DocumentsUI-equivalent handler.
- *  - the app's own external-files dir, hidden from file managers on
- *    Android 11+ scoped storage without adb/root.
- * MediaStore.Downloads is a core system provider apps can write their own
- * entries to without storage permission. Requires API 29+.
+ * Writes to MediaStore's Downloads collection (no storage permission needed,
+ * API 29+) instead of: SAF's picker, which fails on TV boxes with no
+ * DocumentsUI-equivalent handler; or the app's own external-files dir,
+ * which scoped storage hides from file managers on Android 11+.
  *
- * Each backup gets its own timestamped filename, so restore lists what's
- * available instead of assuming exactly one.
+ * Each backup gets its own timestamped filename, so restore can list what's
+ * available rather than assuming exactly one.
  */
 object LauncherBackup {
 
@@ -68,12 +65,9 @@ object LauncherBackup {
         return json.toString(2)
     }
 
-    /**
-     * Returns null (rather than throwing) on anything malformed — a
-     * hand-edited or corrupted backup file shouldn't crash the launcher,
-     * it should just fail the restore cleanly so the caller can show an
-     * error instead.
-     */
+    /** Returns null (rather than throwing) on malformed input, so a
+     *  hand-edited or corrupted backup fails the restore cleanly instead
+     *  of crashing the launcher. */
     fun fromJson(raw: String): LauncherSettings? {
         return try {
             val json = JSONObject(raw)
