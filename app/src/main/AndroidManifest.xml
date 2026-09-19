@@ -18,23 +18,18 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!--
-      Backs the full-screen-intent fallback in ScreenWakeGuardService.kt.
-      On Android 14+ this is no longer auto-granted to most apps the way
-      it used to be - if the wake-guard feature doesn't work, check
-      Settings -> Apps -> MX3 Launcher -> "Full screen notifications"
-      (naming varies by OEM) and confirm it's actually granted.
+      Backs the full-screen-intent fallback in ScreenWakeGuardService.kt. Not
+      auto-granted on Android 14+ -- if wake-guard doesn't work, check
+      Settings -> Apps -> MX3 Launcher -> "Full screen notifications".
     -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"
         tools:ignore="FullScreenIntentPolicy" />
 
     <!--
-      A launcher needs to see EVERY installed app. This is the correct,
-      Play-Store-compliant way to do that on API 30+ (package-visibility
-      filtering) - matching by intent-filter signature via &lt;queries&gt;,
-      rather than requesting the much more heavily gated
-      QUERY_ALL_PACKAGES permission. Without this,
-      PackageManager.queryIntentActivities() silently returns nothing for
-      any app outside this one's own package.
+      A launcher needs to see every installed app. &lt;queries&gt; is the
+      Play-Store-compliant way to do that on API 30+, vs. the more heavily
+      gated QUERY_ALL_PACKAGES. Without it, queryIntentActivities() silently
+      returns nothing for other packages.
     -->
     <queries>
         <intent>
@@ -74,11 +69,9 @@
         </activity>
 
         <!--
-          Foreground service type is required as of Android 14 - none of
-          the specific FGS types (location, camera, mediaPlayback, etc.)
-          describe "watch for screen-on and bring the launcher back", so
-          this uses specialUse with a justification property, same
-          pattern as Button Mapper's StatusForegroundService.
+          Foreground service type required as of Android 14; no specific FGS
+          type fits "watch for screen-on and bring the launcher back", so
+          this uses specialUse with a justification property.
         -->
         <service
             android:name=".ScreenWakeGuardService"
