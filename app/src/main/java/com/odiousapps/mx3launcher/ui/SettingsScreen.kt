@@ -105,12 +105,9 @@ fun SettingsScreen(
             }
         }
 
-        // Calls a small server-side script on app launch to wake a
-        // soundbar that auto-enters standby with no way to disable that
-        // on the hardware itself. URL and secret are configured here
-        // rather than hardcoded, so they can be changed without a
-        // rebuild -- see AppGridScreen.kt's wakeSoundbarIfNeeded() for
-        // how these get used.
+        // URL/secret for waking a soundbar that auto-enters standby; kept
+        // configurable rather than hardcoded. See wakeSoundbarIfNeeded() in
+        // AppGridScreen.kt.
         SettingsSection(title = "Soundbar wake") {
             Button(onClick = { onSoundbarWakeEnabledChange(!settings.soundbarWakeEnabled) }) {
                 Text(text = if (settings.soundbarWakeEnabled) "Enabled ✓" else "Disabled")
@@ -123,16 +120,9 @@ fun SettingsScreen(
             )
         }
 
-        // No Storage Access Framework / system picker here -- that was
-        // tried first and failed with "you don't have an app that can do
-        // this" on this device, since it doesn't ship anything that
-        // handles SAF's picker intents. Reads/writes the public
-        // Downloads collection via MediaStore directly instead, which
-        // needs no picker or provider app to exist at all. See
-        // LauncherBackup.kt. Each backup gets its own timestamped
-        // filename rather than overwriting a single fixed name, so
-        // restore lists what's available instead of assuming there's
-        // exactly one.
+        // Uses MediaStore's Downloads collection directly rather than a SAF
+        // picker, which this device has no handler for. See LauncherBackup.kt.
+        // Each backup is timestamped rather than overwriting one fixed file.
         SettingsSection(title = "Backup & restore") {
             var availableBackups by remember { mutableStateOf(LauncherBackup.listBackups(context)) }
             var showRestoreList by remember { mutableStateOf(false) }
@@ -155,11 +145,8 @@ fun SettingsScreen(
                     Text(text = "Restore settings")
                 }
                 Button(onClick = {
-                    // Reuses the same restoreAll() path as picking a
-                    // backup -- resetting is really just "restore" to a
-                    // fixed default LauncherSettings, same default values
-                    // used for collectAsState's initial state up in
-                    // MainActivity.kt.
+                    // Reset is just a restore to the same defaults used for
+                    // collectAsState's initial state in MainActivity.kt.
                     onRestore(LauncherSettings(ThemeMode.SYSTEM, GRADIENT_PRESETS.first().id, 6, emptySet(), emptyList()))
                     showRestoreList = false
                     backupStatus = "Reset to defaults"
@@ -315,8 +302,7 @@ private fun SoundbarPairingSection(
                                 return@launch
                             }
                             is SoundbarPairing.PollResult.Error -> {
-                                // Transient network hiccup -- keep polling rather
-                                // than giving up on the first blip.
+                                // Keep polling; don't give up on a transient blip.
                             }
                             SoundbarPairing.PollResult.Pending -> {
                                 // Keep waiting.
@@ -341,8 +327,7 @@ private fun SoundbarPairingSection(
                 )
                 Text(text = "Scan with your phone's camera, or go to:")
             } else {
-                // QR generation failed -- fall back to the plain text
-                // path entirely rather than showing a broken state.
+                // QR generation failed -- fall back to plain text.
                 Text(text = "On your phone, go to:")
             }
             Text(text = "mx3launcher.odiousapps.com/credential_view.php")

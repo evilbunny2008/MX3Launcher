@@ -35,16 +35,10 @@ fun LauncherTheme(
     val colorScheme = if (isDark) darkColorScheme() else lightColorScheme()
     val gradient = gradientFor(gradientId)
 
-    // Computed directly rather than trusting MaterialTheme's own ambient
-    // content-colour setup. This project mixes androidx.tv.material3.Text
-    // with androidx.compose.material3.Icon in a couple of places (see
-    // TopBar.kt). Relying on either family's internal colour-scheme
-    // resolution to "just work" isn't something verifiable without a
-    // real build against this specific young library. Forcing an
-    // explicit, known-correct colour onto both families' content-colour
-    // locals sidesteps that uncertainty entirely -- this is what was
-    // actually missing before, which is why text rendered black
-    // regardless of theme.
+    // Set explicitly rather than trusting MaterialTheme's ambient content colour:
+    // this project mixes androidx.tv.material3.Text with androidx.compose.material3.Icon
+    // (see TopBar.kt), and their colour-scheme resolution can't be trusted to
+    // "just work" together -- without this, text rendered black regardless of theme.
     val contentColor = if (isDark) Color(0xFFF2F2F2) else Color(0xFF1A1A1A)
 
     MaterialTheme(colorScheme = colorScheme) {

@@ -54,17 +54,11 @@ fun AppGridScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = rememberCoroutineScope()
 
-    // Holds the error message while a blocking dialog shows it -- null
-    // means no dialog is showing. Just a String rather than also
-    // carrying the AppEntry that triggered it, since a failure now
-    // blocks launching entirely rather than launching that app once
-    // dismissed (see the dialog below).
+    // Error message for the blocking dialog below; null means no dialog.
     var pendingWakeFailure by remember { mutableStateOf<String?>(null) }
 
-    // One FocusRequester per app, re-created whenever the app list itself
-    // changes (install/uninstall, reorder, show/hide) -- keyed on `apps`
-    // rather than just remember{} so stale requesters from a previous
-    // list shape never get referenced after a change.
+    // Keyed on `apps` so requesters are re-created (not stale) whenever the
+    // list itself changes -- install/uninstall, reorder, show/hide.
     val focusRequesters = remember(apps) { List(apps.size) { FocusRequester() } }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -83,13 +77,8 @@ fun AppGridScreen(
                 AppTile(
                     app = app,
                     onClick = {
-                        // Waits for the wake attempt's result BEFORE
-                        // launching -- this is why it's a coroutine
-                        // rather than the earlier fire-and-forget
-                        // background Thread. A failure shows a blocking
-                        // dialog and does NOT launch the app at all --
-                        // dismissing the dialog only closes it; actually
-                        // launching requires pressing the tile again.
+                        // Waits for the wake result before launching; a failure
+                        // shows a blocking dialog and does not launch the app.
                         scope.launch {
                             if (soundbarWakeEnabled && soundbarWakeUrl.isNotBlank()) {
                                 val error = withContext(kotlinx.coroutines.Dispatchers.IO) {
@@ -113,12 +102,8 @@ fun AppGridScreen(
     }
 
     pendingWakeFailure?.let { message ->
-        // A wake failure is a hard block, not just an FYI -- dismissing
-        // this (OK, or Back/outside-tap) only closes the dialog, it does
-        // NOT launch the app. The person needs to actually retry (fix
-        // whatever's wrong, or accept it and press the tile again) to
-        // launch, rather than the failure being informational and
-        // launching happening regardless either way.
+        // Dismissing only closes the dialog; it does not launch the app --
+        // the person must press the tile again to retry.
         val dismiss = { pendingWakeFailure = null }
         androidx.compose.material3.AlertDialog(
             onDismissRequest = dismiss,
@@ -147,9 +132,7 @@ private fun AppTile(
 
     val column = index % columns
     val rowStart = index - column
-    // Handles a partial final row (total items not evenly divisible by
-    // columns) -- the last real item in this row isn't always at
-    // column (columns - 1).
+    // A partial final row may not end at column (columns - 1).
     val rowEnd = minOf(rowStart + columns - 1, totalCount - 1)
     val isLastInRow = index == rowEnd
 
@@ -158,14 +141,8 @@ private fun AppTile(
         modifier = Modifier
             .fillMaxWidth()
             .focusRequester(focusRequesters[index])
-            // Compose's key-event modifiers only fire while this specific
-            // composable (or a focused descendant) actually holds D-pad
-            // focus -- so this naturally scopes to "whichever tile is
-            // currently focused" with no extra focus-tracking state
-            // needed. This is a plain Activity, so it already receives
-            // hardware key events natively; no accessibility service or
-            // elevated privileges needed for this, unlike Button Mapper's
-            // system-wide interception.
+            // Only fires while this tile holds D-pad focus, so it naturally
+            // scopes to the focused tile with no extra tracking state needed.
             .onKeyEvent { keyEvent ->
                 if (keyEvent.type != KeyEventType.KeyDown) return@onKeyEvent false
 
@@ -175,17 +152,9 @@ private fun AppTile(
                     return@onKeyEvent true
                 }
 
-                // Compose's default D-pad navigation doesn't wrap grid
-                // edges on its own -- pressing Left at column 0 (or
-                // Right at the last column) would otherwise just do
-                // nothing, or move focus somewhere outside the grid
-                // entirely. Explicitly redirect to the opposite edge of
-                // the SAME row instead, consuming the event so the
-                // default (non-wrapping) behaviour doesn't also fire.
-                // Uses the same raw nativeKeyEvent.keyCode approach as
-                // the Menu check above, rather than Compose's own Key.*
-                // constants -- kept to one single, already-verified way
-                // of reading key identity in this file.
+                // Compose doesn't wrap D-pad focus at grid edges on its own;
+                // redirect Left/Right at row ends to the opposite edge of the
+                // same row instead.
                 val keyCode = keyEvent.nativeKeyEvent.keyCode
                 val isLeftAtStart = keyCode == android.view.KeyEvent.KEYCODE_DPAD_LEFT && column == 0
                 val isRightAtEnd = keyCode == android.view.KeyEvent.KEYCODE_DPAD_RIGHT && isLastInRow
@@ -205,15 +174,10 @@ private fun AppTile(
             modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Preserves the drawable's own natural aspect ratio rather
-            // than forcing a fixed square canvas. Forcing
-            // toBitmap(width, height) to an exact size non-uniformly
-            // squishes any drawable that isn't already perfectly square
-            // -- that's what caused icons to look off-centre after the
-            // previous fix. Falls back to a fixed size only if the
-            // drawable reports an invalid intrinsic size (some adaptive
-            // icons can report -1), which toBitmap() itself would
-            // otherwise mishandle.
+            // Preserves the drawable's natural aspect ratio; forcing a fixed
+            // square size squishes non-square icons. Falls back to a fixed
+            // size only when intrinsic size is invalid (some adaptive icons
+            // report -1).
             val bitmap = remember(app.packageName) {
                 val hasValidIntrinsicSize = app.icon.intrinsicWidth > 0 && app.icon.intrinsicHeight > 0
                 if (hasValidIntrinsicSize) {
@@ -223,11 +187,8 @@ private fun AppTile(
                 }
             }
 
-            // Full-width backdrop behind the icon, per request -- a
-            // subtle tint that reads reasonably in both light and dark
-            // theme without needing separate per-theme colours, rather
-            // than the icon sitting in empty space at its own small
-            // fixed size.
+            // Full-width backdrop behind the icon; one subtle tint works in
+            // both themes without needing per-theme colours.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -235,11 +196,7 @@ private fun AppTile(
                     .padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                // ContentScale.Fit preserves aspect ratio (no stretching)
-                // AND centers by default (its default alignment is
-                // Alignment.Center) -- this single setting is what
-                // guarantees both "not distorted" and "properly centered"
-                // regardless of any given icon's own native proportions.
+                // ContentScale.Fit preserves aspect ratio and centers by default.
                 Image(
                     bitmap = bitmap,
                     contentDescription = app.label,
@@ -262,36 +219,24 @@ private fun launchAppIntent(context: Context, app: AppEntry) {
     try {
         context.startActivity(intent)
     } catch (_: Exception) {
-        // App may have been uninstalled between the grid loading and the
-        // tap landing -- fail quietly rather than crashing the launcher
-        // itself, since a crashing launcher takes the whole home screen
-        // down with it.
+        // App may have been uninstalled since the grid loaded -- fail quietly
+        // rather than crash the launcher and take the whole home screen down.
     }
 }
 
 private const val TAG = "SoundbarWake"
 
-// Standing hardware limitation, not a bug: the soundbar auto-enters
-// standby after inactivity and has no setting to disable that.
-// Superseded the earlier AudioManager volume-nudge approach -- that
-// turned out not to actually wake it, since it only ever adjusted a
-// volume SETTING without opening a real audio session, and separately
-// even the soundbar's own remote couldn't wake it via volume at all.
-// This instead calls a small server-side script over HTTPS (URL and
-// shared-secret key configured in Settings, not hardcoded here), which
-// checks a power-monitoring smart socket to see whether the soundbar
-// is actually in standby, and only then sends a Zigbee IR toggle
-// command to wake it -- the IR code toggles power rather than being a
-// dedicated "on" command, so blindly firing it on every launch would
-// turn an already-on soundbar OFF instead.
+// Hardware limitation, not a bug: the soundbar auto-enters standby with no
+// way to disable that. An AudioManager volume nudge didn't wake it (that
+// only adjusts a volume setting, no real audio session). This instead calls
+// a server-side script (URL/secret from Settings) that checks a
+// power-monitoring smart socket and, only if the soundbar is actually in
+// standby, sends a Zigbee IR power-toggle -- toggle, not a dedicated "on"
+// command, so firing it blindly would turn an already-on soundbar off.
 //
-// Blocking (not fire-and-forget) and returns a result rather than
-// showing its own Toast -- the caller needs to actually wait for this
-// before deciding whether to show a dialog or launch immediately, which
-// is why this is a plain function meant to be called from
-// withContext(Dispatchers.IO) rather than spawning its own background
-// Thread the way it used to. Returns null on success, or a
-// human-readable failure description otherwise.
+// Blocking, not fire-and-forget: the caller awaits this (via
+// withContext(Dispatchers.IO)) before deciding whether to show a dialog or
+// launch. Returns null on success, or a human-readable failure otherwise.
 private fun checkSoundbarWake(url: String, secret: String): String? {
     val fullUrl = if (secret.isBlank()) {
         url
@@ -307,33 +252,23 @@ private fun checkSoundbarWake(url: String, secret: String): String? {
         connection.readTimeout = 4000
         connection.requestMethod = "GET"
 
-        // Response code has to be checked BEFORE deciding which stream
-        // to read -- HttpURLConnection.inputStream throws for non-2xx
-        // responses (error bodies come from .errorStream instead), so
-        // reading .inputStream unconditionally would itself throw
-        // before a response-code check placed after it was ever reached.
+        // Must check the response code before reading a stream --
+        // .inputStream throws for non-2xx (error bodies come from .errorStream).
         val responseCode = connection.responseCode
         val result = if (responseCode in 200..299) {
-            connection.inputStream.use { it.readBytes() } // drain the response, no result needed
+            connection.inputStream.use { it.readBytes() } // drain, result unneeded
             null
         } else {
-            // Actually capture the body, not just drain it -- our own
-            // wake_soundbar.php returns a real JSON error message here
-            // (e.g. {"OK":false,"error":"Could not read socket state..."}),
-            // which is far more useful than the bare status code alone.
-            // Truncated defensively in case something entirely different
-            // is at this URL and returns something huge/malformed (an
-            // HTML error page from a misconfigured server, etc.).
+            // wake_soundbar.php returns a JSON error body, more useful than
+            // the bare status code; truncated in case something else is at
+            // this URL and returns something huge/malformed.
             val errorBody = connection.errorStream
                 ?.use { it.readBytes().toString(Charsets.UTF_8) }
                 ?.trim()
                 ?.take(500)
                 .orEmpty()
-            // Logs the plain url, NOT fullUrl -- fullUrl has the secret
-            // appended as ?key=..., and logcat is readable by anything
-            // with adb/appropriate permissions, so leaking the secret
-            // into logs would undermine a lot of the point of keeping
-            // it out of view in the first place.
+            // Logs the plain url, not fullUrl, to avoid leaking the secret
+            // (appended as ?key=...) into logcat.
             val logSuffix = if (errorBody.isNotEmpty()) ": $errorBody" else ""
             android.util.Log.w(TAG, "Wake failed for $url -- server returned $responseCode$logSuffix")
             if (errorBody.isNotEmpty()) "Server returned $responseCode: $errorBody" else "Server returned $responseCode"
@@ -347,12 +282,9 @@ private fun checkSoundbarWake(url: String, secret: String): String? {
 }
 
 /**
- * Opens Android's own System App Info page for the given package --
- * the standard "long-press an icon" destination on most launchers
- * (uninstall, permissions, storage, notifications, etc.), reached here
- * via Menu on whichever tile currently has D-pad focus instead of a
- * touch-only long-press gesture, which doesn't really have a D-pad
- * equivalent.
+ * Opens Android's App Info page for the package -- the usual "long-press an
+ * icon" destination, reached here via Menu on the focused tile since long-press
+ * has no D-pad equivalent.
  */
 private fun openAppInfo(context: Context, packageName: String) {
     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -362,7 +294,6 @@ private fun openAppInfo(context: Context, packageName: String) {
     try {
         context.startActivity(intent)
     } catch (_: Exception) {
-        // Same reasoning as launchAppIntent() -- fail quietly rather than
-        // crash the launcher.
+        // Same reasoning as launchAppIntent() -- fail quietly.
     }
 }

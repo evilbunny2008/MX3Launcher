@@ -91,10 +91,8 @@ private fun WifiStatusButton(context: Context) {
 }
 
 /**
- * Checks the ACTIVE network specifically -- a device can have Wi-Fi
- * radio-on but actually be routing over Ethernet, in which case showing
- * a "connected" Wi-Fi icon would be misleading. This checks whether
- * Wi-Fi specifically is the transport actually in use right now.
+ * Checks the active network specifically -- Wi-Fi radio can be on while
+ * actually routing over Ethernet, which would make a Wi-Fi icon misleading.
  */
 private fun isWifiConnected(context: Context): Boolean {
     val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false

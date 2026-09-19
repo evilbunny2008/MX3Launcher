@@ -46,14 +46,9 @@ fun AppDisplaySettingsScreen(
 
     val listState = rememberLazyListState()
 
-    // The actual reorder is async -- onMove persists to DataStore, which
-    // flows back down as a new `allApps` list some time later, not
-    // synchronously. LazyColumn keeps the moved item's own composable
-    // identity correctly (thanks to key = { it.packageName }), but it
-    // does NOT auto-scroll to keep a moved item in the visible viewport
-    // on its own. This tracks which package to follow, and once the
-    // updated order actually arrives (allApps changes), scrolls it back
-    // into view.
+    // onMove persists asynchronously, so `allApps` updates later, not
+    // synchronously; LazyColumn won't auto-scroll to follow a moved item, so
+    // track it here and scroll into view once the new order arrives.
     var pendingScrollTarget by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(allApps, pendingScrollTarget) {

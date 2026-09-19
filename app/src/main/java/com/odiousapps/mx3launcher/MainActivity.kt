@@ -42,17 +42,13 @@ private sealed class Screen {
 class MainActivity : ComponentActivity() {
 
     companion object {
-        // Set by Button Mapper (or anything else) to request opening
-        // straight to the settings screen instead of the home grid --
-        // see ButtonMapperService.kt's launchLauncherSettings().
+        // Requests opening straight to Settings instead of the home grid; set by
+        // Button Mapper (see ButtonMapperService.kt's launchLauncherSettings()).
         const val EXTRA_OPEN_SETTINGS = "com.odiousapps.mx3launcher.OPEN_SETTINGS"
     }
 
-    // Held here (not as remember{} inside the composable) specifically so
-    // onKeyDown() below -- which lives outside Compose entirely -- can
-    // read and write it directly. Still fully reactive from Compose's
-    // side: a MutableState triggers recomposition on write regardless of
-    // where it was created, as long as it's read within a @Composable.
+    // Held here rather than remember{} so onKeyDown() below, which is outside
+    // Compose, can read/write it directly; still recomposes on write.
     private val screenState: MutableState<Screen> = mutableStateOf(Screen.Home)
 
     private val notificationPermissionLauncher =
@@ -69,19 +65,15 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Starts immediately on launch too, not just on the next boot via
-     * BootReceiver.kt -- otherwise the wake-guard feature wouldn't take
-     * effect until after a reboot, even though the app was just
-     * installed and opened.
+     * Also started on launch, not just on boot via BootReceiver.kt, so the
+     * wake-guard is active immediately after install rather than only after a reboot.
      */
     private fun startWakeGuardService() {
         startForegroundService(Intent(this, ScreenWakeGuardService::class.java))
     }
 
     private fun requestNotificationPermissionIfNeeded() {
-        // Only needed on API 33+ -- ScreenWakeGuardService's notifications
-        // (both the persistent "active" one and the wake-trigger
-        // fallback) won't show without this on newer Android.
+        // API 33+ only: required for ScreenWakeGuardService's notifications to show.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
@@ -90,12 +82,8 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * android:launchMode="singleTask" means a NEW launch intent arriving
-     * while this Activity is already running (e.g. Button Mapper
-     * launching us a second time) does NOT go through onCreate() again --
-     * it comes here instead, on the existing instance. Without this
-     * override, the settings-jump would only ever work on a cold start
-     * of the launcher, not when it's already alive in the background.
+     * android:launchMode="singleTask" routes a new launch intent (e.g. Button
+     * Mapper relaunching us) here instead of onCreate() when already running.
      */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -121,11 +109,8 @@ private fun LauncherApp(screenState: MutableState<Screen>) {
         installedApps = AppRepository.loadInstalledApps(context)
     }
 
-    // Without this, installedApps only ever loads once on cold start --
-    // uninstalling (or installing) an app while the launcher is already
-    // running wouldn't be reflected until the next restart, which is
-    // also why stale package references never got pruned below (this
-    // effect running is a prerequisite for that).
+    // Keeps installedApps in sync with install/uninstall while running, rather
+    // than only reloading on cold start; also a prerequisite for pruning below.
     DisposableEffect(Unit) {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(receiverContext: Context, intent: Intent) {
@@ -149,30 +134,16 @@ private fun LauncherApp(screenState: MutableState<Screen>) {
     val settings by LauncherPreferences.observe(context)
         .collectAsState(initial = LauncherSettings(ThemeMode.SYSTEM, "slate", 6, emptySet(), emptyList()))
 
-    // Home is the root of this app -- Back should do nothing there, same
-    // as every other launcher. Without this, Android's default back
-    // behaviour finishes the Activity entirely once on the Home screen
-    // (nothing else intercepts it, unlike Settings/AppDisplaySettings,
-    // which each have their own BackHandler navigating back to Home).
-    // Finishing here is exactly what let the TV fall through to
-    // whatever the system's other Home app is (Google's built-in
-    // launcher) instead of staying on MX3 Launcher. Composed
-    // unconditionally with `enabled` tied to the current screen, rather
-    // than only composed while on Home, so toggling it on/off as the
-    // screen changes doesn't fight with Settings/AppDisplaySettings's
-    // own BackHandlers when THEY'RE the active screen.
+    // Suppresses Back on Home, which otherwise finishes the Activity and lets the
+    // TV fall through to the system's other Home app. Composed unconditionally
+    // (enabled tied to `screen`) so it doesn't fight with the other screens' own
+    // BackHandlers when they're active.
     androidx.activity.compose.BackHandler(enabled = screen == Screen.Home) {}
 
-    // Stored appOrder/hiddenPackages only ever grow -- nothing prunes an
-    // entry when its package gets uninstalled (orderApps() already
-    // filters stale entries out at DISPLAY time, which is why the grid
-    // itself looks fine regardless, but the underlying stored data, and
-    // therefore any backup taken from it, kept the old reference
-    // indefinitely). Once installedApps is known, drop anything from
-    // storage that's no longer actually installed. Guarded by an
-    // inequality check so this only writes when there's an actual
-    // change -- otherwise the settings Flow re-emitting after a write
-    // would just trigger this effect again in a tight loop.
+    // appOrder/hiddenPackages only ever grow in storage (orderApps() filters stale
+    // entries at display time, so the grid looks fine regardless, but backups would
+    // keep old references forever). Prune once installedApps is known; the
+    // inequality check avoids a write-triggers-reload-triggers-write loop.
     LaunchedEffect(installedApps, settings) {
         if (installedApps.isEmpty()) return@LaunchedEffect
         val installedPackages = installedApps.map { it.packageName }.toSet()

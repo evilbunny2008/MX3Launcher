@@ -1,12 +1,9 @@
 package com.odiousapps.mx3launcher.data
 
 /**
- * Applies the user's saved order to the raw installed-app list. Apps
- * newly discovered since the order was last saved (freshly installed, or
- * this is first launch and appOrder is empty) are appended at the end in
- * their default alphabetical order. Apps that were saved in the order but
- * are no longer installed are simply dropped -- no error, no special
- * handling needed.
+ * Applies the user's saved order to the raw installed-app list. Apps not yet
+ * in the saved order are appended alphabetically; saved entries no longer
+ * installed are dropped.
  */
 fun orderApps(installed: List<AppEntry>, appOrder: List<String>): List<AppEntry> {
     val byPackage = installed.associateBy { it.packageName }
@@ -16,8 +13,7 @@ fun orderApps(installed: List<AppEntry>, appOrder: List<String>): List<AppEntry>
     return ordered + remaining
 }
 
-/** Same ordering, minus anything the user has hidden -- this is what the
- *  home grid actually shows. The settings screen uses [orderApps] alone
- *  (unfiltered) so hidden apps can still be found and re-shown. */
+/** Same ordering minus hidden apps -- what the home grid shows. The settings
+ *  screen uses [orderApps] unfiltered so hidden apps can still be re-shown. */
 fun visibleOrderedApps(installed: List<AppEntry>, settings: LauncherSettings): List<AppEntry> =
     orderApps(installed, settings.appOrder).filter { it.packageName !in settings.hiddenPackages }

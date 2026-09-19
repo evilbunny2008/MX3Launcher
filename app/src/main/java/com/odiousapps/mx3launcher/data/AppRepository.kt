@@ -7,17 +7,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Finds every launchable app, one entry per package. Where an app has a
- * dedicated CATEGORY_LEANBACK_LAUNCHER entry (a TV-specific home-screen
- * icon, distinct from its regular phone/tablet launcher icon) that's used;
- * otherwise falls back to its plain CATEGORY_LAUNCHER entry, so sideloaded
- * apps without TV-specific packaging still show up.
+ * Finds every launchable app, one entry per package. Prefers a dedicated
+ * CATEGORY_LEANBACK_LAUNCHER entry (TV-specific icon); falls back to
+ * CATEGORY_LAUNCHER so sideloaded apps without TV packaging still show up.
  *
- * Querying other apps' launchable activities like this needs the
- * <queries> declarations in AndroidManifest_snippet.xml -- without them,
- * package-visibility filtering (API 30+) makes queryIntentActivities()
- * silently return nothing for apps outside your own package, the same
- * failure mode covered in Button Mapper's README.
+ * Requires the <queries> declarations in AndroidManifest_snippet.xml --
+ * without them, API 30+ package-visibility filtering makes
+ * queryIntentActivities() silently return nothing for other packages.
  */
 object AppRepository {
 

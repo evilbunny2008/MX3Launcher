@@ -14,27 +14,19 @@ import android.os.IBinder
 import android.util.Log
 
 /**
- * Persistent foreground service whose only job is catching screen-on
- * events and forcing MX3 Launcher back to the foreground -- including
- * when its own Activity/Compose UI isn't currently alive.
+ * Persistent foreground service whose only job is catching screen-on events
+ * and forcing MX3 Launcher back to the foreground, including when its own
+ * Activity/Compose UI isn't alive.
  *
- * WHY THIS NEEDS TO BE A FOREGROUND SERVICE, not just a receiver tied to
- * MainActivity's own lifecycle (like the package-change receiver already
- * in MainActivity.kt): the reported symptom was that Android TV's own
- * Google launcher sometimes shows on wake instead of MX3 Launcher, which
- * means Android is killing MX3 Launcher's process/task under memory
- * pressure while the screen is off. If the app's own process isn't even
- * alive, there's no live Activity around to host a receiver tied to its
- * composition lifecycle. A foreground service is kept alive far more
- * reliably by the OS specifically because it's foreground, so its
- * receiver registration survives even when nothing else in the app does.
+ * Needs to be a foreground service, not a receiver tied to MainActivity's
+ * lifecycle: Android can kill MX3 Launcher's process under memory pressure
+ * while the screen is off (symptom: the system's Google launcher shows on
+ * wake instead), leaving no Activity to host a lifecycle-bound receiver. A
+ * foreground service survives that.
  *
- * SCREEN_ON specifically CANNOT be declared in the manifest as a static
- * receiver -- it's one of the implicit broadcasts Android has never
- * delivered to manifest-declared receivers (unlike BOOT_COMPLETED, which
- * still works that way -- see BootReceiver.kt). It has to be registered
- * dynamically via Context.registerReceiver(), which is exactly why this
- * needs a persistently-running component to host that registration.
+ * SCREEN_ON can't be a static manifest receiver (unlike BOOT_COMPLETED, see
+ * BootReceiver.kt) -- it must be registered dynamically via
+ * Context.registerReceiver(), hence needing a persistent component to host it.
  */
 class ScreenWakeGuardService : Service() {
 
@@ -58,9 +50,7 @@ class ScreenWakeGuardService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // START_STICKY: ask Android to restart this service if it gets
-        // killed rather than leaving it dead -- the whole point is
-        // staying alive persistently.
+        // START_STICKY: restart if killed, since staying alive is the whole point.
         return START_STICKY
     }
 

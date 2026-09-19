@@ -14,31 +14,19 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Uses org.json (built into the Android SDK) rather than adding a JSON
- * library dependency -- this project has already hit enough real
- * dependency-version friction (Compose BOM/tv-material skew, missing
- * material3 artefact, etc.) that avoiding an extra one where a built-in
- * option already covers the need is worth it.
+ * Uses org.json (built into the SDK) rather than adding a JSON dependency,
+ * given this project's existing Compose/tv-material dependency friction.
  *
  * Writes to the public Downloads collection via MediaStore rather than:
- *  - Storage Access Framework's CreateDocument/OpenDocument picker,
- *    which failed with "you don't have an app that can do this" -- many
- *    lightweight Android TV boxes don't ship a DocumentsUI-equivalent
- *    app the way phones reliably do, so SAF's picker intents have no
- *    handler to route to at all.
- *  - the app's own external-files directory, which is technically
- *    "external" storage but is hidden from normal file managers on
- *    Android 11+ due to scoped storage -- effectively inaccessible to
- *    the user without adb or root.
- * MediaStore.Downloads is a core system content provider on every
- * Android device (not a removable app like DocumentsUI), and apps can
- * freely create/manage their OWN entries in it without any storage
- * permission -- that's an explicit part of the scoped-storage model.
- * Requires API 29+ (see the minSdk bump in build.gradle.kts).
+ *  - SAF's picker, which fails with "you don't have an app that can do
+ *    this" on TV boxes lacking a DocumentsUI-equivalent handler.
+ *  - the app's own external-files dir, hidden from file managers on
+ *    Android 11+ scoped storage without adb/root.
+ * MediaStore.Downloads is a core system provider apps can write their own
+ * entries to without storage permission. Requires API 29+.
  *
- * Each backup gets its own timestamped filename rather than overwriting
- * a single fixed name -- restore lists available backups instead of
- * assuming there's exactly one.
+ * Each backup gets its own timestamped filename, so restore lists what's
+ * available instead of assuming exactly one.
  */
 object LauncherBackup {
 
@@ -60,11 +48,8 @@ object LauncherBackup {
         val displayName: String,
         val timestampMillis: Long,
     ) {
-        // Built fresh on each access rather than cached in a static field
-        // with Locale.getDefault() baked in at class-init time -- a
-        // cached instance would keep using whatever locale was active
-        // when the app started, even if the user changes their system
-        // locale while the app is still running.
+        // Built fresh each access, not cached, so a system locale change while
+        // running takes effect immediately.
         val displayLabel: String
             get() = SimpleDateFormat("MMM d, yyyy h:mm a", Locale.getDefault()).format(Date(timestampMillis))
     }
@@ -153,9 +138,7 @@ object LauncherBackup {
         )?.use { cursor ->
             val idCol = cursor.getColumnIndexOrThrow(MediaStore.Downloads._ID)
             val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Downloads.DISPLAY_NAME)
-            // DATE_MODIFIED from MediaStore is in whole SECONDS since
-            // epoch, not milliseconds -- multiplying is required or
-            // every displayed date comes out as sometime in 1970.
+            // DATE_MODIFIED is in seconds, not millis -- must multiply below.
             val dateCol = cursor.getColumnIndexOrThrow(MediaStore.Downloads.DATE_MODIFIED)
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idCol)
