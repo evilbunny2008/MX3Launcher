@@ -16,7 +16,7 @@ Binaries:
 Builds:
   - versionName: 0.0.42
     versionCode: 42
-    commit:
+    commit: ea612e2dbf1aebd34d374d1d1e56ac856de97109
     subdir: app
     gradle:
       - yes
