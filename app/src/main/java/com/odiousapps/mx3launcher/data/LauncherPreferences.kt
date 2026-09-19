@@ -18,7 +18,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
 /** A selectable background gradient. Curated presets rather than a full
- *  RGB picker -- much easier to navigate with a D-pad than a colour wheel. */
+ *  RGB picker — much easier to navigate with a D-pad than a colour wheel. */
 data class GradientPreset(val id: String, val label: String, val start: Color, val end: Color)
 
 val GRADIENT_PRESETS = listOf(

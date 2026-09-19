@@ -58,7 +58,7 @@ fun AppGridScreen(
     var pendingWakeFailure by remember { mutableStateOf<String?>(null) }
 
     // Keyed on `apps` so requesters are re-created (not stale) whenever the
-    // list itself changes -- install/uninstall, reorder, show/hide.
+    // list itself changes — install/uninstall, reorder, show/hide.
     val focusRequesters = remember(apps) { List(apps.size) { FocusRequester() } }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -102,7 +102,7 @@ fun AppGridScreen(
     }
 
     pendingWakeFailure?.let { message ->
-        // Dismissing only closes the dialog; it does not launch the app --
+        // Dismissing only closes the dialog; it does not launch the app —
         // the person must press the tile again to retry.
         val dismiss = { pendingWakeFailure = null }
         androidx.compose.material3.AlertDialog(
@@ -219,7 +219,7 @@ private fun launchAppIntent(context: Context, app: AppEntry) {
     try {
         context.startActivity(intent)
     } catch (_: Exception) {
-        // App may have been uninstalled since the grid loaded -- fail quietly
+        // App may have been uninstalled since the grid loaded — fail quietly
         // rather than crash the launcher and take the whole home screen down.
     }
 }
@@ -231,7 +231,7 @@ private const val TAG = "SoundbarWake"
 // only adjusts a volume setting, no real audio session). This instead calls
 // a server-side script (URL/secret from Settings) that checks a
 // power-monitoring smart socket and, only if the soundbar is actually in
-// standby, sends a Zigbee IR power-toggle -- toggle, not a dedicated "on"
+// standby, sends a Zigbee IR power-toggle — toggle, not a dedicated "on"
 // command, so firing it blindly would turn an already-on soundbar off.
 //
 // Blocking, not fire-and-forget: the caller awaits this (via
@@ -252,7 +252,7 @@ private fun checkSoundbarWake(url: String, secret: String): String? {
         connection.readTimeout = 4000
         connection.requestMethod = "GET"
 
-        // Must check the response code before reading a stream --
+        // Must check the response code before reading a stream —
         // .inputStream throws for non-2xx (error bodies come from .errorStream).
         val responseCode = connection.responseCode
         val result = if (responseCode in 200..299) {
@@ -270,7 +270,7 @@ private fun checkSoundbarWake(url: String, secret: String): String? {
             // Logs the plain url, not fullUrl, to avoid leaking the secret
             // (appended as ?key=...) into logcat.
             val logSuffix = if (errorBody.isNotEmpty()) ": $errorBody" else ""
-            android.util.Log.w(TAG, "Wake failed for $url -- server returned $responseCode$logSuffix")
+            android.util.Log.w(TAG, "Wake failed for $url — server returned $responseCode$logSuffix")
             if (errorBody.isNotEmpty()) "Server returned $responseCode: $errorBody" else "Server returned $responseCode"
         }
         connection.disconnect()
@@ -282,7 +282,7 @@ private fun checkSoundbarWake(url: String, secret: String): String? {
 }
 
 /**
- * Opens Android's App Info page for the package -- the usual "long-press an
+ * Opens Android's App Info page for the package — the usual "long-press an
  * icon" destination, reached here via Menu on the focused tile since long-press
  * has no D-pad equivalent.
  */
@@ -294,6 +294,6 @@ private fun openAppInfo(context: Context, packageName: String) {
     try {
         context.startActivity(intent)
     } catch (_: Exception) {
-        // Same reasoning as launchAppIntent() -- fail quietly.
+        // Same reasoning as launchAppIntent() — fail quietly.
     }
 }

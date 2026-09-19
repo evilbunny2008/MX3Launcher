@@ -1,5 +1,5 @@
 // Suppresses the @Incubating warning for centralised repository declaration
-// below -- works today, API may still change. Same suppression used in
+// below — works today, API may still change. Same suppression used in
 // app/build.gradle.kts for the equivalent AGP Variant API warnings.
 @file:Suppress("UnstableApiUsage")
 

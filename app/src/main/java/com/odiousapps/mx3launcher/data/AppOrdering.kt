@@ -13,7 +13,7 @@ fun orderApps(installed: List<AppEntry>, appOrder: List<String>): List<AppEntry>
     return ordered + remaining
 }
 
-/** Same ordering minus hidden apps -- what the home grid shows. The settings
+/** Same ordering minus hidden apps — what the home grid shows. The settings
  *  screen uses [orderApps] unfiltered so hidden apps can still be re-shown. */
 fun visibleOrderedApps(installed: List<AppEntry>, settings: LauncherSettings): List<AppEntry> =
     orderApps(installed, settings.appOrder).filter { it.packageName !in settings.hiddenPackages }

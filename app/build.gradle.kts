@@ -1,5 +1,5 @@
 // Suppresses the @Incubating warning for the AGP Variant API members used
-// below (outputFileName, artifacts.get, onVariants/selector) -- works today,
+// below (outputFileName, artifacts.get, onVariants/selector) - works today,
 // API may still change.
 @file:Suppress("UnstableApiUsage")
 
@@ -71,10 +71,10 @@ android {
 
 // Copies the release .aab to app/dist/<appName>-<versionName>.aab (gitignored),
 // outside build/ so it survives a clean build. Don't switch this back to
-// app/release/ -- that path collides with Android Studio's own "Generate
+// app/release/ — that path collides with Android Studio's own "Generate
 // Signed Bundle" wizard, which writes its own app-release.aab there too.
 // Must run after AGP's "produce...BundleIdeListingFile" task, which declares
-// the bundle at its default location as an input -- touching it earlier fails
+// the bundle at its default location as an input — touching it earlier fails
 // that task's input validation.
 //
 // A typed task class with Provider/Property inputs, not a doLast{} closure:
@@ -98,12 +98,12 @@ abstract class RenameBundleTask : DefaultTask() {
             destination.parentFile.mkdirs()
             file.copyTo(destination, overwrite = true)
             logger.lifecycle("renameBundle: copied to $destination")
-            // File.delete() returns false rather than throwing on failure --
+            // File.delete() returns false rather than throwing on failure —
             // check explicitly so a locked source file shows up in the log.
             if (file.delete()) {
                 logger.lifecycle("renameBundle: removed original $file")
             } else {
-                logger.warn("renameBundle: could not delete original $file after copying -- it may be locked by another process; the copy at $destination is still correct")
+                logger.warn("renameBundle: could not delete original $file after copying - it may be locked by another process; the copy at $destination is still correct")
             }
         } else {
             logger.lifecycle("renameBundle: expected bundle file not found at $file - skipping rename")
@@ -112,7 +112,7 @@ abstract class RenameBundleTask : DefaultTask() {
 }
 
 // Copies the release APK(s) to app/dist/ too, alongside the bundle above.
-// Unlike RenameBundleTask, doesn't delete the originals -- no known
+// Unlike RenameBundleTask, doesn't delete the originals — no known
 // collision to avoid there.
 //
 // SingleArtifact.APK resolves to a directory (a variant can produce more
@@ -190,14 +190,14 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.runtime)
     // Pinned to the BOM explicitly, not left to tv-material's transitive
-    // version -- tv-material is outside the compose-bom platform, so without
+    // version — tv-material is outside the compose-bom platform, so without
     // this two compose-foundation versions can end up on the classpath,
     // producing "internal in file" errors on classes like RowColumnParentData.
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.compose.material.icons.extended)
-    // Provides the Icon composable used in TopBar.kt -- icons-extended only
+    // Provides the Icon composable used in TopBar.kt — icons-extended only
     // ships the icon assets, not the composable that renders them.
     implementation(libs.androidx.compose.material3)
 

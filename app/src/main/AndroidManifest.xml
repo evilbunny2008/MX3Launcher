@@ -19,7 +19,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!--
       Backs the full-screen-intent fallback in ScreenWakeGuardService.kt. Not
-      auto-granted on Android 14+ -- if wake-guard doesn't work, check
+      auto-granted on Android 14+ — if wake-guard doesn't work, check
       Settings -> Apps -> MX3 Launcher -> "Full screen notifications".
     -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"

@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
  * CATEGORY_LEANBACK_LAUNCHER entry (TV-specific icon); falls back to
  * CATEGORY_LAUNCHER so sideloaded apps without TV packaging still show up.
  *
- * Requires the <queries> declarations in AndroidManifest_snippet.xml --
+ * Requires the <queries> declarations in AndroidManifest_snippet.xml —
  * without them, API 30+ package-visibility filtering makes
  * queryIntentActivities() silently return nothing for other packages.
  */

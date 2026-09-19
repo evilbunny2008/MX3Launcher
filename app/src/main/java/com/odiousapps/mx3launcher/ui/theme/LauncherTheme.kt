@@ -38,7 +38,7 @@ fun LauncherTheme(
     // Set explicitly rather than trusting MaterialTheme's ambient content colour:
     // this project mixes androidx.tv.material3.Text with androidx.compose.material3.Icon
     // (see TopBar.kt), and their colour-scheme resolution can't be trusted to
-    // "just work" together -- without this, text rendered black regardless of theme.
+    // "just work" together — without this, text rendered black regardless of theme.
     val contentColor = if (isDark) Color(0xFFF2F2F2) else Color(0xFF1A1A1A)
 
     MaterialTheme(colorScheme = colorScheme) {

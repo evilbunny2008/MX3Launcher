@@ -69,7 +69,7 @@ object LauncherBackup {
     }
 
     /**
-     * Returns null (rather than throwing) on anything malformed -- a
+     * Returns null (rather than throwing) on anything malformed — a
      * hand-edited or corrupted backup file shouldn't crash the launcher,
      * it should just fail the restore cleanly so the caller can show an
      * error instead.
@@ -96,7 +96,7 @@ object LauncherBackup {
         }
     }
 
-    /** Returns true on success. Always creates a NEW timestamped entry --
+    /** Returns true on success. Always creates a NEW timestamped entry —
      *  never overwrites a previous backup. */
     fun writeBackup(context: Context, settings: LauncherSettings): Boolean {
         return try {
@@ -138,7 +138,7 @@ object LauncherBackup {
         )?.use { cursor ->
             val idCol = cursor.getColumnIndexOrThrow(MediaStore.Downloads._ID)
             val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Downloads.DISPLAY_NAME)
-            // DATE_MODIFIED is in seconds, not millis -- must multiply below.
+            // DATE_MODIFIED is in seconds, not millis — must multiply below.
             val dateCol = cursor.getColumnIndexOrThrow(MediaStore.Downloads.DATE_MODIFIED)
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idCol)

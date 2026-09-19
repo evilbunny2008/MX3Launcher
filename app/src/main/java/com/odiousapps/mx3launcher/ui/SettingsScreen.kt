@@ -167,7 +167,7 @@ fun SettingsScreen(
                                     onRestore(restored)
                                     backupStatus = "Restored from ${backup.displayLabel}"
                                 } else {
-                                    backupStatus = "Restore failed -- couldn't read ${backup.displayName}"
+                                    backupStatus = "Restore failed — couldn't read ${backup.displayName}"
                                 }
                                 showRestoreList = false
                             }) {
@@ -237,7 +237,7 @@ private sealed class PairingUiState {
 }
 
 /**
- * Device-code-style pairing UI -- replaces raw text-entry fields
+ * Device-code-style pairing UI — replaces raw text-entry fields
  * entirely. The TV only ever displays a short code and polls in the
  * background; the real URL+secret get typed nowhere on the TV, which
  * also sidesteps the D-pad navigation trap plain TextFields hit here
@@ -277,7 +277,7 @@ private fun SoundbarPairingSection(
                     val session = withContext(Dispatchers.IO) { SoundbarPairing.startPairing() }
                     if (session == null) {
                         pairingState = PairingUiState.Failed(
-                            "Couldn't start pairing -- check the server is reachable"
+                            "Couldn't start pairing — check the server is reachable"
                         )
                         return@launch
                     }
@@ -298,7 +298,7 @@ private fun SoundbarPairingSection(
                                 return@launch
                             }
                             is SoundbarPairing.PollResult.Expired -> {
-                                pairingState = PairingUiState.Failed("Code expired -- try again")
+                                pairingState = PairingUiState.Failed("Code expired — try again")
                                 return@launch
                             }
                             is SoundbarPairing.PollResult.Error -> {
@@ -309,7 +309,7 @@ private fun SoundbarPairingSection(
                             }
                         }
                     }
-                    pairingState = PairingUiState.Failed("Code expired -- try again")
+                    pairingState = PairingUiState.Failed("Code expired — try again")
                 }
             }) {
                 Text(text = "Pair")
@@ -327,7 +327,7 @@ private fun SoundbarPairingSection(
                 )
                 Text(text = "Scan with your phone's camera, or go to:")
             } else {
-                // QR generation failed -- fall back to plain text.
+                // QR generation failed — fall back to plain text.
                 Text(text = "On your phone, go to:")
             }
             Text(text = "mx3launcher.odiousapps.com/credential_view.php")

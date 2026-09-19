@@ -25,7 +25,7 @@ import android.util.Log
  * foreground service survives that.
  *
  * SCREEN_ON can't be a static manifest receiver (unlike BOOT_COMPLETED, see
- * BootReceiver.kt) -- it must be registered dynamically via
+ * BootReceiver.kt) — it must be registered dynamically via
  * Context.registerReceiver(), hence needing a persistent component to host it.
  */
 class ScreenWakeGuardService : Service() {
@@ -59,7 +59,7 @@ class ScreenWakeGuardService : Service() {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(receiverContext: Context, intent: Intent) {
                 if (intent.action == Intent.ACTION_SCREEN_ON) {
-                    Log.i(TAG, "Screen on -- bringing MX3 Launcher to front")
+                    Log.i(TAG, "Screen on — bringing MX3 Launcher to front")
                     bringLauncherToFront()
                 }
             }
@@ -69,7 +69,7 @@ class ScreenWakeGuardService : Service() {
     }
 
     /**
-     * Tries a direct startActivity() first -- cheap, and works fine in a
+     * Tries a direct startActivity() first — cheap, and works fine in a
      * lot of real-world cases despite the theoretical background-launch
      * restriction risk. Falls back to a full-screen-intent notification,
      * the Android-sanctioned mechanism for forcing an activity to the

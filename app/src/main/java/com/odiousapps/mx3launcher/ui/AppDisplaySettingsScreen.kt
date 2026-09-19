@@ -30,7 +30,7 @@ import com.odiousapps.mx3launcher.data.AppEntry
 
 /**
  * Reordering here is move-up/move-down buttons rather than drag-and-drop.
- * Drag gestures don't have a sane D-pad equivalent -- this way every
+ * Drag gestures don't have a sane D-pad equivalent — this way every
  * action maps directly to a single remote press, no touch/pointer input
  * assumed anywhere.
  */

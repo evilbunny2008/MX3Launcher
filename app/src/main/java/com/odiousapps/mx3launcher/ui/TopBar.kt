@@ -91,7 +91,7 @@ private fun WifiStatusButton(context: Context) {
 }
 
 /**
- * Checks the active network specifically -- Wi-Fi radio can be on while
+ * Checks the active network specifically — Wi-Fi radio can be on while
  * actually routing over Ethernet, which would make a Wi-Fi icon misleading.
  */
 private fun isWifiConnected(context: Context): Boolean {

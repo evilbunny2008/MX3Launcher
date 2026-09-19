@@ -11,12 +11,12 @@ import java.nio.charset.StandardCharsets
  * only on a phone, never the TV, avoiding the D-pad focus trap plain
  * TextFields hit while text-editing.
  *
- * Talks to mx3launcher.odiousapps.com's credential relay in "pull" mode --
+ * Talks to mx3launcher.odiousapps.com's credential relay in "pull" mode —
  * this device asks to receive credentials for "MX3Launcher", and the account
  * holder picks a saved preset at credential_view.php. See that project's
  * README for the protocol; "URL"/"Secret" are its documented field names.
  *
- * All functions here perform blocking network I/O -- callers must run them
+ * All functions here perform blocking network I/O — callers must run them
  * off the main thread (Dispatchers.IO, per SettingsScreen.kt's usage).
  */
 object SoundbarPairing {
