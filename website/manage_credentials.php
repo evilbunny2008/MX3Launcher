@@ -237,7 +237,11 @@ $csrfToken = generate_csrf_token();
 </head>
 <body>
     <h2>Your saved credentials</h2>
-    <p><a class="btn" href="/credential_view.php">Enter a pairing code</a> <a class="btn" href="/logout.php">Log out</a></p>
+    <p>
+        <a class="btn" href="/credential_view.php">Enter a pairing code</a>
+        <a class="btn" href="/change_email.php">Change email</a>
+        <a class="btn" href="/logout.php">Log out</a>
+    </p>
     <?php if($error): ?><div class="error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
     <?php if($success): ?><div class="success"><?= htmlspecialchars($success) ?></div><?php endif; ?>
 

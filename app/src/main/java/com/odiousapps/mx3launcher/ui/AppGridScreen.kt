@@ -88,6 +88,10 @@ fun AppGridScreen(
                                     pendingWakeFailure = error
                                     return@launch
                                 }
+                            } else if (!soundbarWakeEnabled) {
+                                android.util.Log.i(TAG, "Wake skipped: disabled in Settings")
+                            } else {
+                                android.util.Log.i(TAG, "Wake skipped: enabled but no URL configured")
                             }
                             launchAppIntent(context, app)
                         }
@@ -253,6 +257,7 @@ private fun checkSoundbarWake(url: String, secret: String): String? {
         val responseCode = connection.responseCode
         val result = if (responseCode in 200..299) {
             connection.inputStream.use { it.readBytes() } // drain, result unneeded
+            android.util.Log.i(TAG, "Wake request to $url succeeded ($responseCode)")
             null
         } else {
             // wake_soundbar.php returns a JSON error body, more useful than

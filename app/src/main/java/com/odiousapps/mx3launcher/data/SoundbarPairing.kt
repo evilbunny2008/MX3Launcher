@@ -1,6 +1,8 @@
 package com.odiousapps.mx3launcher.data
 
+import android.util.Log
 import org.json.JSONObject
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
@@ -20,6 +22,8 @@ import java.nio.charset.StandardCharsets
  * off the main thread (Dispatchers.IO, as SettingsScreen.kt does).
  */
 object SoundbarPairing {
+
+    private const val TAG = "SoundbarPairing"
 
     // Self-service pairing site (accounts + saved-credential presets), separate
     // from any individual user's own home server.
@@ -41,15 +45,19 @@ object SoundbarPairing {
         return try {
             // Pull-mode request: asks to receive credentials, offers none.
             val body = JSONObject().put("app", APP_NAME)
-            val response = httpPost(START_URL, body.toString()) ?: return null
+            val response = httpPost(START_URL, body.toString())
             val json = JSONObject(response)
-            if (!json.optBoolean("ok", false)) return null
+            if (!json.optBoolean("ok", false)) {
+                Log.w(TAG, "startPairing: $START_URL returned ok=false: $response")
+                return null
+            }
             PairingSession(
                 code = json.getString("code"),
                 token = json.getString("token"),
                 expiresInSeconds = json.optInt("expires_in", 600),
             )
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.w(TAG, "startPairing: request to $START_URL failed", e)
             null
         }
     }
@@ -57,8 +65,8 @@ object SoundbarPairing {
     fun pollPairing(token: String): PollResult {
         return try {
             val encodedToken = java.net.URLEncoder.encode(token, "UTF-8")
-            val response = httpGet("$STATUS_URL?token=$encodedToken")
-                ?: return PollResult.Error("No response")
+            val requestUrl = "$STATUS_URL?token=$encodedToken"
+            val response = httpGet(requestUrl)
             val json = JSONObject(response)
             when (json.optString("status")) {
                 "viewed" -> {
@@ -77,23 +85,42 @@ object SoundbarPairing {
                 else -> PollResult.Error(json.optString("error", "Unknown error"))
             }
         } catch (e: Exception) {
+            Log.w(TAG, "pollPairing: request to $STATUS_URL failed", e)
             PollResult.Error(e.message ?: "Network error")
         }
     }
 
-    private fun httpGet(url: String): String? {
+    /** Reads the response body on a 2xx status, or throws with the response
+     *  code, URL, and server-provided error body (if any) baked into the
+     *  message — so a caller's log line shows why a request failed instead
+     *  of a bare, contextless stream exception. */
+    private fun readResponseOrThrow(connection: HttpURLConnection): String {
+        val responseCode = connection.responseCode
+        if (responseCode in 200..299) {
+            return connection.inputStream.bufferedReader().use { it.readText() }
+        }
+        val errorBody = connection.errorStream
+            ?.use { it.readBytes().toString(Charsets.UTF_8) }
+            ?.trim()
+            ?.take(500)
+            .orEmpty()
+        val suffix = if (errorBody.isNotEmpty()) ": $errorBody" else ""
+        throw IOException("HTTP $responseCode from ${connection.url}$suffix")
+    }
+
+    private fun httpGet(url: String): String {
         val connection = URL(url).openConnection() as HttpURLConnection
         connection.connectTimeout = 5000
         connection.readTimeout = 5000
         connection.requestMethod = "GET"
         return try {
-            connection.inputStream.bufferedReader().use { it.readText() }
+            readResponseOrThrow(connection)
         } finally {
             connection.disconnect()
         }
     }
 
-    private fun httpPost(url: String, body: String): String? {
+    private fun httpPost(url: String, body: String): String {
         val connection = URL(url).openConnection() as HttpURLConnection
         connection.connectTimeout = 5000
         connection.readTimeout = 5000
@@ -102,7 +129,7 @@ object SoundbarPairing {
         connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
         connection.outputStream.use { it.write(body.toByteArray(StandardCharsets.UTF_8)) }
         return try {
-            connection.inputStream.bufferedReader().use { it.readText() }
+            readResponseOrThrow(connection)
         } finally {
             connection.disconnect()
         }

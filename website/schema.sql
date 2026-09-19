@@ -53,12 +53,16 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `email` varchar(255) NOT NULL,
+  `pending_email` varchar(255) DEFAULT NULL,
   `password_hash` varchar(255) NOT NULL,
   `email_verified` tinyint(1) NOT NULL DEFAULT 0,
   `verification_token` varchar(64) DEFAULT NULL,
   `verification_token_expires_at` datetime DEFAULT NULL,
+  `email_change_token` varchar(64) DEFAULT NULL,
+  `email_change_token_expires_at` datetime DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`)
+  UNIQUE KEY `email` (`email`),
+  KEY `idx_email_change_token` (`email_change_token`)
 ) ENGINE=InnoDB DEFAULT;
 COMMIT;

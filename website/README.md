@@ -26,11 +26,13 @@ folded into the one generic relay.
    mysql -u root -p your_database_name < credential_shares.schema.sql
    mysql -u root -p your_database_name < saved_credentials.schema.sql
    ```
-   (A fresh install only needs those three. If you're upgrading a
-   deployment that already had `credential_shares.schema.sql` applied
-   from before pull-mode existed, run
-   `credential_shares_pull_mode.migration.sql` instead of re-running
-   `credential_shares.schema.sql`.)
+   (A fresh install only needs those three — `schema.sql` already
+   includes the `pending_email`/`email_change_token` columns `change_email.php`
+   needs. If you're upgrading a deployment that already had
+   `credential_shares.schema.sql` applied from before pull-mode existed,
+   run `credential_shares_pull_mode.migration.sql` instead of re-running
+   `credential_shares.schema.sql`; if it predates `change_email.php`, run
+   `change_email.migration.sql` too.)
 
 2. **`db.php`**: fill in the `TODO_*` constants with your real MariaDB
    host/database name/username/password.
@@ -56,7 +58,12 @@ folded into the one generic relay.
 ## How it works
 
 1. Someone lands on `index.php`, signs up (`register.php`), verifies
-   their email (`verify_email.php`), and logs in (`login.php`).
+   their email (`verify_email.php`), and logs in (`login.php`). They can
+   change their account email later from `change_email.php` — this
+   re-asks for their current password, and the new address isn't live
+   until its confirmation link (`confirm_email_change.php`, sent to that
+   new address) is clicked, so typing an address you don't own can't
+   hijack anything. The old address is notified either way.
 2. On `manage_credentials.php`, they add one or more named presets —
    an app name (e.g. "MX3Launcher" or "Z2M Dash"), a label (e.g. "Living
    room TV"), and its fields as key/value row pairs (add/remove rows
@@ -114,10 +121,10 @@ folded into the one generic relay.
   readable by the same process that could be compromised). Worth
   revisiting if this ever handles anything more sensitive than a
   home-automation wake signal or a home MQTT broker's password.
-- **No rate limiting** on login attempts, registration, or
-  credential-share attempts. Fine for a small personal/friends-and-
-  family scale service; worth adding if this is ever exposed more
-  broadly.
+- **No rate limiting** on login attempts, registration, email-change
+  attempts, or credential-share attempts. Fine for a small personal/
+  friends-and-family scale service; worth adding if this is ever
+  exposed more broadly.
 - **No password reset flow** — not asked for, so not built. A locked-out
   user currently has no self-service way back in.
 - **Deployment ordering matters**: the old `pair_start.php`/
