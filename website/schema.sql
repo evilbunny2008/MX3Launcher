@@ -65,4 +65,24 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `email` (`email`),
   KEY `idx_email_change_token` (`email_change_token`)
 ) ENGINE=InnoDB DEFAULT;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `default_credentials`
+--
+-- One remembered saved_credentials choice per (user, app) - lets
+-- credential_view.php's pull-mode approval skip the picker and show a
+-- single "Approve" button instead, once a user has picked "remember this"
+-- for that app at least once. See credential_view.php for how it's used.
+--
+
+DROP TABLE IF EXISTS `default_credentials`;
+CREATE TABLE IF NOT EXISTS `default_credentials` (
+  `user_id` int(11) NOT NULL,
+  `app_name` varchar(64) NOT NULL,
+  `saved_credential_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`, `app_name`)
+) ENGINE=InnoDB DEFAULT;
+
 COMMIT;

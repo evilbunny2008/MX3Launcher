@@ -28,11 +28,12 @@ folded into the one generic relay.
    ```
    (A fresh install only needs those three — `schema.sql` already
    includes the `pending_email`/`email_change_token` columns `change_email.php`
-   needs. If you're upgrading a deployment that already had
-   `credential_shares.schema.sql` applied from before pull-mode existed,
-   run `credential_shares_pull_mode.migration.sql` instead of re-running
-   `credential_shares.schema.sql`; if it predates `change_email.php`, run
-   `change_email.migration.sql` too.)
+   needs, and the `default_credentials` table below. If you're upgrading a
+   deployment that already had `credential_shares.schema.sql` applied from
+   before pull-mode existed, run `credential_shares_pull_mode.migration.sql`
+   instead of re-running `credential_shares.schema.sql`; if it predates
+   `change_email.php`, run `change_email.migration.sql` too; if it predates
+   remembered pull-mode defaults, run `default_credentials.migration.sql`.)
 
 2. **`db.php`**: fill in the `TODO_*` constants with your real MariaDB
    host/database name/username/password.
@@ -90,8 +91,14 @@ folded into the one generic relay.
      own. Gets back `{code, token, expires_in}` and shows the code/QR
      (linking to `credential_view.php?code=...`).
    - Someone opens that link — requires login. Since this share has no
-     data yet, the page shows their own saved presets for that app and
-     lets them pick one to send.
+     data yet, the page shows their own saved presets **for that app only**
+     and lets them pick one to send (ticking "Remember this choice"
+     records it in `default_credentials`).
+   - On a later pull request for the same app, if a remembered choice
+     exists (and that saved preset still exists), the picker is skipped
+     entirely in favour of a single "Approve sending '<label>'?" button —
+     "Choose a different one instead" still falls back to the full picker
+     for that one confirmation without changing what's remembered.
    - The device's own poll of `credential_status.php?token=...`
      receives the resolved fields once that happens.
 4. **Push** (available to any app that wants it, though nothing
