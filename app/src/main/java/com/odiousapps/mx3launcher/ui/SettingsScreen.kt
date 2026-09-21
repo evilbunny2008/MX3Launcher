@@ -49,6 +49,8 @@ fun SettingsScreen(
     onColumnsChange: (Int) -> Unit,
     onOpenAppDisplaySettings: () -> Unit,
     onRestore: suspend (LauncherSettings) -> Unit,
+    configSyncDeviceToken: String,
+    onConfigSyncDeviceTokenChange: (String) -> Unit,
     onSoundbarWakeEnabledChange: (Boolean) -> Unit,
     onSoundbarWakeUrlChange: (String) -> Unit,
     onSoundbarWakeSecretChange: (String) -> Unit,
@@ -122,15 +124,17 @@ fun SettingsScreen(
             )
         }
 
-        // See LauncherConfigSync.kt: backup/restore go over the same
+        // See LauncherConfigSync.kt: pair once over the same
         // mx3launcher.odiousapps.com credential relay SoundbarPairingSection
-        // uses below, rather than any on-device storage mechanism.
+        // uses below, then back up/restore directly - no code/QR per
+        // operation, unlike soundbar pairing.
         SettingsSection(title = "Backup & restore") {
-            Text(text = "Back up")
-            BackupSyncSection(settings = settings)
-
-            Text(text = "Restore")
-            RestoreSyncSection(onRestore = onRestore)
+            ConfigSyncSection(
+                settings = settings,
+                deviceToken = configSyncDeviceToken,
+                onDeviceTokenChange = onConfigSyncDeviceTokenChange,
+                onRestore = onRestore,
+            )
 
             Button(onClick = {
                 scope.launch {
@@ -329,120 +333,166 @@ private fun SoundbarPairingSection(
     }
 }
 
-/**
- * Same device-code UI as SoundbarPairingSection above, driving a "push"
- * share of this device's current settings (see LauncherConfigSync.kt).
- * Unlike soundbar pairing there's no persistent "paired" state to fall
- * back to afterwards — success is shown as a transient message, then the
- * button is offered again for the next backup.
- */
-@Composable
-private fun BackupSyncSection(settings: LauncherSettings) {
-    var state by remember { mutableStateOf<PairingUiState>(PairingUiState.Idle) }
-    val scope = rememberCoroutineScope()
-
-    when (val s = state) {
-        is PairingUiState.Idle, is PairingUiState.Failed, is PairingUiState.Done -> {
-            if (s is PairingUiState.Failed) Text(text = s.message)
-            if (s is PairingUiState.Done) Text(text = s.message)
-            Button(onClick = {
-                state = PairingUiState.Starting
-                scope.launch {
-                    val session = withContext(Dispatchers.IO) { LauncherConfigSync.startBackup(settings) }
-                    if (session == null) {
-                        state = PairingUiState.Failed("Couldn't start backup — check the server is reachable")
-                        return@launch
-                    }
-                    val qrBitmap = withContext(Dispatchers.Default) { generateQrCodeBitmap(session.approveUrl) }
-                    state = PairingUiState.ShowingCode(session.code, session.token, qrBitmap)
-
-                    val deadlineMs = System.currentTimeMillis() + session.expiresInSeconds * 1000L
-                    while (System.currentTimeMillis() < deadlineMs) {
-                        delay(3000.milliseconds)
-                        when (withContext(Dispatchers.IO) { LauncherConfigSync.pollBackup(session.token) }) {
-                            LauncherConfigSync.BackupPollResult.Saved -> {
-                                state = PairingUiState.Done("Backup saved to your account")
-                                return@launch
-                            }
-                            LauncherConfigSync.BackupPollResult.Expired -> {
-                                state = PairingUiState.Failed("Code expired — try again")
-                                return@launch
-                            }
-                            is LauncherConfigSync.BackupPollResult.Error -> {
-                                // Keep polling; don't give up on a transient blip.
-                            }
-                            LauncherConfigSync.BackupPollResult.Pending -> {
-                                // Keep waiting.
-                            }
-                        }
-                    }
-                    state = PairingUiState.Failed("Code expired — try again")
-                }
-            }) {
-                Text(text = "Back up settings")
-            }
-        }
-        is PairingUiState.Starting -> Text(text = "Starting...")
-        is PairingUiState.ShowingCode -> PairingCodeDisplay(s)
-    }
+private sealed class RestoreListUiState {
+    object Idle : RestoreListUiState()
+    object Loading : RestoreListUiState()
+    data class Loaded(val backups: List<LauncherConfigSync.RemoteBackup>) : RestoreListUiState()
+    data class Failed(val message: String) : RestoreListUiState()
 }
 
 /**
- * Same shape as BackupSyncSection above, but a "pull" share: this device
- * has nothing of its own, and receives whichever saved preset the account
- * holder picks at credential_view.php (see LauncherConfigSync.kt).
+ * Pair once (same device-code UI as SoundbarPairingSection above), then
+ * back up/restore directly against device_backup.php and friends — no
+ * further code/QR per operation, unlike soundbar pairing or the old
+ * per-backup pairing this replaced. See LauncherConfigSync.kt.
  */
 @Composable
-private fun RestoreSyncSection(onRestore: suspend (LauncherSettings) -> Unit) {
-    var state by remember { mutableStateOf<PairingUiState>(PairingUiState.Idle) }
+private fun ConfigSyncSection(
+    settings: LauncherSettings,
+    deviceToken: String,
+    onDeviceTokenChange: (String) -> Unit,
+    onRestore: suspend (LauncherSettings) -> Unit,
+) {
+    if (deviceToken.isBlank()) {
+        DevicePairingSection(onPaired = onDeviceTokenChange)
+        return
+    }
+
+    val scope = rememberCoroutineScope()
+    var syncStatus by remember { mutableStateOf<String?>(null) }
+    var restoreState by remember { mutableStateOf<RestoreListUiState>(RestoreListUiState.Idle) }
+
+    Text(text = "Paired ✓")
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Button(onClick = {
+            onDeviceTokenChange("")
+            restoreState = RestoreListUiState.Idle
+            syncStatus = null
+        }) {
+            Text(text = "Forget pairing")
+        }
+        Button(onClick = {
+            scope.launch {
+                syncStatus = "Backing up..."
+                val ok = withContext(Dispatchers.IO) { LauncherConfigSync.uploadBackup(deviceToken, settings) }
+                syncStatus = if (ok) "Backed up" else "Backup failed — check the server is reachable"
+            }
+        }) {
+            Text(text = "Back up settings")
+        }
+        Button(onClick = {
+            scope.launch {
+                restoreState = RestoreListUiState.Loading
+                val backups = withContext(Dispatchers.IO) { LauncherConfigSync.listBackups(deviceToken) }
+                restoreState = if (backups == null) {
+                    RestoreListUiState.Failed("Couldn't load backups — check the server is reachable")
+                } else {
+                    RestoreListUiState.Loaded(backups)
+                }
+            }
+        }) {
+            Text(text = "Restore settings")
+        }
+    }
+    Text(text = "Manage or revoke this pairing any time at mx3launcher.odiousapps.com/paired_devices.php")
+    syncStatus?.let { Text(text = it) }
+
+    when (val s = restoreState) {
+        RestoreListUiState.Idle -> {}
+        RestoreListUiState.Loading -> Text(text = "Loading...")
+        is RestoreListUiState.Failed -> Text(text = s.message)
+        is RestoreListUiState.Loaded -> {
+            if (s.backups.isEmpty()) {
+                Text(text = "No backups yet")
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    s.backups.forEach { backup ->
+                        Button(onClick = {
+                            scope.launch {
+                                val fetched = withContext(Dispatchers.IO) {
+                                    LauncherConfigSync.fetchBackup(deviceToken, backup.id)
+                                }
+                                if (fetched != null) {
+                                    // Awaited, not fired-and-forgotten, so this
+                                    // status message reflects the settings
+                                    // write actually completing.
+                                    onRestore(fetched)
+                                    restoreState = RestoreListUiState.Idle
+                                    syncStatus = "Restored from ${backup.label}"
+                                } else {
+                                    restoreState = RestoreListUiState.Failed("Couldn't read that backup")
+                                }
+                            }
+                        }) {
+                            Text(text = backup.label)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DevicePairingSection(onPaired: (String) -> Unit) {
+    var pairingState by remember { mutableStateOf<PairingUiState>(PairingUiState.Idle) }
     val scope = rememberCoroutineScope()
 
-    when (val s = state) {
-        is PairingUiState.Idle, is PairingUiState.Failed, is PairingUiState.Done -> {
-            if (s is PairingUiState.Failed) Text(text = s.message)
-            if (s is PairingUiState.Done) Text(text = s.message)
+    when (val state = pairingState) {
+        is PairingUiState.Idle, is PairingUiState.Failed -> {
+            if (state is PairingUiState.Failed) {
+                Text(text = state.message)
+            }
+            Text(text = "Pair once to back up/restore settings without a code each time.")
             Button(onClick = {
-                state = PairingUiState.Starting
+                pairingState = PairingUiState.Starting
                 scope.launch {
-                    val session = withContext(Dispatchers.IO) { LauncherConfigSync.startRestore() }
+                    val session = withContext(Dispatchers.IO) { LauncherConfigSync.pairDevice() }
                     if (session == null) {
-                        state = PairingUiState.Failed("Couldn't start restore — check the server is reachable")
+                        pairingState = PairingUiState.Failed(
+                            "Couldn't start pairing — check the server is reachable"
+                        )
                         return@launch
                     }
                     val qrBitmap = withContext(Dispatchers.Default) { generateQrCodeBitmap(session.approveUrl) }
-                    state = PairingUiState.ShowingCode(session.code, session.token, qrBitmap)
+                    pairingState = PairingUiState.ShowingCode(session.code, session.token, qrBitmap)
 
                     val deadlineMs = System.currentTimeMillis() + session.expiresInSeconds * 1000L
                     while (System.currentTimeMillis() < deadlineMs) {
                         delay(3000.milliseconds)
-                        when (val result = withContext(Dispatchers.IO) { LauncherConfigSync.pollRestore(session.token) }) {
-                            is LauncherConfigSync.RestorePollResult.Restored -> {
-                                // Awaited, not fired-and-forgotten, so the
-                                // "Restored" message below reflects the
-                                // settings write actually completing.
-                                onRestore(result.settings)
-                                state = PairingUiState.Done("Settings restored")
+                        when (val result = withContext(Dispatchers.IO) {
+                            LauncherConfigSync.pollPairing(session.token)
+                        }) {
+                            is LauncherConfigSync.PairingPollResult.Paired -> {
+                                onPaired(result.deviceToken)
+                                pairingState = PairingUiState.Idle
                                 return@launch
                             }
-                            is LauncherConfigSync.RestorePollResult.Expired -> {
-                                state = PairingUiState.Failed("Code expired — try again")
+                            is LauncherConfigSync.PairingPollResult.Expired -> {
+                                pairingState = PairingUiState.Failed("Code expired — try again")
                                 return@launch
                             }
-                            is LauncherConfigSync.RestorePollResult.Error -> {
+                            is LauncherConfigSync.PairingPollResult.Error -> {
                                 // Keep polling; don't give up on a transient blip.
                             }
-                            LauncherConfigSync.RestorePollResult.Pending -> {
+                            LauncherConfigSync.PairingPollResult.Pending -> {
                                 // Keep waiting.
                             }
                         }
                     }
-                    state = PairingUiState.Failed("Code expired — try again")
+                    pairingState = PairingUiState.Failed("Code expired — try again")
                 }
             }) {
-                Text(text = "Restore settings")
+                Text(text = "Pair")
             }
         }
-        is PairingUiState.Starting -> Text(text = "Starting...")
-        is PairingUiState.ShowingCode -> PairingCodeDisplay(s)
+        is PairingUiState.Starting -> {
+            Text(text = "Starting...")
+        }
+        is PairingUiState.ShowingCode -> PairingCodeDisplay(state)
+        is PairingUiState.Done -> {
+            // DevicePairingSection never produces this state — success
+            // flips deviceToken non-blank via onPaired instead.
+        }
     }
 }

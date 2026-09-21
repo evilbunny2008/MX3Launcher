@@ -80,6 +80,19 @@ if($_SERVER["REQUEST_METHOD"] === "POST")
         );
         $stmt->execute([$id, $userId, BACKUP_APP_NAME]);
         $success = "Deleted.";
+    } elseif(($_POST["action"] ?? "") === "rename") {
+        $id = intval($_POST["id"] ?? 0);
+        $label = trim((string)($_POST["label"] ?? ""));
+        if($label === "" || strlen($label) > 128)
+        {
+            $error = "Label must be 1-128 characters.";
+        } else {
+            $stmt = db()->prepare(
+                "UPDATE saved_credentials SET label = ? WHERE id = ? AND user_id = ? AND app_name = ?"
+            );
+            $stmt->execute([$label, $id, $userId, BACKUP_APP_NAME]);
+            $success = "Renamed.";
+        }
     } elseif(($_POST["action"] ?? "") === "upload") {
         $upload = $_FILES["backup_file"] ?? null;
         if($upload === null || ($upload["error"] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE)
@@ -153,6 +166,8 @@ $csrfToken = generate_csrf_token();
         .hint { color: #666; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         td, th { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+        .rename-form { display: flex; gap: 8px; }
+        .rename-form input[type=text] { margin-bottom: 0; }
     </style>
 </head>
 <body>
@@ -162,6 +177,7 @@ $csrfToken = generate_csrf_token();
         uploaded below. "Restore settings" on the launcher picks from these the same way either way.
     </p>
     <p class="nav-buttons">
+        <a class="btn" href="/paired_devices.php">Your paired devices</a>
         <a class="btn" href="/manage_credentials.php">Your other saved credentials</a>
         <a class="btn" href="/credential_view.php">Enter a pairing code</a>
     </p>
@@ -169,10 +185,18 @@ $csrfToken = generate_csrf_token();
     <?php if($success): ?><div class="success"><?= htmlspecialchars($success) ?></div><?php endif; ?>
 
     <table>
-        <tr><th>Made</th><th></th></tr>
+        <tr><th>Label</th><th></th></tr>
         <?php foreach($backups as $row): ?>
         <tr>
-            <td><?= htmlspecialchars($row["label"]) ?></td>
+            <td>
+                <form method="post" class="rename-form">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                    <input type="hidden" name="action" value="rename">
+                    <input type="hidden" name="id" value="<?= (int)$row["id"] ?>">
+                    <input type="text" name="label" value="<?= htmlspecialchars($row["label"]) ?>" maxlength="128">
+                    <button type="submit">Rename</button>
+                </form>
+            </td>
             <td>
                 <a class="btn" href="/settings_backups.php?download=<?= (int)$row["id"] ?>">Download</a>
                 <form method="post" style="display:inline;">

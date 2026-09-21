@@ -216,11 +216,10 @@ $csrfToken = generate_csrf_token();
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <title>Your saved credentials</title>
     <style>
-        /* 700, not 600: the 4 nav buttons up top (Enter a pairing code,
-           MX3 Launcher settings backups, Change email, Log out) need at
-           least one more button-width of room than 600px gives them
-           before they wrap awkwardly. */
-        body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 16px; }
+        /* Wider than the site's other pages: 5 nav buttons up top (Enter a
+           pairing code, MX3 Launcher settings backups, Paired devices,
+           Change email, Log out) need the room, or they wrap awkwardly. */
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 16px; }
         input, select { font-size: 16px; width: 100%; padding: 10px; margin-bottom: 12px; box-sizing: border-box; font-family: inherit; }
         button, .btn {
             font-family: inherit; font-size: 16px; line-height: 1.2; padding: 10px;
@@ -256,6 +255,7 @@ $csrfToken = generate_csrf_token();
     <p class="nav-buttons">
         <a class="btn" href="/credential_view.php">Enter a pairing code</a>
         <a class="btn" href="/settings_backups.php">MX3 Launcher settings backups</a>
+        <a class="btn" href="/paired_devices.php">Paired devices</a>
         <a class="btn" href="/change_email.php">Change email</a>
         <a class="btn" href="/logout.php">Log out</a>
     </p>

@@ -51,6 +51,13 @@ object LauncherPreferences {
     private val KEY_SOUNDBAR_WAKE_ENABLED = booleanPreferencesKey("soundbar_wake_enabled")
     private val KEY_SOUNDBAR_WAKE_URL = stringPreferencesKey("soundbar_wake_url")
     private val KEY_SOUNDBAR_WAKE_SECRET = stringPreferencesKey("soundbar_wake_secret")
+    // Deliberately not a LauncherSettings field, and not touched by
+    // observe()/restoreAll() below - this identifies *this device install*
+    // to the config-sync server (see LauncherConfigSync.kt's pairDevice()),
+    // so it must never travel inside a settings backup/restore itself
+    // (restoring one on a different device must not silently adopt the
+    // backed-up device's identity/token).
+    private val KEY_CONFIG_SYNC_DEVICE_TOKEN = stringPreferencesKey("config_sync_device_token")
 
     private const val DEFAULT_COLUMNS = 6
     private const val ORDER_DELIMITER = ","
@@ -103,6 +110,13 @@ object LauncherPreferences {
 
     suspend fun setSoundbarWakeSecret(context: Context, secret: String) {
         context.dataStore.edit { it[KEY_SOUNDBAR_WAKE_SECRET] = secret }
+    }
+
+    fun observeConfigSyncDeviceToken(context: Context): Flow<String> =
+        context.dataStore.data.map { it[KEY_CONFIG_SYNC_DEVICE_TOKEN] ?: "" }
+
+    suspend fun setConfigSyncDeviceToken(context: Context, token: String) {
+        context.dataStore.edit { it[KEY_CONFIG_SYNC_DEVICE_TOKEN] = token }
     }
 
     /** Writes every field at once (used by restore) rather than calling

@@ -21,7 +21,13 @@
  *   default_credentials in schema.sql). The requesting device's own poll
  *   of credential_status.php then receives it automatically - this page
  *   never displays the values in that case, since this browser is the
- *   approver, not the device actually receiving them.
+ *   approver, not the device actually receiving them. A pull request for
+ *   DEVICE_PAIR_APP_NAME is a special case of this: instead of picking a
+ *   saved_credentials preset, approving mints a new device_tokens row and
+ *   sends that back as the resolved "fields" - see device_backup.php/
+ *   device_backups_list.php/device_backup_get.php for what a device does
+ *   with it afterwards (direct, unattended backup/restore, no further
+ *   trip through this page).
  *
  * Either way, once acted on, viewed_at gets set and
  * credential_status.php reports it resolved.
@@ -34,6 +40,8 @@ $userId = require_login();
 // Kept in sync with manage_credentials.php/settings_backups.php's own copy
 // of this constant, and with LauncherConfigSync.kt's APP_NAME.
 const BACKUP_APP_NAME = "MX3Launcher Settings";
+// Kept in sync with LauncherConfigSync.kt's DEVICE_PAIR_APP_NAME.
+const DEVICE_PAIR_APP_NAME = "MX3Launcher Device";
 
 $error = "";
 $revealed = null; // ["app"=>, "label"=>, "fields"=>[...]] - push mode, once shown
@@ -79,6 +87,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST")
         $prefilledCode = $code;
         $presetId = intval($_POST["preset_id"] ?? 0);
         $useDefault = ($_POST["action"] ?? "") === "approve_default";
+        $approvePairing = ($_POST["action"] ?? "") === "approve_pairing";
         $remember = isset($_POST["remember"]);
 
         if($code === "")
@@ -124,12 +133,30 @@ if($_SERVER["REQUEST_METHOD"] === "POST")
                     $error = "That entry's data was malformed.";
                 }
             } else {
-                // Pull mode - attach a preset, owned by this user: either
-                // the remembered default for this app, or one explicitly
-                // picked from the (matching-app-only) dropdown.
+                // Pull mode - attach a preset, owned by this user: either a
+                // freshly-minted device token (pairing), the remembered
+                // default for this app, or one explicitly picked from the
+                // (matching-app-only) dropdown.
                 $preset = false;
-                if($useDefault)
+                if($approvePairing && (string)($share["requested_app"] ?? "") === DEVICE_PAIR_APP_NAME)
                 {
+                    $deviceToken = generate_random_token();
+                    $label = "Paired " . date("M j, Y g:i A");
+                    $stmt = db()->prepare(
+                        "INSERT INTO device_tokens (user_id, token, label, created_at) VALUES (?, ?, ?, NOW())"
+                    );
+                    $stmt->execute([$userId, $deviceToken, $label]);
+                    // Shaped like a saved_credentials row so the attach
+                    // logic below (which only reads these three fields)
+                    // doesn't need to know or care that this one didn't
+                    // come from that table.
+                    $preset = [
+                        "id" => 0,
+                        "app_name" => DEVICE_PAIR_APP_NAME,
+                        "label" => $label,
+                        "fields_json" => json_encode(["DeviceToken" => $deviceToken]),
+                    ];
+                } elseif($useDefault) {
                     $preset = find_default_preset($userId, (string)($share["requested_app"] ?? ""));
                     if($preset === false)
                         $error = "Your remembered choice for this is no longer available - pick one below instead.";
@@ -188,12 +215,14 @@ $pendingShare = ($revealed === null && !$attached && $prefilledCode !== "") ? fi
 $isPullMode = $pendingShare !== false && $pendingShare["payload_json"] === null;
 $requestedApp = $isPullMode ? $pendingShare["requested_app"] : null;
 
+$isPairingRequest = $isPullMode && $requestedApp === DEVICE_PAIR_APP_NAME;
+
 $defaultPreset = false;
-if($isPullMode && !$forceChoose)
+if($isPullMode && !$isPairingRequest && !$forceChoose)
     $defaultPreset = find_default_preset($userId, (string)$requestedApp);
 
 $presets = [];
-if($isPullMode && $defaultPreset === false)
+if($isPullMode && !$isPairingRequest && $defaultPreset === false)
 {
     $stmt = db()->prepare(
         "SELECT id, app_name, label FROM saved_credentials WHERE user_id = ? AND app_name = ? ORDER BY label"
@@ -253,6 +282,19 @@ $csrfToken = generate_csrf_token();
         </p>
     <?php elseif($attached): ?>
         <p class="message notice">Sent. The requesting device should pick this up within a few seconds.</p>
+    <?php elseif($isPairingRequest): ?>
+        <p>
+            A device wants to pair with your account for MX3 Launcher settings backup/restore.
+            Once approved, it can back up and restore its own settings directly, without
+            needing to come back here each time - see <a href="/paired_devices.php">your paired
+            devices</a> any time to review or revoke this.
+        </p>
+        <form method="post">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+            <input type="hidden" name="code" value="<?= htmlspecialchars($prefilledCode) ?>">
+            <input type="hidden" name="action" value="approve_pairing">
+            <button type="submit">Approve pairing</button>
+        </form>
     <?php elseif($isPullMode && $defaultPreset !== false): ?>
         <p>
             <?= htmlspecialchars($requestedApp ?: "A device") ?> is asking to receive credentials.

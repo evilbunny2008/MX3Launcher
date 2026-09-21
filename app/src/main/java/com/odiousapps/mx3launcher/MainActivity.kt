@@ -133,6 +133,8 @@ private fun LauncherApp(screenState: MutableState<Screen>) {
 
     val settings by LauncherPreferences.observe(context)
         .collectAsState(initial = LauncherSettings(ThemeMode.SYSTEM, "slate", 6, emptySet(), emptyList()))
+    val configSyncDeviceToken by LauncherPreferences.observeConfigSyncDeviceToken(context)
+        .collectAsState(initial = "")
 
     // Suppresses Back on Home, which otherwise finishes the Activity and lets the
     // TV fall through to the system's other Home app. Composed unconditionally
@@ -178,6 +180,10 @@ private fun LauncherApp(screenState: MutableState<Screen>) {
                 // SettingsScreen's "Restored from ..." status is trustworthy
                 // rather than reported the instant the write is scheduled.
                 onRestore = { restored -> LauncherPreferences.restoreAll(context, restored) },
+                configSyncDeviceToken = configSyncDeviceToken,
+                onConfigSyncDeviceTokenChange = { token ->
+                    scope.launch { LauncherPreferences.setConfigSyncDeviceToken(context, token) }
+                },
                 onSoundbarWakeEnabledChange = { enabled ->
                     scope.launch { LauncherPreferences.setSoundbarWakeEnabled(context, enabled) }
                 },

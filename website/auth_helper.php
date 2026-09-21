@@ -67,3 +67,25 @@ function generate_random_token(): string
 {
     return bin2hex(random_bytes(32));
 }
+
+/** Resolves a device_tokens row (minted once via the DEVICE_PAIR_APP_NAME
+ *  pairing flow in credential_view.php) to its owning user id, touching
+ *  last_used_at - or null if the token doesn't exist/was revoked. No
+ *  session/login involved; the token itself is the credential, the same
+ *  trust model as a credential_shares poll token but much longer-lived -
+ *  used by device_backup.php/device_backups_list.php/device_backup_get.php
+ *  so a paired device can back up/restore without a human approving each
+ *  individual call. */
+function user_id_from_device_token(string $token): ?int
+{
+    $stmt = db()->prepare("SELECT user_id FROM device_tokens WHERE token = ?");
+    $stmt->execute([$token]);
+    $row = $stmt->fetch();
+    if($row === false)
+        return null;
+
+    $stmt = db()->prepare("UPDATE device_tokens SET last_used_at = NOW() WHERE token = ?");
+    $stmt->execute([$token]);
+
+    return (int)$row["user_id"];
+}

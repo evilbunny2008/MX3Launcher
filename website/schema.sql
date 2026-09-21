@@ -85,4 +85,30 @@ CREATE TABLE IF NOT EXISTS `default_credentials` (
   PRIMARY KEY (`user_id`, `app_name`)
 ) ENGINE=InnoDB DEFAULT;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `device_tokens`
+--
+-- A long-lived credential a device earns once via the normal QR/code pull
+-- flow (see DEVICE_PAIR_APP_NAME in credential_view.php), then holds onto
+-- so it can call device_backup.php/device_backups_list.php/
+-- device_backup_get.php directly - no further human approval per
+-- backup/restore, unlike everything else on this site. See
+-- paired_devices.php to review/revoke these.
+--
+
+DROP TABLE IF EXISTS `device_tokens`;
+CREATE TABLE IF NOT EXISTS `device_tokens` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `token` char(64) NOT NULL,
+  `label` varchar(128) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `last_used_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_token` (`token`),
+  KEY `idx_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT;
+
 COMMIT;

@@ -3,37 +3,23 @@ package com.odiousapps.mx3launcher.data
 import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 /**
- * Settings backup/restore over mx3launcher.odiousapps.com's credential
- * relay — the same site/protocol SoundbarPairing.kt uses for a different
- * purpose (see that project's website/README.md for the full protocol),
- * under a separate "app" name so the two kinds of saved presets don't mix
- * together in the picker at credential_view.php.
+ * Settings backup/restore over mx3launcher.odiousapps.com. Two phases:
  *
- * Backup is a "push" share: this device already has the data (its current
- * settings), sends it up front, and shows a code/QR linking to
- * credential_view.php. The account holder there confirms the code, which
- * both reveals it to them and — per credential_view.php's push-mode
- * handling — saves it as one of their saved_credentials presets in the
- * same step, so this device's poll seeing it resolved means it was
- * actually kept, not just glanced at.
- *
- * Restore is a "pull" share: this device has nothing of its own yet, asks
- * to receive it, and the account holder picks one of their previously-saved
- * "MX3Launcher Settings" presets at credential_view.php (typically one
- * made by a previous backup, though nothing stops them adding one by hand
- * at manage_credentials.php).
- *
- * Deliberately not a device-storage-based approach (MediaStore, SAF, or
- * otherwise) — those all ultimately depend on either scoped-storage
- * per-app file ownership (which doesn't survive an uninstall that changes
- * signing key) or a document-picker app being present (which many TV boxes
- * don't have). This only needs network access, which the app already
- * requires for the soundbar-wake feature.
+ * - Pairing (pairDevice/pollPairing): a one-time "pull" share over the same
+ *   credential relay SoundbarPairing.kt uses (see that project's
+ *   website/README.md for the protocol, and credential_view.php's
+ *   DEVICE_PAIR_APP_NAME handling), under yet another distinct "app" name
+ *   so it doesn't mix with either soundbar-wake presets or settings-backup
+ *   presets in that picker. Approving it doesn't hand back saved
+ *   credentials - the server mints a fresh, long-lived device token and
+ *   sends that back instead, once.
+ * - Backup/restore (uploadBackup/listBackups/fetchBackup): the device
+ *   holds onto that token (see LauncherPreferences.observeConfigSyncDeviceToken)
+ *   and calls device_backup.php/device_backups_list.php/device_backup_get.php
+ *   directly from then on - no further code/QR, no further human approval
+ *   per call, unlike the pairing step or SoundbarPairing's flow.
  *
  * All functions here perform blocking network I/O — callers must run them
  * off the main thread (Dispatchers.IO, as SettingsScreen.kt does).
@@ -44,9 +30,14 @@ object LauncherConfigSync {
 
     private const val START_URL = "https://mx3launcher.odiousapps.com/credential_start.php"
     private const val STATUS_URL = "https://mx3launcher.odiousapps.com/credential_status.php"
+    private const val BACKUP_URL = "https://mx3launcher.odiousapps.com/device_backup.php"
+    private const val LIST_URL = "https://mx3launcher.odiousapps.com/device_backups_list.php"
+    private const val GET_URL = "https://mx3launcher.odiousapps.com/device_backup_get.php"
     const val VIEW_URL_PREFIX = "https://mx3launcher.odiousapps.com/credential_view.php?code="
 
-    private const val APP_NAME = "MX3Launcher Settings"
+    // Kept in sync with credential_view.php's own copy of this constant.
+    private const val DEVICE_PAIR_APP_NAME = "MX3Launcher Device"
+    private const val FIELD_DEVICE_TOKEN = "DeviceToken"
     private const val FIELD_CONFIG = "Config"
 
     private const val KEY_THEME_MODE = "themeMode"
@@ -56,46 +47,49 @@ object LauncherConfigSync {
     private const val KEY_APP_ORDER = "appOrder"
     private val KNOWN_KEYS = listOf(KEY_THEME_MODE, KEY_GRADIENT_ID, KEY_COLUMNS, KEY_HIDDEN_PACKAGES, KEY_APP_ORDER)
 
-    private val LABEL_TIMESTAMP_FORMAT = SimpleDateFormat("MMM d, yyyy h:mm a", Locale.getDefault())
-
     data class PairingSession(val code: String, val token: String, val expiresInSeconds: Int) {
         val approveUrl: String get() = "$VIEW_URL_PREFIX$code"
     }
 
-    sealed class BackupPollResult {
-        object Pending : BackupPollResult()
-        object Expired : BackupPollResult()
-        object Saved : BackupPollResult()
-        data class Error(val message: String) : BackupPollResult()
+    sealed class PairingPollResult {
+        object Pending : PairingPollResult()
+        object Expired : PairingPollResult()
+        data class Paired(val deviceToken: String) : PairingPollResult()
+        data class Error(val message: String) : PairingPollResult()
     }
 
-    sealed class RestorePollResult {
-        object Pending : RestorePollResult()
-        object Expired : RestorePollResult()
-        data class Restored(val settings: LauncherSettings) : RestorePollResult()
-        data class Error(val message: String) : RestorePollResult()
-    }
+    data class RemoteBackup(val id: Int, val label: String, val createdAt: String)
 
-    /** Starts a "push" share carrying this device's current settings. */
-    fun startBackup(settings: LauncherSettings): PairingSession? {
+    /** Starts a one-time "pull" share asking the account holder to pair
+     *  this device. See credential_view.php's DEVICE_PAIR_APP_NAME branch. */
+    fun pairDevice(): PairingSession? {
         return try {
-            val label = "Backup — ${LABEL_TIMESTAMP_FORMAT.format(Date())}"
-            val fields = JSONObject().put(FIELD_CONFIG, toJson(settings))
-            val body = JSONObject().put("app", APP_NAME).put("label", label).put("fields", fields)
-            startSession(body)
+            startSession(JSONObject().put("app", DEVICE_PAIR_APP_NAME))
         } catch (e: Exception) {
-            Log.w(TAG, "startBackup failed", e)
+            Log.w(TAG, "pairDevice failed", e)
             null
         }
     }
 
-    /** Starts a "pull" share asking to receive a previously-saved backup. */
-    fun startRestore(): PairingSession? {
+    fun pollPairing(token: String): PairingPollResult {
         return try {
-            startSession(JSONObject().put("app", APP_NAME))
+            val json = JSONObject(PairingHttp.get(pollUrl(token)))
+            when (json.optString("status")) {
+                "viewed" -> {
+                    val deviceToken = (json.optJSONObject("fields") ?: JSONObject()).optString(FIELD_DEVICE_TOKEN)
+                    if (deviceToken.isBlank()) {
+                        PairingPollResult.Error("Approval didn't include a device token")
+                    } else {
+                        PairingPollResult.Paired(deviceToken)
+                    }
+                }
+                "pending" -> PairingPollResult.Pending
+                "expired" -> PairingPollResult.Expired
+                else -> PairingPollResult.Error(json.optString("error", "Unknown error"))
+            }
         } catch (e: Exception) {
-            Log.w(TAG, "startRestore failed", e)
-            null
+            Log.w(TAG, "pollPairing: request failed", e)
+            PairingPollResult.Error(e.message ?: "Network error")
         }
     }
 
@@ -113,46 +107,57 @@ object LauncherConfigSync {
         )
     }
 
-    fun pollBackup(token: String): BackupPollResult {
-        return try {
-            when (val status = JSONObject(PairingHttp.get(pollUrl(token))).optString("status")) {
-                "viewed" -> BackupPollResult.Saved
-                "pending" -> BackupPollResult.Pending
-                "expired" -> BackupPollResult.Expired
-                else -> BackupPollResult.Error("Unexpected status: $status")
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "pollBackup: request failed", e)
-            BackupPollResult.Error(e.message ?: "Network error")
-        }
-    }
-
-    fun pollRestore(token: String): RestorePollResult {
-        return try {
-            val json = JSONObject(PairingHttp.get(pollUrl(token)))
-            when (json.optString("status")) {
-                "viewed" -> {
-                    val raw = (json.optJSONObject("fields") ?: JSONObject()).optString(FIELD_CONFIG)
-                    val settings = raw.takeIf { it.isNotBlank() }?.let { fromJson(it) }
-                    if (settings == null) {
-                        RestorePollResult.Error("That saved preset doesn't look like a settings backup")
-                    } else {
-                        RestorePollResult.Restored(settings)
-                    }
-                }
-                "pending" -> RestorePollResult.Pending
-                "expired" -> RestorePollResult.Expired
-                else -> RestorePollResult.Error(json.optString("error", "Unknown error"))
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "pollRestore: request failed", e)
-            RestorePollResult.Error(e.message ?: "Network error")
-        }
-    }
-
     private fun pollUrl(token: String): String {
         val encodedToken = java.net.URLEncoder.encode(token, "UTF-8")
         return "$STATUS_URL?token=$encodedToken"
+    }
+
+    /** Returns true on success. */
+    fun uploadBackup(deviceToken: String, settings: LauncherSettings): Boolean {
+        return try {
+            val body = JSONObject().put("token", deviceToken).put("config", toJson(settings))
+            JSONObject(PairingHttp.post(BACKUP_URL, body.toString())).optBoolean("ok", false)
+        } catch (e: Exception) {
+            Log.w(TAG, "uploadBackup failed", e)
+            false
+        }
+    }
+
+    /** Returns null on failure (network error, revoked token, ...); an
+     *  empty list just means no backups exist yet. */
+    fun listBackups(deviceToken: String): List<RemoteBackup>? {
+        return try {
+            val encodedToken = java.net.URLEncoder.encode(deviceToken, "UTF-8")
+            val json = JSONObject(PairingHttp.get("$LIST_URL?token=$encodedToken"))
+            if (!json.optBoolean("ok", false)) return null
+
+            val array = json.optJSONArray("backups") ?: JSONArray()
+            (0 until array.length()).map { i ->
+                val entry = array.getJSONObject(i)
+                RemoteBackup(
+                    id = entry.optInt("id"),
+                    label = entry.optString("label"),
+                    createdAt = entry.optString("created_at"),
+                )
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "listBackups failed", e)
+            null
+        }
+    }
+
+    /** Returns the parsed settings on success, or null if the fetch or
+     *  parse failed. */
+    fun fetchBackup(deviceToken: String, id: Int): LauncherSettings? {
+        return try {
+            val encodedToken = java.net.URLEncoder.encode(deviceToken, "UTF-8")
+            val json = JSONObject(PairingHttp.get("$GET_URL?token=$encodedToken&id=$id"))
+            if (!json.optBoolean("ok", false)) return null
+            fromJson(json.optString("config"))
+        } catch (e: Exception) {
+            Log.w(TAG, "fetchBackup failed", e)
+            null
+        }
     }
 
     private fun toJson(settings: LauncherSettings): String {
