@@ -27,6 +27,10 @@ require_once __DIR__ . "/auth_helper.php";
 
 $userId = require_login();
 
+// Kept in sync with manage_credentials.php/settings_backups.php's own copy
+// of this constant, and with LauncherConfigSync.kt's APP_NAME.
+const BACKUP_APP_NAME = "MX3Launcher Settings";
+
 $error = "";
 $revealed = null; // ["app"=>, "label"=>, "fields"=>[...]] - push mode, once shown
 $savedAsPreset = false; // true once a push-mode reveal's data has also been saved below
@@ -194,7 +198,11 @@ $csrfToken = generate_csrf_token();
         </table>
         <p class="message notice">
             Copy these into whatever needs them now if you want to - this page won't show them again.
-            <?php if($savedAsPreset): ?>They've also been saved to <a href="/manage_credentials.php">your saved credentials</a> for later.<?php endif; ?>
+            <?php if($savedAsPreset && ($revealed["app"] ?? "") === BACKUP_APP_NAME): ?>
+                It's also been saved to <a href="/settings_backups.php">your settings backups</a> for later.
+            <?php elseif($savedAsPreset): ?>
+                They've also been saved to <a href="/manage_credentials.php">your saved credentials</a> for later.
+            <?php endif; ?>
         </p>
     <?php elseif($attached): ?>
         <p class="message notice">Sent. The requesting device should pick this up within a few seconds.</p>
@@ -203,7 +211,12 @@ $csrfToken = generate_csrf_token();
             <?= htmlspecialchars($requestedApp ?: "A device") ?> is asking to receive credentials.
             Choose which of your saved entries to send it.
         </p>
-        <?php if(empty($presets)): ?>
+        <?php if(empty($presets) && $requestedApp === BACKUP_APP_NAME): ?>
+            <p class="message error">
+                You don't have any settings backups yet.
+                Use "Back up settings" on the launcher first, then come back to this code.
+            </p>
+        <?php elseif(empty($presets)): ?>
             <p class="message error">
                 You don't have any saved credentials yet.
                 <a href="/manage_credentials.php">Add one first</a>, then come back to this code.

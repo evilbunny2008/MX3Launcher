@@ -21,11 +21,18 @@
  * what each app's own code actually reads, being a separate repo -
  * MX3 Launcher's SoundbarPairing.kt and Z2M Dash's
  * AddEditBrokerScreen.kt/applyImportedFields are the real ground truth).
+ *
+ * Excludes MX3 Launcher's settings-backup presets (app_name
+ * BACKUP_APP_NAME, from LauncherConfigSync.kt) - those aren't hand-managed
+ * credentials, they accumulate one new entry per backup, and would swamp
+ * this list over time. See settings_backups.php for those instead.
  */
 
 require_once __DIR__ . "/auth_helper.php";
 
 $userId = require_login();
+
+const BACKUP_APP_NAME = "MX3Launcher Settings";
 
 const MAX_FIELDS = 20;
 const MAX_KEY_LENGTH = 64;
@@ -191,8 +198,11 @@ if($_SERVER["REQUEST_METHOD"] === "GET" && intval($_GET["edit"] ?? 0) > 0)
     }
 }
 
-$stmt = db()->prepare("SELECT id, app_name, label, created_at FROM saved_credentials WHERE user_id = ? ORDER BY app_name, label");
-$stmt->execute([$userId]);
+$stmt = db()->prepare(
+    "SELECT id, app_name, label, created_at FROM saved_credentials
+     WHERE user_id = ? AND app_name != ? ORDER BY app_name, label"
+);
+$stmt->execute([$userId, BACKUP_APP_NAME]);
 $savedCredentials = $stmt->fetchAll();
 
 $csrfToken = generate_csrf_token();
@@ -206,7 +216,11 @@ $csrfToken = generate_csrf_token();
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <title>Your saved credentials</title>
     <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 16px; }
+        /* 700, not 600: the 4 nav buttons up top (Enter a pairing code,
+           MX3 Launcher settings backups, Change email, Log out) need at
+           least one more button-width of room than 600px gives them
+           before they wrap awkwardly. */
+        body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 16px; }
         input, select { font-size: 16px; width: 100%; padding: 10px; margin-bottom: 12px; box-sizing: border-box; font-family: inherit; }
         button, .btn {
             font-family: inherit; font-size: 16px; line-height: 1.2; padding: 10px;
@@ -215,6 +229,8 @@ $csrfToken = generate_csrf_token();
             box-sizing: border-box; appearance: none; -webkit-appearance: none;
             margin: 0 8px 0 0; min-width: 90px; vertical-align: middle;
         }
+        .nav-buttons { text-align: center; }
+        .nav-buttons .btn:last-child { margin-right: 0; }
         .error { background: #fdd; padding: 12px; border-radius: 4px; margin-bottom: 12px; }
         .success { background: #dfd; padding: 12px; border-radius: 4px; margin-bottom: 12px; }
         .hint { color: #666; }
@@ -237,8 +253,9 @@ $csrfToken = generate_csrf_token();
 </head>
 <body>
     <h2>Your saved credentials</h2>
-    <p>
+    <p class="nav-buttons">
         <a class="btn" href="/credential_view.php">Enter a pairing code</a>
+        <a class="btn" href="/settings_backups.php">MX3 Launcher settings backups</a>
         <a class="btn" href="/change_email.php">Change email</a>
         <a class="btn" href="/logout.php">Log out</a>
     </p>
