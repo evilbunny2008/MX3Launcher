@@ -33,9 +33,9 @@ for anyone who just wants a fast app grid.
 
 ## Screen Shots
 
-![Home Screen](metadata/en-US/images/tvScreenShots/1.png){width=500px}<br>
-![App Display Setting Screen](metadata/en-US/images/tvScreenShots/4.png){width=500px}<br>
-![Settings Screen 2](metadata/en-US/images/tvScreenShots/3.png){width=500px}
+![Home Screen](metadata/en-US/images/tvScreenShots/1.png)<br>
+![App Display Setting Screen](metadata/en-US/images/tvScreenShots/4.png)<br>
+![Settings Screen 2](metadata/en-US/images/tvScreenShots/3.png)
 
 ## Installing
 
