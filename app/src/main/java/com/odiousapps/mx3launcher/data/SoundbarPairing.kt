@@ -9,7 +9,7 @@ import org.json.JSONObject
  * only on a phone, never the TV (see SoundbarPairingSection in
  * SettingsScreen.kt for why).
  *
- * Talks to mx3launcher.odiousapps.com's credential relay in "pull" mode:
+ * Talks to sync.odiousapps.com's credential relay in "pull" mode:
  * this device asks to receive credentials for "MX3Launcher", and the account
  * holder picks a saved preset at credential_view.php. See that project's
  * README for the protocol; "URL"/"Secret" are its documented field names.
@@ -23,8 +23,8 @@ object SoundbarPairing {
 
     // Self-service pairing site (accounts + saved-credential presets), separate
     // from any individual user's own home server.
-    private const val START_URL = "https://mx3launcher.odiousapps.com/credential_start.php"
-    private const val STATUS_URL = "https://mx3launcher.odiousapps.com/credential_status.php"
+    private const val START_URL = "https://sync.odiousapps.com/credential_start.php"
+    private const val STATUS_URL = "https://sync.odiousapps.com/credential_status.php"
 
     private const val APP_NAME = "MX3Launcher"
 

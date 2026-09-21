@@ -2,10 +2,12 @@
 /**
  * settings_backups.php
  * ---------------------
- * Lists this account's MX3 Launcher settings backups - saved_credentials
- * rows with app_name BACKUP_APP_NAME, created automatically by
- * credential_view.php's push-mode handling whenever a "Back up settings"
- * QR/code (see the app's LauncherConfigSync.kt) is confirmed here. Split
+ * "Config Backups" - lists this account's saved_credentials rows with
+ * app_name BACKUP_APP_NAME (currently just MX3 Launcher's, via
+ * LauncherConfigSync.kt - the name/mechanism here is intentionally generic
+ * so another app could hook into the same relay under its own app_name
+ * later), created automatically by credential_view.php's push-mode
+ * handling whenever a "Back up settings" QR/code is confirmed here. Split
  * out from manage_credentials.php because backups accumulate one new
  * entry per backup (never overwritten) rather than staying at a handful of
  * hand-managed entries, and would otherwise swamp that page's single list
@@ -101,7 +103,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST")
         } elseif($upload["error"] !== UPLOAD_ERR_OK) {
             $error = "Upload failed (error code " . (int)$upload["error"] . ").";
         } elseif($upload["size"] > MAX_CONFIG_LENGTH) {
-            $error = "That file is too large to be a settings backup (max " . MAX_CONFIG_LENGTH . " bytes).";
+            $error = "That file is too large to be a config backup (max " . MAX_CONFIG_LENGTH . " bytes).";
         } else {
             $raw = file_get_contents($upload["tmp_name"]);
             $decoded = $raw !== false ? json_decode($raw, true) : null;
@@ -110,7 +112,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST")
 
             if(!$looksLikeSettings)
             {
-                $error = "That file doesn't look like an MX3 Launcher settings backup.";
+                $error = "That file doesn't look like a config backup.";
             } else {
                 $label = trim((string)($_POST["label"] ?? ""));
                 if($label === "")
@@ -146,7 +148,7 @@ $csrfToken = generate_csrf_token();
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <title>Your MX3 Launcher settings backups</title>
+    <title>Config Backups</title>
     <style>
         body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 16px; }
         input[type=text], input[type=file] {
@@ -171,10 +173,10 @@ $csrfToken = generate_csrf_token();
     </style>
 </head>
 <body>
-    <h2>Your MX3 Launcher settings backups</h2>
+    <h2>Config Backups</h2>
     <p class="hint">
-        Made by tapping "Back up settings" on the launcher and confirming the code/QR here, or
-        uploaded below. "Restore settings" on the launcher picks from these the same way either way.
+        Made by tapping "Back up settings" in an app and confirming the code/QR here, or
+        uploaded below. "Restore settings" in that app picks from these the same way either way.
     </p>
     <p class="nav-buttons">
         <a class="btn" href="/paired_devices.php">Your paired devices</a>
@@ -223,7 +225,7 @@ $csrfToken = generate_csrf_token();
     </form>
     <p class="hint">
         Accepts a .json file previously downloaded from here, or exported some other way -
-        it just needs to be an MX3 Launcher settings backup underneath.
+        it just needs to be a config backup underneath.
     </p>
 </body>
 </html>

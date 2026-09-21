@@ -87,7 +87,7 @@ $csrfToken = generate_csrf_token();
         gets no warning, its next backup/restore attempt will simply fail until re-paired.
     </p>
     <p class="nav-buttons">
-        <a class="btn" href="/settings_backups.php">Your settings backups</a>
+        <a class="btn" href="/settings_backups.php">Config Backups</a>
         <a class="btn" href="/manage_credentials.php">Your other saved credentials</a>
     </p>
     <?php if($error): ?><div class="error"><?= htmlspecialchars($error) ?></div><?php endif; ?>

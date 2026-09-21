@@ -6,7 +6,7 @@ import java.net.URL
 import java.nio.charset.StandardCharsets
 
 /**
- * Shared blocking HTTP helpers for mx3launcher.odiousapps.com's credential
+ * Shared blocking HTTP helpers for sync.odiousapps.com's credential
  * relay (see that project's website/README.md for the protocol), used by
  * both SoundbarPairing.kt and LauncherConfigSync.kt - two independent
  * pairings against the same site, under different "app" names so their

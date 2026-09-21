@@ -275,7 +275,7 @@ $csrfToken = generate_csrf_token();
         <p class="message notice">
             Copy these into whatever needs them now if you want to - this page won't show them again.
             <?php if($savedAsPreset && ($revealed["app"] ?? "") === BACKUP_APP_NAME): ?>
-                It's also been saved to <a href="/settings_backups.php">your settings backups</a> for later.
+                It's also been saved to <a href="/settings_backups.php">Config Backups</a> for later.
             <?php elseif($savedAsPreset): ?>
                 They've also been saved to <a href="/manage_credentials.php">your saved credentials</a> for later.
             <?php endif; ?>
@@ -284,7 +284,7 @@ $csrfToken = generate_csrf_token();
         <p class="message notice">Sent. The requesting device should pick this up within a few seconds.</p>
     <?php elseif($isPairingRequest): ?>
         <p>
-            A device wants to pair with your account for MX3 Launcher settings backup/restore.
+            A device wants to pair with your account for config backup/restore.
             Once approved, it can back up and restore its own settings directly, without
             needing to come back here each time - see <a href="/paired_devices.php">your paired
             devices</a> any time to review or revoke this.

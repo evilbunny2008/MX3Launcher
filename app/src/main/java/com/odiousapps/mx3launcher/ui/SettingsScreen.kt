@@ -125,7 +125,7 @@ fun SettingsScreen(
         }
 
         // See LauncherConfigSync.kt: pair once over the same
-        // mx3launcher.odiousapps.com credential relay SoundbarPairingSection
+        // sync.odiousapps.com credential relay SoundbarPairingSection
         // uses below, then back up/restore directly - no code/QR per
         // operation, unlike soundbar pairing.
         SettingsSection(title = "Backup & restore") {
@@ -231,7 +231,7 @@ private fun PairingCodeDisplay(state: PairingUiState.ShowingCode) {
             // QR generation failed — fall back to plain text.
             Text(text = "On your phone, go to:")
         }
-        Text(text = "mx3launcher.odiousapps.com/credential_view.php")
+        Text(text = "sync.odiousapps.com/credential_view.php")
         Text(text = "and enter this code:")
         // Large, bold, and letter-spaced — this needs to be read at normal
         // TV sitting distance, not proofread up close like body text.
@@ -288,7 +288,7 @@ private fun SoundbarPairingSection(
                         )
                         return@launch
                     }
-                    val approveUrl = "https://mx3launcher.odiousapps.com/credential_view.php?code=${session.code}"
+                    val approveUrl = "https://sync.odiousapps.com/credential_view.php?code=${session.code}"
                     val qrBitmap = withContext(Dispatchers.Default) { generateQrCodeBitmap(approveUrl) }
                     pairingState = PairingUiState.ShowingCode(session.code, session.token, qrBitmap)
 
@@ -394,7 +394,7 @@ private fun ConfigSyncSection(
             Text(text = "Restore settings")
         }
     }
-    Text(text = "Manage or revoke this pairing any time at mx3launcher.odiousapps.com/paired_devices.php")
+    Text(text = "Manage or revoke this pairing any time at sync.odiousapps.com/paired_devices.php")
     syncStatus?.let { Text(text = it) }
 
     when (val s = restoreState) {

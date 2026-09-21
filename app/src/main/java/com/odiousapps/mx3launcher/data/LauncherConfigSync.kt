@@ -5,7 +5,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Settings backup/restore over mx3launcher.odiousapps.com. Two phases:
+ * Settings backup/restore over sync.odiousapps.com. Two phases:
  *
  * - Pairing (pairDevice/pollPairing): a one-time "pull" share over the same
  *   credential relay SoundbarPairing.kt uses (see that project's
@@ -28,12 +28,12 @@ object LauncherConfigSync {
 
     private const val TAG = "LauncherConfigSync"
 
-    private const val START_URL = "https://mx3launcher.odiousapps.com/credential_start.php"
-    private const val STATUS_URL = "https://mx3launcher.odiousapps.com/credential_status.php"
-    private const val BACKUP_URL = "https://mx3launcher.odiousapps.com/device_backup.php"
-    private const val LIST_URL = "https://mx3launcher.odiousapps.com/device_backups_list.php"
-    private const val GET_URL = "https://mx3launcher.odiousapps.com/device_backup_get.php"
-    const val VIEW_URL_PREFIX = "https://mx3launcher.odiousapps.com/credential_view.php?code="
+    private const val START_URL = "https://sync.odiousapps.com/credential_start.php"
+    private const val STATUS_URL = "https://sync.odiousapps.com/credential_status.php"
+    private const val BACKUP_URL = "https://sync.odiousapps.com/device_backup.php"
+    private const val LIST_URL = "https://sync.odiousapps.com/device_backups_list.php"
+    private const val GET_URL = "https://sync.odiousapps.com/device_backup_get.php"
+    const val VIEW_URL_PREFIX = "https://sync.odiousapps.com/credential_view.php?code="
 
     // Kept in sync with credential_view.php's own copy of this constant.
     private const val DEVICE_PAIR_APP_NAME = "MX3Launcher Device"
