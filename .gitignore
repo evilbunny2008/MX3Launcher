@@ -11,3 +11,4 @@ app/release
 build
 gradlew
 gradlew.bat
+app/dist
