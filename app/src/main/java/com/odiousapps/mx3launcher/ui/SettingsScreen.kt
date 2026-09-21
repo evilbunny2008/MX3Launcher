@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,8 +22,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Button
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
@@ -200,20 +204,40 @@ private sealed class PairingUiState {
 /** The QR/code display shared by every PairingUiState.ShowingCode, below. */
 @Composable
 private fun PairingCodeDisplay(state: PairingUiState.ShowingCode) {
-    if (state.qrBitmap != null) {
-        androidx.compose.foundation.Image(
-            bitmap = state.qrBitmap,
-            contentDescription = "QR code to open the pairing page",
-            modifier = Modifier.size(200.dp),
+    // Newly-appearing content nested this deep inside SettingsScreen's outer
+    // verticalScroll Column doesn't otherwise pull the scroll position along
+    // with it — nothing here is TV-focusable to trigger the usual
+    // focus-follows-scroll behaviour, so without this the QR/code can end up
+    // partially or fully below the bottom of the screen the moment it appears.
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    LaunchedEffect(Unit) { bringIntoViewRequester.bringIntoView() }
+
+    Column(
+        modifier = Modifier.bringIntoViewRequester(bringIntoViewRequester),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (state.qrBitmap != null) {
+            androidx.compose.foundation.Image(
+                bitmap = state.qrBitmap,
+                contentDescription = "QR code to open the pairing page",
+                modifier = Modifier.size(200.dp),
+            )
+            Text(text = "Scan with your phone's camera, or go to:")
+        } else {
+            // QR generation failed — fall back to plain text.
+            Text(text = "On your phone, go to:")
+        }
+        Text(text = "mx3launcher.odiousapps.com/credential_view.php")
+        Text(text = "and enter this code:")
+        // Large, bold, and letter-spaced — this needs to be read at normal
+        // TV sitting distance, not proofread up close like body text.
+        Text(
+            text = state.code,
+            fontSize = 56.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 8.sp,
         )
-        Text(text = "Scan with your phone's camera, or go to:")
-    } else {
-        // QR generation failed — fall back to plain text.
-        Text(text = "On your phone, go to:")
     }
-    Text(text = "mx3launcher.odiousapps.com/credential_view.php")
-    Text(text = "and enter this code:")
-    Text(text = state.code)
 }
 
 /**

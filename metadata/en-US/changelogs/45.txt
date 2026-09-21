@@ -3,3 +3,7 @@
   code) with your phone, the same way soundbar-wake pairing already works.
   This survives a full app uninstall/reinstall, which the old on-device
   backup could not reliably do.
+* Fixed the pairing QR code/code (soundbar wake, and the new settings
+  backup/restore above) sometimes appearing partly off the bottom of the
+  screen, and made the code itself much larger and bolder so it's easy to
+  read from normal TV viewing distance.
