@@ -29,9 +29,9 @@ $userId = require_login();
 
 const MAX_FIELDS = 20;
 const MAX_KEY_LENGTH = 64;
-// Generous enough for a full set of broker settings including a
-// base64-encoded self-signed certificate (a few KB), not just short strings.
-const MAX_VALUE_LENGTH = 8192;
+// Kept in sync with credential_start.php's own per-field limit - see the
+// comment there for why 32768 (not just "a few KB" of broker settings).
+const MAX_VALUE_LENGTH = 32768;
 
 // Every field a known app looks up by name, used to render both the
 // human-readable reference below the form and the template picker's

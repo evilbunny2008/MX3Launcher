@@ -1,0 +1,5 @@
+* Replaced local settings backup/restore with a new online backup: back up
+  or restore your settings by scanning a QR code (or entering a short
+  code) with your phone, the same way soundbar-wake pairing already works.
+  This survives a full app uninstall/reinstall, which the old on-device
+  backup could not reliably do.

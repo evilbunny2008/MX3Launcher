@@ -72,8 +72,17 @@ if($fieldsProvided)
     {
         $key = trim((string)$key);
         $value = (string)$value;
-        if($key === "" || strlen($key) > 64 || strlen($value) > 8192)
-            bad_request("Each field key must be 1-64 chars and its value at most 8192 chars");
+        // 32768: generous enough for a full set of broker settings
+        // including a base64-encoded self-signed certificate, but also
+        // for MX3 Launcher's full settings-backup blob (LauncherConfigSync.kt) -
+        // its hiddenPackages/appOrder are both full package-name lists,
+        // so a heavily-customised install with 100+ apps can otherwise
+        // exceed the old 8192 limit. Comfortably under the 65535-byte
+        // ceiling on the `text` columns (schema.sql) this ends up in,
+        // even accounting for this same value later being re-embedded
+        // (and re-escaped) inside a further JSON envelope.
+        if($key === "" || strlen($key) > 64 || strlen($value) > 32768)
+            bad_request("Each field key must be 1-64 chars and its value at most 32768 chars");
         $cleanFields[$key] = $value;
     }
     $payloadJson = json_encode(["app" => $app, "label" => $label, "fields" => $cleanFields]);

@@ -2,10 +2,6 @@ package com.odiousapps.mx3launcher.data
 
 import android.util.Log
 import org.json.JSONObject
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
-import java.nio.charset.StandardCharsets
 
 /**
  * OAuth-device-flow-style pairing, scaled down for a personal setup: the TV
@@ -45,7 +41,7 @@ object SoundbarPairing {
         return try {
             // Pull-mode request: asks to receive credentials, offers none.
             val body = JSONObject().put("app", APP_NAME)
-            val response = httpPost(START_URL, body.toString())
+            val response = PairingHttp.post(START_URL, body.toString())
             val json = JSONObject(response)
             if (!json.optBoolean("ok", false)) {
                 Log.w(TAG, "startPairing: $START_URL returned ok=false: $response")
@@ -66,7 +62,7 @@ object SoundbarPairing {
         return try {
             val encodedToken = java.net.URLEncoder.encode(token, "UTF-8")
             val requestUrl = "$STATUS_URL?token=$encodedToken"
-            val response = httpGet(requestUrl)
+            val response = PairingHttp.get(requestUrl)
             val json = JSONObject(response)
             when (json.optString("status")) {
                 "viewed" -> {
@@ -90,48 +86,4 @@ object SoundbarPairing {
         }
     }
 
-    /** Reads the response body on a 2xx status, or throws with the response
-     *  code, URL, and server-provided error body (if any) baked into the
-     *  message — so a caller's log line shows why a request failed instead
-     *  of a bare, contextless stream exception. */
-    private fun readResponseOrThrow(connection: HttpURLConnection): String {
-        val responseCode = connection.responseCode
-        if (responseCode in 200..299) {
-            return connection.inputStream.bufferedReader().use { it.readText() }
-        }
-        val errorBody = connection.errorStream
-            ?.use { it.readBytes().toString(Charsets.UTF_8) }
-            ?.trim()
-            ?.take(500)
-            .orEmpty()
-        val suffix = if (errorBody.isNotEmpty()) ": $errorBody" else ""
-        throw IOException("HTTP $responseCode from ${connection.url}$suffix")
-    }
-
-    private fun httpGet(url: String): String {
-        val connection = URL(url).openConnection() as HttpURLConnection
-        connection.connectTimeout = 5000
-        connection.readTimeout = 5000
-        connection.requestMethod = "GET"
-        return try {
-            readResponseOrThrow(connection)
-        } finally {
-            connection.disconnect()
-        }
-    }
-
-    private fun httpPost(url: String, body: String): String {
-        val connection = URL(url).openConnection() as HttpURLConnection
-        connection.connectTimeout = 5000
-        connection.readTimeout = 5000
-        connection.requestMethod = "POST"
-        connection.doOutput = true
-        connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-        connection.outputStream.use { it.write(body.toByteArray(StandardCharsets.UTF_8)) }
-        return try {
-            readResponseOrThrow(connection)
-        } finally {
-            connection.disconnect()
-        }
-    }
 }

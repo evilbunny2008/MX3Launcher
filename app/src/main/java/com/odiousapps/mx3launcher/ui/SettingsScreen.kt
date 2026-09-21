@@ -25,7 +25,7 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.odiousapps.mx3launcher.data.GRADIENT_PRESETS
-import com.odiousapps.mx3launcher.data.LauncherBackup
+import com.odiousapps.mx3launcher.data.LauncherConfigSync
 import com.odiousapps.mx3launcher.data.LauncherSettings
 import com.odiousapps.mx3launcher.data.SoundbarPairing
 import com.odiousapps.mx3launcher.data.ThemeMode
@@ -52,9 +52,7 @@ fun SettingsScreen(
 ) {
     BackHandler(onBack = onBack)
 
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var backupStatus by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -120,76 +118,24 @@ fun SettingsScreen(
             )
         }
 
-        // See LauncherBackup.kt for why MediaStore (not SAF) and per-backup timestamps.
+        // See LauncherConfigSync.kt: backup/restore go over the same
+        // mx3launcher.odiousapps.com credential relay SoundbarPairingSection
+        // uses below, rather than any on-device storage mechanism.
         SettingsSection(title = "Backup & restore") {
-            var availableBackups by remember { mutableStateOf(LauncherBackup.listBackups(context)) }
-            var showRestoreList by remember { mutableStateOf(false) }
+            Text(text = "Back up")
+            BackupSyncSection(settings = settings)
 
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(onClick = {
-                    scope.launch {
-                        val wrote = withContext(Dispatchers.IO) { LauncherBackup.writeBackup(context, settings) }
-                        backupStatus = if (wrote) {
-                            availableBackups = withContext(Dispatchers.IO) { LauncherBackup.listBackups(context) }
-                            "Backup saved to ${LauncherBackup.BACKUP_LOCATION_DESCRIPTION}"
-                        } else {
-                            "Backup failed"
-                        }
-                    }
-                }) {
-                    Text(text = "Back up settings")
-                }
-                Button(onClick = {
-                    scope.launch {
-                        availableBackups = withContext(Dispatchers.IO) { LauncherBackup.listBackups(context) }
-                        showRestoreList = true
-                    }
-                }) {
-                    Text(text = "Restore settings")
-                }
-                Button(onClick = {
-                    scope.launch {
-                        // Reset is just a restore to the same defaults used for
-                        // collectAsState's initial state in MainActivity.kt.
-                        onRestore(LauncherSettings(ThemeMode.SYSTEM, GRADIENT_PRESETS.first().id, 6, emptySet(), emptyList()))
-                        showRestoreList = false
-                        backupStatus = "Reset to defaults"
-                    }
-                }) {
-                    Text(text = "Reset to defaults")
-                }
-            }
+            Text(text = "Restore")
+            RestoreSyncSection(onRestore = onRestore)
 
-            if (showRestoreList) {
-                if (availableBackups.isEmpty()) {
-                    Text(text = "No backups found in ${LauncherBackup.BACKUP_LOCATION_DESCRIPTION}")
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        availableBackups.forEach { backup ->
-                            Button(onClick = {
-                                scope.launch {
-                                    val restored = withContext(Dispatchers.IO) { LauncherBackup.readBackup(context, backup.uri) }
-                                    if (restored != null) {
-                                        // Awaited, not fired-and-forgotten, so this status
-                                        // message reflects the write actually completing
-                                        // rather than just having been scheduled.
-                                        onRestore(restored)
-                                        backupStatus = "Restored from ${backup.displayLabel}"
-                                    } else {
-                                        backupStatus = "Restore failed — couldn't read ${backup.displayName}"
-                                    }
-                                    showRestoreList = false
-                                }
-                            }) {
-                                Text(text = backup.displayLabel)
-                            }
-                        }
-                    }
+            Button(onClick = {
+                scope.launch {
+                    // Reset is just a restore to the same defaults used for
+                    // collectAsState's initial state in MainActivity.kt.
+                    onRestore(LauncherSettings(ThemeMode.SYSTEM, GRADIENT_PRESETS.first().id, 6, emptySet(), emptyList()))
                 }
-            }
-
-            backupStatus?.let { status ->
-                Text(text = status)
+            }) {
+                Text(text = "Reset to defaults")
             }
         }
 
@@ -244,6 +190,30 @@ private sealed class PairingUiState {
         val qrBitmap: androidx.compose.ui.graphics.ImageBitmap?,
     ) : PairingUiState()
     data class Failed(val message: String) : PairingUiState()
+    // Only used by BackupSyncSection/RestoreSyncSection below — a transient
+    // success message shown alongside the next "start again" button, unlike
+    // SoundbarPairingSection, whose success instead flips settings into a
+    // persistent "Paired ✓" state.
+    data class Done(val message: String) : PairingUiState()
+}
+
+/** The QR/code display shared by every PairingUiState.ShowingCode, below. */
+@Composable
+private fun PairingCodeDisplay(state: PairingUiState.ShowingCode) {
+    if (state.qrBitmap != null) {
+        androidx.compose.foundation.Image(
+            bitmap = state.qrBitmap,
+            contentDescription = "QR code to open the pairing page",
+            modifier = Modifier.size(200.dp),
+        )
+        Text(text = "Scan with your phone's camera, or go to:")
+    } else {
+        // QR generation failed — fall back to plain text.
+        Text(text = "On your phone, go to:")
+    }
+    Text(text = "mx3launcher.odiousapps.com/credential_view.php")
+    Text(text = "and enter this code:")
+    Text(text = state.code)
 }
 
 /**
@@ -327,21 +297,128 @@ private fun SoundbarPairingSection(
         is PairingUiState.Starting -> {
             Text(text = "Starting...")
         }
-        is PairingUiState.ShowingCode -> {
-            if (state.qrBitmap != null) {
-                androidx.compose.foundation.Image(
-                    bitmap = state.qrBitmap,
-                    contentDescription = "QR code to open the pairing page",
-                    modifier = Modifier.size(200.dp),
-                )
-                Text(text = "Scan with your phone's camera, or go to:")
-            } else {
-                // QR generation failed — fall back to plain text.
-                Text(text = "On your phone, go to:")
-            }
-            Text(text = "mx3launcher.odiousapps.com/credential_view.php")
-            Text(text = "and enter this code:")
-            Text(text = state.code)
+        is PairingUiState.ShowingCode -> PairingCodeDisplay(state)
+        is PairingUiState.Done -> {
+            // SoundbarPairingSection never produces this state — success
+            // flips settings into the "Paired ✓" branch above instead.
         }
+    }
+}
+
+/**
+ * Same device-code UI as SoundbarPairingSection above, driving a "push"
+ * share of this device's current settings (see LauncherConfigSync.kt).
+ * Unlike soundbar pairing there's no persistent "paired" state to fall
+ * back to afterwards — success is shown as a transient message, then the
+ * button is offered again for the next backup.
+ */
+@Composable
+private fun BackupSyncSection(settings: LauncherSettings) {
+    var state by remember { mutableStateOf<PairingUiState>(PairingUiState.Idle) }
+    val scope = rememberCoroutineScope()
+
+    when (val s = state) {
+        is PairingUiState.Idle, is PairingUiState.Failed, is PairingUiState.Done -> {
+            if (s is PairingUiState.Failed) Text(text = s.message)
+            if (s is PairingUiState.Done) Text(text = s.message)
+            Button(onClick = {
+                state = PairingUiState.Starting
+                scope.launch {
+                    val session = withContext(Dispatchers.IO) { LauncherConfigSync.startBackup(settings) }
+                    if (session == null) {
+                        state = PairingUiState.Failed("Couldn't start backup — check the server is reachable")
+                        return@launch
+                    }
+                    val qrBitmap = withContext(Dispatchers.Default) { generateQrCodeBitmap(session.approveUrl) }
+                    state = PairingUiState.ShowingCode(session.code, session.token, qrBitmap)
+
+                    val deadlineMs = System.currentTimeMillis() + session.expiresInSeconds * 1000L
+                    while (System.currentTimeMillis() < deadlineMs) {
+                        delay(3000.milliseconds)
+                        when (withContext(Dispatchers.IO) { LauncherConfigSync.pollBackup(session.token) }) {
+                            LauncherConfigSync.BackupPollResult.Saved -> {
+                                state = PairingUiState.Done("Backup saved to your account")
+                                return@launch
+                            }
+                            LauncherConfigSync.BackupPollResult.Expired -> {
+                                state = PairingUiState.Failed("Code expired — try again")
+                                return@launch
+                            }
+                            is LauncherConfigSync.BackupPollResult.Error -> {
+                                // Keep polling; don't give up on a transient blip.
+                            }
+                            LauncherConfigSync.BackupPollResult.Pending -> {
+                                // Keep waiting.
+                            }
+                        }
+                    }
+                    state = PairingUiState.Failed("Code expired — try again")
+                }
+            }) {
+                Text(text = "Back up settings")
+            }
+        }
+        is PairingUiState.Starting -> Text(text = "Starting...")
+        is PairingUiState.ShowingCode -> PairingCodeDisplay(s)
+    }
+}
+
+/**
+ * Same shape as BackupSyncSection above, but a "pull" share: this device
+ * has nothing of its own, and receives whichever saved preset the account
+ * holder picks at credential_view.php (see LauncherConfigSync.kt).
+ */
+@Composable
+private fun RestoreSyncSection(onRestore: suspend (LauncherSettings) -> Unit) {
+    var state by remember { mutableStateOf<PairingUiState>(PairingUiState.Idle) }
+    val scope = rememberCoroutineScope()
+
+    when (val s = state) {
+        is PairingUiState.Idle, is PairingUiState.Failed, is PairingUiState.Done -> {
+            if (s is PairingUiState.Failed) Text(text = s.message)
+            if (s is PairingUiState.Done) Text(text = s.message)
+            Button(onClick = {
+                state = PairingUiState.Starting
+                scope.launch {
+                    val session = withContext(Dispatchers.IO) { LauncherConfigSync.startRestore() }
+                    if (session == null) {
+                        state = PairingUiState.Failed("Couldn't start restore — check the server is reachable")
+                        return@launch
+                    }
+                    val qrBitmap = withContext(Dispatchers.Default) { generateQrCodeBitmap(session.approveUrl) }
+                    state = PairingUiState.ShowingCode(session.code, session.token, qrBitmap)
+
+                    val deadlineMs = System.currentTimeMillis() + session.expiresInSeconds * 1000L
+                    while (System.currentTimeMillis() < deadlineMs) {
+                        delay(3000.milliseconds)
+                        when (val result = withContext(Dispatchers.IO) { LauncherConfigSync.pollRestore(session.token) }) {
+                            is LauncherConfigSync.RestorePollResult.Restored -> {
+                                // Awaited, not fired-and-forgotten, so the
+                                // "Restored" message below reflects the
+                                // settings write actually completing.
+                                onRestore(result.settings)
+                                state = PairingUiState.Done("Settings restored")
+                                return@launch
+                            }
+                            is LauncherConfigSync.RestorePollResult.Expired -> {
+                                state = PairingUiState.Failed("Code expired — try again")
+                                return@launch
+                            }
+                            is LauncherConfigSync.RestorePollResult.Error -> {
+                                // Keep polling; don't give up on a transient blip.
+                            }
+                            LauncherConfigSync.RestorePollResult.Pending -> {
+                                // Keep waiting.
+                            }
+                        }
+                    }
+                    state = PairingUiState.Failed("Code expired — try again")
+                }
+            }) {
+                Text(text = "Restore settings")
+            }
+        }
+        is PairingUiState.Starting -> Text(text = "Starting...")
+        is PairingUiState.ShowingCode -> PairingCodeDisplay(s)
     }
 }

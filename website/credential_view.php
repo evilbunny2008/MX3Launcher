@@ -29,6 +29,7 @@ $userId = require_login();
 
 $error = "";
 $revealed = null; // ["app"=>, "label"=>, "fields"=>[...]] - push mode, once shown
+$savedAsPreset = false; // true once a push-mode reveal's data has also been saved below
 $attached = false; // true once a preset has been attached - pull mode
 $prefilledCode = strtoupper(trim($_GET["code"] ?? ""));
 
@@ -63,7 +64,14 @@ if($_SERVER["REQUEST_METHOD"] === "POST")
             } elseif($share["payload_json"] !== null) {
                 // Push mode - reveal now, regardless of any preset_id
                 // that might have been posted (there's nothing to pick
-                // here).
+                // here). Also saved as a reusable saved_credentials preset
+                // in the same step (not a separate opt-in action), so a
+                // sending device that polls credential_status.php and sees
+                // "viewed" can rely on that meaning it was actually kept,
+                // not just glanced at - e.g. MX3 Launcher's settings-backup
+                // flow (LauncherConfigSync.kt) needs that guarantee, and
+                // any human-readable use of the reveal below still works
+                // exactly as before.
                 $stmt = db()->prepare(
                     "UPDATE credential_shares SET viewed_at = NOW(), viewed_by_user_id = ? WHERE code = ?"
                 );
@@ -71,9 +79,22 @@ if($_SERVER["REQUEST_METHOD"] === "POST")
 
                 $decoded = json_decode($share["payload_json"], true);
                 if(is_array($decoded))
+                {
                     $revealed = $decoded;
-                else
+                    $stmt = db()->prepare(
+                        "INSERT INTO saved_credentials (user_id, app_name, label, fields_json, created_at)
+                         VALUES (?, ?, ?, ?, NOW())"
+                    );
+                    $stmt->execute([
+                        $userId,
+                        (string)($decoded["app"] ?? ""),
+                        (string)($decoded["label"] ?? ""),
+                        json_encode($decoded["fields"] ?? new stdClass()),
+                    ]);
+                    $savedAsPreset = true;
+                } else {
                     $error = "That entry's data was malformed.";
+                }
             } else {
                 // Pull mode - attach the chosen preset, owned by this user.
                 if($presetId === 0)
@@ -171,7 +192,10 @@ $csrfToken = generate_csrf_token();
                 <tr><td><?= htmlspecialchars($key) ?></td><td><?= htmlspecialchars($value) ?></td></tr>
             <?php endforeach; ?>
         </table>
-        <p class="message notice">Copy these into whatever needs them now - this page won't show them again.</p>
+        <p class="message notice">
+            Copy these into whatever needs them now if you want to - this page won't show them again.
+            <?php if($savedAsPreset): ?>They've also been saved to <a href="/manage_credentials.php">your saved credentials</a> for later.<?php endif; ?>
+        </p>
     <?php elseif($attached): ?>
         <p class="message notice">Sent. The requesting device should pick this up within a few seconds.</p>
     <?php elseif($isPullMode): ?>
