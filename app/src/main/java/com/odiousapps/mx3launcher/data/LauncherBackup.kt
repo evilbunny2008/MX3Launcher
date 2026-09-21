@@ -65,12 +65,24 @@ object LauncherBackup {
         return json.toString(2)
     }
 
+    private val KNOWN_KEYS = listOf(KEY_THEME_MODE, KEY_GRADIENT_ID, KEY_COLUMNS, KEY_HIDDEN_PACKAGES, KEY_APP_ORDER)
+
     /** Returns null (rather than throwing) on malformed input, so a
      *  hand-edited or corrupted backup fails the restore cleanly instead
-     *  of crashing the launcher. */
+     *  of crashing the launcher.
+     *
+     *  Every field below is read leniently (opt* with a default) so a
+     *  backup from an older app version — missing a key added later —
+     *  still restores instead of failing outright. That same leniency
+     *  means a JSON object with none of our keys (e.g. an empty "{}" from
+     *  a truncated or otherwise-not-really-a-backup file) would otherwise
+     *  parse "successfully" into all-default settings with no way to tell
+     *  that apart from a real restore — so that case is rejected explicitly
+     *  up front instead. */
     fun fromJson(raw: String): LauncherSettings? {
         return try {
             val json = JSONObject(raw)
+            if (KNOWN_KEYS.none { json.has(it) }) return null
             val themeMode = json.optString(KEY_THEME_MODE, ThemeMode.SYSTEM.name)
                 .let { name -> runCatching { ThemeMode.valueOf(name) }.getOrDefault(ThemeMode.SYSTEM) }
             val gradientId = json.optString(KEY_GRADIENT_ID, GRADIENT_PRESETS.first().id)

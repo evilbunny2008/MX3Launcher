@@ -1,0 +1,2 @@
+* No functional changes - this update just replaces the Play Store
+  listing screenshots.

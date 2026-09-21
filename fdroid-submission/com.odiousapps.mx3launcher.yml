@@ -14,9 +14,9 @@ Binaries:
   https://github.com/evilbunny2008/MX3Launcher/releases/download/v%v/MX3Launcher-%v.apk
 
 Builds:
-  - versionName: 0.0.42
-    versionCode: 42
-    commit: ea612e2dbf1aebd34d374d1d1e56ac856de97109
+  - versionName: 0.0.43
+    versionCode: 43
+    commit: a236a762a497a26d8435b0d21ed5767f3058df4d
     subdir: app
     gradle:
       - yes
@@ -25,5 +25,5 @@ AllowedAPKSigningKeys: 6e194e3a58ba968613afc235136f63fb845e8aa0d718e70925cac04a9
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.0.42
-CurrentVersionCode: 42
+CurrentVersion: 0.0.43
+CurrentVersionCode: 43

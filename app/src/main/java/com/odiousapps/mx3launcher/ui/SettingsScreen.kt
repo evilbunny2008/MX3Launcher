@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,7 +44,7 @@ fun SettingsScreen(
     onGradientChange: (String) -> Unit,
     onColumnsChange: (Int) -> Unit,
     onOpenAppDisplaySettings: () -> Unit,
-    onRestore: (LauncherSettings) -> Unit,
+    onRestore: suspend (LauncherSettings) -> Unit,
     onSoundbarWakeEnabledChange: (Boolean) -> Unit,
     onSoundbarWakeUrlChange: (String) -> Unit,
     onSoundbarWakeSecretChange: (String) -> Unit,
@@ -52,6 +53,7 @@ fun SettingsScreen(
     BackHandler(onBack = onBack)
 
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var backupStatus by remember { mutableStateOf<String?>(null) }
 
     Column(
@@ -125,27 +127,34 @@ fun SettingsScreen(
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(onClick = {
-                    backupStatus = if (LauncherBackup.writeBackup(context, settings)) {
-                        availableBackups = LauncherBackup.listBackups(context)
-                        "Backup saved to ${LauncherBackup.BACKUP_LOCATION_DESCRIPTION}"
-                    } else {
-                        "Backup failed"
+                    scope.launch {
+                        val wrote = withContext(Dispatchers.IO) { LauncherBackup.writeBackup(context, settings) }
+                        backupStatus = if (wrote) {
+                            availableBackups = withContext(Dispatchers.IO) { LauncherBackup.listBackups(context) }
+                            "Backup saved to ${LauncherBackup.BACKUP_LOCATION_DESCRIPTION}"
+                        } else {
+                            "Backup failed"
+                        }
                     }
                 }) {
                     Text(text = "Back up settings")
                 }
                 Button(onClick = {
-                    availableBackups = LauncherBackup.listBackups(context)
-                    showRestoreList = true
+                    scope.launch {
+                        availableBackups = withContext(Dispatchers.IO) { LauncherBackup.listBackups(context) }
+                        showRestoreList = true
+                    }
                 }) {
                     Text(text = "Restore settings")
                 }
                 Button(onClick = {
-                    // Reset is just a restore to the same defaults used for
-                    // collectAsState's initial state in MainActivity.kt.
-                    onRestore(LauncherSettings(ThemeMode.SYSTEM, GRADIENT_PRESETS.first().id, 6, emptySet(), emptyList()))
-                    showRestoreList = false
-                    backupStatus = "Reset to defaults"
+                    scope.launch {
+                        // Reset is just a restore to the same defaults used for
+                        // collectAsState's initial state in MainActivity.kt.
+                        onRestore(LauncherSettings(ThemeMode.SYSTEM, GRADIENT_PRESETS.first().id, 6, emptySet(), emptyList()))
+                        showRestoreList = false
+                        backupStatus = "Reset to defaults"
+                    }
                 }) {
                     Text(text = "Reset to defaults")
                 }
@@ -158,14 +167,19 @@ fun SettingsScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         availableBackups.forEach { backup ->
                             Button(onClick = {
-                                val restored = LauncherBackup.readBackup(context, backup.uri)
-                                if (restored != null) {
-                                    onRestore(restored)
-                                    backupStatus = "Restored from ${backup.displayLabel}"
-                                } else {
-                                    backupStatus = "Restore failed — couldn't read ${backup.displayName}"
+                                scope.launch {
+                                    val restored = withContext(Dispatchers.IO) { LauncherBackup.readBackup(context, backup.uri) }
+                                    if (restored != null) {
+                                        // Awaited, not fired-and-forgotten, so this status
+                                        // message reflects the write actually completing
+                                        // rather than just having been scheduled.
+                                        onRestore(restored)
+                                        backupStatus = "Restored from ${backup.displayLabel}"
+                                    } else {
+                                        backupStatus = "Restore failed — couldn't read ${backup.displayName}"
+                                    }
+                                    showRestoreList = false
                                 }
-                                showRestoreList = false
                             }) {
                                 Text(text = backup.displayLabel)
                             }

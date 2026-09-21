@@ -174,7 +174,10 @@ private fun LauncherApp(screenState: MutableState<Screen>) {
                 onGradientChange = { id -> scope.launch { LauncherPreferences.setGradient(context, id) } },
                 onColumnsChange = { columns -> scope.launch { LauncherPreferences.setColumns(context, columns) } },
                 onOpenAppDisplaySettings = { screen = Screen.AppDisplaySettings },
-                onRestore = { restored -> scope.launch { LauncherPreferences.restoreAll(context, restored) } },
+                // Suspends until the DataStore write actually completes, so
+                // SettingsScreen's "Restored from ..." status is trustworthy
+                // rather than reported the instant the write is scheduled.
+                onRestore = { restored -> LauncherPreferences.restoreAll(context, restored) },
                 onSoundbarWakeEnabledChange = { enabled ->
                     scope.launch { LauncherPreferences.setSoundbarWakeEnabled(context, enabled) }
                 },
