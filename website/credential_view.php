@@ -315,7 +315,7 @@ $csrfToken = generate_csrf_token();
         </p>
         <?php if(empty($presets) && $requestedApp === BACKUP_APP_NAME): ?>
             <p class="message error">
-                You don't have any settings backups yet.
+                You don't have any config backups yet.
                 Use "Back up settings" on the launcher first, then come back to this code.
             </p>
         <?php elseif(empty($presets)): ?>

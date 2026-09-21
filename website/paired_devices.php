@@ -4,8 +4,8 @@
  * -------------------
  * Lists this account's device_tokens - long-lived tokens minted via the
  * DEVICE_PAIR_APP_NAME pairing flow in credential_view.php, which let a
- * device back up/restore its MX3 Launcher settings directly (device_backup.php
- * etc.) without a human approving each individual call. This is the one
+ * device back up/restore its config directly (device_backup.php etc.)
+ * without a human approving each individual call. This is the one
  * place to see that a device still holds such a token, and to revoke it
  * (e.g. the device was lost/stolen, or you just don't trust it any more) -
  * revoking here takes effect immediately, the device gets no warning.
@@ -82,7 +82,7 @@ $csrfToken = generate_csrf_token();
 <body>
     <h2>Your paired devices</h2>
     <p class="hint">
-        Each of these can back up and restore its MX3 Launcher settings on its own, without
+        Each of these can back up and restore its config on its own, without
         approving each individual call here. Revoke one if you no longer trust it - the device
         gets no warning, its next backup/restore attempt will simply fail until re-paired.
     </p>
