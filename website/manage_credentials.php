@@ -50,6 +50,14 @@ $KNOWN_APP_FIELDS = [
     "MX3Launcher" => [
         ["key" => "URL", "required" => true],
         ["key" => "Secret", "required" => true],
+        [
+            "key" => "ir_codes_to_send", "required" => false,
+            "hint" => "IR code(s) wake_soundbar.php sends, \"|\"-separated; default P6000_ON"
+        ],
+        [
+            "key" => "check_current", "required" => false,
+            "hint" => "true/false, default true - checks the socket's current draw before toggling; false sends the toggle unconditionally"
+        ],
     ],
     "Z2M Dash" => [
         ["key" => "Hostname", "required" => true],

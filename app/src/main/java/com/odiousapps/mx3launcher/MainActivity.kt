@@ -179,6 +179,8 @@ private fun LauncherApp(screenState: MutableState<Screen>) {
                 soundbarWakeEnabled = settings.soundbarWakeEnabled,
                 soundbarWakeUrl = settings.soundbarWakeUrl,
                 soundbarWakeSecret = settings.soundbarWakeSecret,
+                soundbarIrCodesToSend = settings.soundbarIrCodesToSend,
+                soundbarCheckCurrent = settings.soundbarCheckCurrent,
             )
 
             Screen.Settings -> SettingsScreen(
@@ -198,8 +200,10 @@ private fun LauncherApp(screenState: MutableState<Screen>) {
                 onSoundbarWakeEnabledChange = { enabled ->
                     scope.launch { LauncherPreferences.setSoundbarWakeEnabled(context, enabled) }
                 },
-                onSoundbarWakePairingChange = { url, secret ->
-                    scope.launch { LauncherPreferences.setSoundbarWakePairing(context, url, secret) }
+                onSoundbarWakePairingChange = { url, secret, irCodesToSend, checkCurrent ->
+                    scope.launch {
+                        LauncherPreferences.setSoundbarWakePairing(context, url, secret, irCodesToSend, checkCurrent)
+                    }
                 },
                 onBack = { screen = Screen.Home },
             )

@@ -39,7 +39,13 @@ data class LauncherSettings(
     val soundbarWakeEnabled: Boolean = false,
     val soundbarWakeUrl: String = "",
     val soundbarWakeSecret: String = "",
+    val soundbarIrCodesToSend: String = DEFAULT_SOUNDBAR_IR_CODES,
+    val soundbarCheckCurrent: Boolean = true,
 )
+
+// wake_soundbar.php's default IR code for the Philips 6000 soundbar this was
+// built for - see SoundbarPairing.kt for where a paired preset can override it.
+const val DEFAULT_SOUNDBAR_IR_CODES = "P6000_ON"
 
 object LauncherPreferences {
 
@@ -51,6 +57,8 @@ object LauncherPreferences {
     private val KEY_SOUNDBAR_WAKE_ENABLED = booleanPreferencesKey("soundbar_wake_enabled")
     private val KEY_SOUNDBAR_WAKE_URL = stringPreferencesKey("soundbar_wake_url")
     private val KEY_SOUNDBAR_WAKE_SECRET = stringPreferencesKey("soundbar_wake_secret")
+    private val KEY_SOUNDBAR_IR_CODES = stringPreferencesKey("soundbar_ir_codes_to_send")
+    private val KEY_SOUNDBAR_CHECK_CURRENT = booleanPreferencesKey("soundbar_check_current")
     // Deliberately not a LauncherSettings field, and not touched by
     // observe()/restoreAll() below - this identifies *this device install*
     // to the config-sync server (see LauncherConfigSync.kt's pairDevice()),
@@ -77,6 +85,8 @@ object LauncherPreferences {
                 soundbarWakeEnabled = prefs[KEY_SOUNDBAR_WAKE_ENABLED] ?: false,
                 soundbarWakeUrl = prefs[KEY_SOUNDBAR_WAKE_URL] ?: "",
                 soundbarWakeSecret = prefs[KEY_SOUNDBAR_WAKE_SECRET] ?: "",
+                soundbarIrCodesToSend = prefs[KEY_SOUNDBAR_IR_CODES] ?: DEFAULT_SOUNDBAR_IR_CODES,
+                soundbarCheckCurrent = prefs[KEY_SOUNDBAR_CHECK_CURRENT] ?: true,
             )
         }
 
@@ -115,11 +125,19 @@ object LauncherPreferences {
     /** Used once pairing resolves, instead of separate setSoundbarWakeUrl()/
      *  setSoundbarWakeSecret() calls - those are two independent DataStore
      *  transactions, so there's a real window between them where only one
-     *  of the two is set. This writes both in one transaction instead. */
-    suspend fun setSoundbarWakePairing(context: Context, url: String, secret: String) {
+     *  of the two is set. This writes all four in one transaction instead. */
+    suspend fun setSoundbarWakePairing(
+        context: Context,
+        url: String,
+        secret: String,
+        irCodesToSend: String,
+        checkCurrent: Boolean,
+    ) {
         context.dataStore.edit { prefs ->
             prefs[KEY_SOUNDBAR_WAKE_URL] = url
             prefs[KEY_SOUNDBAR_WAKE_SECRET] = secret
+            prefs[KEY_SOUNDBAR_IR_CODES] = irCodesToSend
+            prefs[KEY_SOUNDBAR_CHECK_CURRENT] = checkCurrent
         }
     }
 
@@ -143,6 +161,8 @@ object LauncherPreferences {
             prefs[KEY_SOUNDBAR_WAKE_ENABLED] = settings.soundbarWakeEnabled
             prefs[KEY_SOUNDBAR_WAKE_URL] = settings.soundbarWakeUrl
             prefs[KEY_SOUNDBAR_WAKE_SECRET] = settings.soundbarWakeSecret
+            prefs[KEY_SOUNDBAR_IR_CODES] = settings.soundbarIrCodesToSend
+            prefs[KEY_SOUNDBAR_CHECK_CURRENT] = settings.soundbarCheckCurrent
         }
     }
 }

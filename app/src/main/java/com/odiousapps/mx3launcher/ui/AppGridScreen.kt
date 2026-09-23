@@ -50,6 +50,8 @@ fun AppGridScreen(
     soundbarWakeEnabled: Boolean,
     soundbarWakeUrl: String,
     soundbarWakeSecret: String,
+    soundbarIrCodesToSend: String,
+    soundbarCheckCurrent: Boolean,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = rememberCoroutineScope()
@@ -82,7 +84,12 @@ fun AppGridScreen(
                         scope.launch {
                             if (soundbarWakeEnabled && soundbarWakeUrl.isNotBlank()) {
                                 val error = withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                    checkSoundbarWake(soundbarWakeUrl, soundbarWakeSecret)
+                                    checkSoundbarWake(
+                                        soundbarWakeUrl,
+                                        soundbarWakeSecret,
+                                        soundbarIrCodesToSend,
+                                        soundbarCheckCurrent,
+                                    )
                                 }
                                 if (error != null) {
                                     pendingWakeFailure = error
@@ -237,13 +244,29 @@ private const val TAG = "SoundbarWake"
 // blindly could turn an already-on soundbar off). Blocking (awaited via
 // Dispatchers.IO) so the caller can decide whether to show a dialog or
 // launch; returns null on success, else a failure message.
-private fun checkSoundbarWake(url: String, secret: String): String? {
-    val fullUrl = if (secret.isBlank()) {
+private fun checkSoundbarWake(
+    url: String,
+    secret: String,
+    irCodesToSend: String,
+    checkCurrent: Boolean,
+): String? {
+    // wake_soundbar.php now reads ir_codes_to_send and check_current from the
+    // request instead of defaulting them server-side, so both must always be
+    // sent alongside the key. wake_soundbar.php compares check_current against
+    // the literal string "true", not a loosely-typed boolean.
+    val params = mutableListOf<String>()
+    if (secret.isNotBlank()) {
+        params += "key=" + java.net.URLEncoder.encode(secret, "UTF-8")
+    }
+    if (irCodesToSend.isNotBlank()) {
+        params += "ir_codes_to_send=" + java.net.URLEncoder.encode(irCodesToSend, "UTF-8")
+    }
+    params += "check_current=" + if (checkCurrent) "true" else "false"
+    val fullUrl = if (params.isEmpty()) {
         url
     } else {
         val separator = if (url.contains("?")) "&" else "?"
-        val encodedSecret = java.net.URLEncoder.encode(secret, "UTF-8")
-        "$url${separator}key=$encodedSecret"
+        "$url$separator${params.joinToString("&")}"
     }
 
     return try {

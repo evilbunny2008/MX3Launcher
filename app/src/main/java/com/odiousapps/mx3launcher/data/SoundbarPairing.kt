@@ -33,7 +33,12 @@ object SoundbarPairing {
     sealed class PollResult {
         object Pending : PollResult()
         object Expired : PollResult()
-        data class Approved(val url: String, val secret: String) : PollResult()
+        data class Approved(
+            val url: String,
+            val secret: String,
+            val irCodesToSend: String,
+            val checkCurrent: Boolean,
+        ) : PollResult()
         data class Error(val message: String) : PollResult()
     }
 
@@ -69,11 +74,24 @@ object SoundbarPairing {
                     val fields = json.optJSONObject("fields") ?: JSONObject()
                     val url = fields.optString("URL")
                     val secret = fields.optString("Secret")
+                    // Optional - most presets won't set it, so fall back to the
+                    // same default wake_soundbar.php itself defaults to.
+                    val irCodesToSend = fields.optString("ir_codes_to_send").ifBlank { DEFAULT_SOUNDBAR_IR_CODES }
+                    // Same "absent/blank means default" treatment as ir_codes_to_send -
+                    // most presets won't set it, and the safe default is true (see
+                    // checkSoundbarWake()'s comment for why skipping this check is risky).
+                    val checkCurrentRaw = fields.optString("check_current")
+                    val checkCurrent = checkCurrentRaw.isBlank() || checkCurrentRaw.equals("true", ignoreCase = true)
                     if (url.isBlank() || secret.isBlank()) {
                         // Don't silently pair with a blank URL/secret.
                         PollResult.Error("Saved preset is missing a URL or Secret field")
                     } else {
-                        PollResult.Approved(url = url, secret = secret)
+                        PollResult.Approved(
+                            url = url,
+                            secret = secret,
+                            irCodesToSend = irCodesToSend,
+                            checkCurrent = checkCurrent,
+                        )
                     }
                 }
                 "pending" -> PollResult.Pending

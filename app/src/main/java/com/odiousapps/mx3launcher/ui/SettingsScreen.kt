@@ -52,7 +52,7 @@ fun SettingsScreen(
     configSyncDeviceToken: String,
     onConfigSyncDeviceTokenChange: (String) -> Unit,
     onSoundbarWakeEnabledChange: (Boolean) -> Unit,
-    onSoundbarWakePairingChange: (url: String, secret: String) -> Unit,
+    onSoundbarWakePairingChange: (url: String, secret: String, irCodesToSend: String, checkCurrent: Boolean) -> Unit,
     onBack: () -> Unit,
 ) {
     BackHandler(onBack = onBack)
@@ -252,7 +252,7 @@ private fun PairingCodeDisplay(state: PairingUiState.ShowingCode) {
 @Composable
 private fun SoundbarPairingSection(
     settings: LauncherSettings,
-    onSoundbarWakePairingChange: (url: String, secret: String) -> Unit,
+    onSoundbarWakePairingChange: (url: String, secret: String, irCodesToSend: String, checkCurrent: Boolean) -> Unit,
 ) {
     val isPaired = settings.soundbarWakeUrl.isNotBlank() && settings.soundbarWakeSecret.isNotBlank()
     var pairingState by remember { mutableStateOf<PairingUiState>(PairingUiState.Idle) }
@@ -261,7 +261,7 @@ private fun SoundbarPairingSection(
     if (isPaired) {
         Text(text = "Paired ✓")
         Button(onClick = {
-            onSoundbarWakePairingChange("", "")
+            onSoundbarWakePairingChange("", "", com.odiousapps.mx3launcher.data.DEFAULT_SOUNDBAR_IR_CODES, true)
             pairingState = PairingUiState.Idle
         }) {
             Text(text = "Forget pairing")
@@ -295,7 +295,12 @@ private fun SoundbarPairingSection(
                             SoundbarPairing.pollPairing(session.token)
                         }) {
                             is SoundbarPairing.PollResult.Approved -> {
-                                onSoundbarWakePairingChange(result.url, result.secret)
+                                onSoundbarWakePairingChange(
+                                    result.url,
+                                    result.secret,
+                                    result.irCodesToSend,
+                                    result.checkCurrent,
+                                )
                                 pairingState = PairingUiState.Idle
                                 return@launch
                             }
