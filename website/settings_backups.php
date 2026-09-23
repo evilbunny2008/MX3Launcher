@@ -38,7 +38,7 @@ function backup_filename(string $label): string
 {
     $slug = preg_replace('/[^A-Za-z0-9_-]+/', '_', $label);
     $slug = trim($slug, '_');
-    return ($slug !== "" ? $slug : "mx3launcher_settings") . ".json";
+    return ($slug !== "" ? $slug : "config_backup") . ".json";
 }
 
 // Handled before any HTML output - this response is a file, not a page.

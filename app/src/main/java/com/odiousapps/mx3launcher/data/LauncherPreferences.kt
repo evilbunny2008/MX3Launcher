@@ -112,6 +112,17 @@ object LauncherPreferences {
         context.dataStore.edit { it[KEY_SOUNDBAR_WAKE_SECRET] = secret }
     }
 
+    /** Used once pairing resolves, instead of separate setSoundbarWakeUrl()/
+     *  setSoundbarWakeSecret() calls - those are two independent DataStore
+     *  transactions, so there's a real window between them where only one
+     *  of the two is set. This writes both in one transaction instead. */
+    suspend fun setSoundbarWakePairing(context: Context, url: String, secret: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_SOUNDBAR_WAKE_URL] = url
+            prefs[KEY_SOUNDBAR_WAKE_SECRET] = secret
+        }
+    }
+
     fun observeConfigSyncDeviceToken(context: Context): Flow<String> =
         context.dataStore.data.map { it[KEY_CONFIG_SYNC_DEVICE_TOKEN] ?: "" }
 

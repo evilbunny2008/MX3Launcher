@@ -327,13 +327,22 @@ $csrfToken = generate_csrf_token();
             <form method="post">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                 <input type="hidden" name="code" value="<?= htmlspecialchars($prefilledCode) ?>">
-                <select name="preset_id">
-                    <?php foreach($presets as $preset): ?>
-                        <option value="<?= (int)$preset["id"] ?>">
-                            <?= htmlspecialchars($preset["label"]) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <?php if(count($presets) === 1): ?>
+                    <?php // Only one to send - a one-item dropdown has nothing to
+                    // actually choose between, so skip straight to a plain
+                    // confirm button, same style as the remembered-default
+                    // "Approve" screen above. ?>
+                    <input type="hidden" name="preset_id" value="<?= (int)$presets[0]["id"] ?>">
+                    <p>Send &ldquo;<?= htmlspecialchars($presets[0]["label"]) ?>&rdquo;?</p>
+                <?php else: ?>
+                    <select name="preset_id">
+                        <?php foreach($presets as $preset): ?>
+                            <option value="<?= (int)$preset["id"] ?>">
+                                <?= htmlspecialchars($preset["label"]) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php endif; ?>
                 <label class="remember">
                     <input type="checkbox" name="remember" value="1">
                     Remember this choice for <?= htmlspecialchars($requestedApp ?: "this app") ?> -

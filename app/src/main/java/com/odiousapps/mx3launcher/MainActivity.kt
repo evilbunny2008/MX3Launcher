@@ -146,16 +146,27 @@ private fun LauncherApp(screenState: MutableState<Screen>) {
     // entries at display time, so the grid looks fine regardless, but backups would
     // keep old references forever). Prune once installedApps is known; the
     // inequality check avoids a write-triggers-reload-triggers-write loop.
+    //
+    // Writes via the targeted setAppOrder/setHiddenPackages below, NOT
+    // restoreAll(settings.copy(...)) - this effect re-runs on every settings
+    // change (it's keyed on `settings`, not just installedApps), so an
+    // in-flight instance can easily still be holding a stale `settings`
+    // snapshot from before some unrelated field (e.g. soundbar pairing's
+    // URL/secret, or a gradient/theme change) was written elsewhere. A full
+    // restoreAll() from that stale snapshot landing afterwards would silently
+    // revert that unrelated write back to blank - this actually happened
+    // with soundbar pairing appearing to succeed then revert. Per-key
+    // setters can't clobber fields they don't touch, race or not.
     LaunchedEffect(installedApps, settings) {
         if (installedApps.isEmpty()) return@LaunchedEffect
         val installedPackages = installedApps.map { it.packageName }.toSet()
         val prunedOrder = settings.appOrder.filter { it in installedPackages }
         val prunedHidden = settings.hiddenPackages.filter { it in installedPackages }.toSet()
-        if (prunedOrder != settings.appOrder || prunedHidden != settings.hiddenPackages) {
-            LauncherPreferences.restoreAll(
-                context,
-                settings.copy(appOrder = prunedOrder, hiddenPackages = prunedHidden),
-            )
+        if (prunedOrder != settings.appOrder) {
+            LauncherPreferences.setAppOrder(context, prunedOrder)
+        }
+        if (prunedHidden != settings.hiddenPackages) {
+            LauncherPreferences.setHiddenPackages(context, prunedHidden)
         }
     }
 
@@ -187,11 +198,8 @@ private fun LauncherApp(screenState: MutableState<Screen>) {
                 onSoundbarWakeEnabledChange = { enabled ->
                     scope.launch { LauncherPreferences.setSoundbarWakeEnabled(context, enabled) }
                 },
-                onSoundbarWakeUrlChange = { url ->
-                    scope.launch { LauncherPreferences.setSoundbarWakeUrl(context, url) }
-                },
-                onSoundbarWakeSecretChange = { secret ->
-                    scope.launch { LauncherPreferences.setSoundbarWakeSecret(context, secret) }
+                onSoundbarWakePairingChange = { url, secret ->
+                    scope.launch { LauncherPreferences.setSoundbarWakePairing(context, url, secret) }
                 },
                 onBack = { screen = Screen.Home },
             )

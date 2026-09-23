@@ -1,8 +1,8 @@
 --
--- Database: `mx3launcher`
+-- Database: `sync`
 --
-CREATE DATABASE IF NOT EXISTS `mx3launcher`;
-USE `mx3launcher`;
+CREATE DATABASE IF NOT EXISTS `sync`;
+USE `sync`;
 
 -- --------------------------------------------------------
 
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `credential_shares` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_token` (`token`),
   KEY `idx_code` (`code`)
-) ENGINE=InnoDB DEFAULT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `saved_credentials` (
   `created_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_user` (`user_id`)
-) ENGINE=InnoDB DEFAULT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `idx_email_change_token` (`email_change_token`)
-) ENGINE=InnoDB DEFAULT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `default_credentials` (
   `app_name` varchar(64) NOT NULL,
   `saved_credential_id` int(11) NOT NULL,
   PRIMARY KEY (`user_id`, `app_name`)
-) ENGINE=InnoDB DEFAULT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -109,6 +109,6 @@ CREATE TABLE IF NOT EXISTS `device_tokens` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_token` (`token`),
   KEY `idx_user` (`user_id`)
-) ENGINE=InnoDB DEFAULT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 COMMIT;

@@ -52,8 +52,7 @@ fun SettingsScreen(
     configSyncDeviceToken: String,
     onConfigSyncDeviceTokenChange: (String) -> Unit,
     onSoundbarWakeEnabledChange: (Boolean) -> Unit,
-    onSoundbarWakeUrlChange: (String) -> Unit,
-    onSoundbarWakeSecretChange: (String) -> Unit,
+    onSoundbarWakePairingChange: (url: String, secret: String) -> Unit,
     onBack: () -> Unit,
 ) {
     BackHandler(onBack = onBack)
@@ -119,8 +118,7 @@ fun SettingsScreen(
 
             SoundbarPairingSection(
                 settings = settings,
-                onSoundbarWakeUrlChange = onSoundbarWakeUrlChange,
-                onSoundbarWakeSecretChange = onSoundbarWakeSecretChange,
+                onSoundbarWakePairingChange = onSoundbarWakePairingChange,
             )
         }
 
@@ -254,8 +252,7 @@ private fun PairingCodeDisplay(state: PairingUiState.ShowingCode) {
 @Composable
 private fun SoundbarPairingSection(
     settings: LauncherSettings,
-    onSoundbarWakeUrlChange: (String) -> Unit,
-    onSoundbarWakeSecretChange: (String) -> Unit,
+    onSoundbarWakePairingChange: (url: String, secret: String) -> Unit,
 ) {
     val isPaired = settings.soundbarWakeUrl.isNotBlank() && settings.soundbarWakeSecret.isNotBlank()
     var pairingState by remember { mutableStateOf<PairingUiState>(PairingUiState.Idle) }
@@ -264,8 +261,7 @@ private fun SoundbarPairingSection(
     if (isPaired) {
         Text(text = "Paired ✓")
         Button(onClick = {
-            onSoundbarWakeUrlChange("")
-            onSoundbarWakeSecretChange("")
+            onSoundbarWakePairingChange("", "")
             pairingState = PairingUiState.Idle
         }) {
             Text(text = "Forget pairing")
@@ -299,8 +295,7 @@ private fun SoundbarPairingSection(
                             SoundbarPairing.pollPairing(session.token)
                         }) {
                             is SoundbarPairing.PollResult.Approved -> {
-                                onSoundbarWakeUrlChange(result.url)
-                                onSoundbarWakeSecretChange(result.secret)
+                                onSoundbarWakePairingChange(result.url, result.secret)
                                 pairingState = PairingUiState.Idle
                                 return@launch
                             }
