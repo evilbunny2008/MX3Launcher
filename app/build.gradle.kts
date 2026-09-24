@@ -36,8 +36,8 @@ android {
         applicationId = "com.odiousapps.mx3launcher"
         minSdk = 29
         targetSdk = 37
-        versionCode = 45
-        versionName = "0.0.45"
+        versionCode = 46
+        versionName = "0.0.46"
     }
 
     buildTypes {
@@ -64,6 +64,13 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+        jniLibs {
+            // androidx.graphics:graphics-path ships this prebuilt without an NDK strip tool
+            // available to match it, so the strip task can't touch it anyway - telling AGP to
+            // keep its debug symbols outright stops it from trying (and logging the warning).
+            keepDebugSymbols += "**/libandroidx.graphics.path.so"
+            keepDebugSymbols += "**/libdatastore_shared_counter.so"
         }
     }
 }
