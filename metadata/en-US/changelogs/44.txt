@@ -1,6 +1,5 @@
-* Fixed the launcher showing up with a blank/default icon on the Google TV
-  home screen — it was missing a proper TV banner image.
-* Fixed backup/restore sometimes reporting success without actually
-  restoring anything.
+* Fixed a blank/default launcher icon on the Google TV home screen.
+* Fixed backup/restore sometimes reporting success without restoring
+  anything.
 * Restore now fails with a clear error instead of silently applying
-  default settings when a backup file can't be read properly.
+  defaults.
