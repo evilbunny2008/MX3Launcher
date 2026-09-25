@@ -1,0 +1,13 @@
+* Settings backup/restore no longer needs a fresh QR code/short code for
+  every single backup or restore — pair once (same scan-a-QR-code flow as
+  soundbar-wake pairing), then back up or restore any time afterwards
+  with a single tap. Manage or revoke a device's pairing any time from
+  the pairing site.
+* Soundbar-wake pairing can now also carry which IR code to send and
+  whether to check the soundbar's current power state first, so one
+  paired preset can be tailored to different soundbars/setups.
+* Approving a pairing request on your phone can now remember your
+  choice, so future approvals for the same device are a single tap
+  instead of picking a saved preset again each time.
+* Fixed a rare bug where soundbar-wake pairing could appear to succeed
+  and then silently revert to unpaired shortly afterwards.
