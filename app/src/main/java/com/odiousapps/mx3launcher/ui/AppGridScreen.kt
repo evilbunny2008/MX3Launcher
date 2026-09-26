@@ -10,10 +10,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -138,7 +138,6 @@ private fun AppTile(
     columns: Int,
     focusRequesters: List<FocusRequester>,
 ) {
-    val iconSizeDp = 36
     val context = androidx.compose.ui.platform.LocalContext.current
 
     val column = index % columns
@@ -197,13 +196,16 @@ private fun AppTile(
                 }
             }
 
-            // Full-width backdrop behind the icon; one subtle tint works in
-            // both themes without needing per-theme colours.
+            // Square backdrop spanning the tile's full width; one subtle tint
+            // works in both themes without needing per-theme colours. The
+            // icon fills this backdrop rather than a fixed size, so it scales
+            // with the tile instead of leaving a mostly-empty box around it.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .aspectRatio(1f)
                     .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(8.dp))
-                    .padding(vertical = 8.dp),
+                    .padding(8.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 // ContentScale.Fit preserves aspect ratio and centers by default.
@@ -211,7 +213,7 @@ private fun AppTile(
                     bitmap = bitmap,
                     contentDescription = app.label,
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(iconSizeDp.dp),
+                    modifier = Modifier.fillMaxSize(),
                 )
             }
 
