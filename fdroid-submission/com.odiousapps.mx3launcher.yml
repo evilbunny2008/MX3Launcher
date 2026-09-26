@@ -10,13 +10,13 @@ AutoName: MX3 Launcher
 
 RepoType: git
 Repo: https://github.com/evilbunny2008/MX3Launcher.git
-Binaries:
+Binaries: 
   https://github.com/evilbunny2008/MX3Launcher/releases/download/v%v/MX3Launcher-%v.apk
 
 Builds:
-  - versionName: 0.0.46
-    versionCode: 46
-    commit: 1c8d7e4ee64e10ff959302de4f6f7e0925ced61a
+  - versionName: 0.0.47
+    versionCode: 47
+    commit:
     subdir: app
     gradle:
       - yes
@@ -25,5 +25,5 @@ AllowedAPKSigningKeys: 6e194e3a58ba968613afc235136f63fb845e8aa0d718e70925cac04a9
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.0.46
-CurrentVersionCode: 46
+CurrentVersion: 0.0.47
+CurrentVersionCode: 47
