@@ -75,7 +75,7 @@ android {
     }
 }
 
-// Copies the release .aab to app/dist/ (gitignored, survives clean builds),
+// Copies the release .aab to dist/ (gitignored, survives clean builds),
 // not app/release/ (which collides with Android Studio's "Generate Signed
 // Bundle" wizard). Must run after produce...BundleIdeListingFile, which needs
 // the bundle at its default location first. Uses a typed task, not doLast{},
@@ -110,7 +110,7 @@ abstract class RenameBundleTask : DefaultTask() {
     }
 }
 
-// Copies the release APK(s) to app/dist/ too. Unlike RenameBundleTask,
+// Copies the release APK(s) to dist/ too. Unlike RenameBundleTask,
 // keeps the originals — no collision to avoid here. SingleArtifact.APK is a
 // directory (a variant can produce multiple APKs, e.g. per-ABI splits), so
 // this copies every .apk found rather than assuming just one.
@@ -145,14 +145,14 @@ androidComponents {
         val ideListingTaskName = "produce${variantNameCapitalized}BundleIdeListingFile"
 
         // outputFileName only renames within AGP's default output directory;
-        // getting it into app/dist/ still needs the copyApk task below.
+        // getting it into dist/ still needs the copyApk task below.
         variant.outputs.forEach { output ->
             output.outputFileName.set("$appName-${versionName.get()}.apk")
         }
 
         val renameBundle = tasks.register("renameBundle$variantNameCapitalized", RenameBundleTask::class.java) {
             group = "build"
-            description = "Copies the $variantNameCapitalized .aab to app/dist/$appName-<versionName>.aab"
+            description = "Copies the $variantNameCapitalized .aab to dist/$appName-<versionName>.aab"
             mustRunAfter(ideListingTaskName)
             bundleFile.set(variant.artifacts.get(SingleArtifact.BUNDLE))
             destinationFile.set(layout.projectDirectory.file("dist/$appName-${versionName.get()}.aab"))
@@ -160,7 +160,7 @@ androidComponents {
 
         val copyApk = tasks.register("copyApk$variantNameCapitalized", CopyApkTask::class.java) {
             group = "build"
-            description = "Copies the $variantNameCapitalized apk(s) to app/dist/"
+            description = "Copies the $variantNameCapitalized apk(s) to dist/"
             apkDirectory.set(variant.artifacts.get(SingleArtifact.APK))
             destinationDirectory.set(layout.projectDirectory.dir("dist"))
         }
