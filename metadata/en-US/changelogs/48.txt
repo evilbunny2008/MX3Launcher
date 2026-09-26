@@ -1,0 +1,2 @@
+* This is a TV launcher, so it now only shows up in the Play Store for
+  Android TV/Google TV devices, not phones/tablets.
