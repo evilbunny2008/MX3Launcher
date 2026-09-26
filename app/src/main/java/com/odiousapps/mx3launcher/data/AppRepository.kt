@@ -44,7 +44,12 @@ object AppRepository {
                     packageName = resolveInfo.activityInfo.packageName,
                     activityClassName = resolveInfo.activityInfo.name,
                     label = resolveInfo.loadLabel(pm).toString(),
-                    icon = resolveInfo.loadIcon(pm),
+                    // TV apps declare a widescreen <banner> for exactly this purpose —
+                    // it's what Google TV's own home screen shows for them, not their
+                    // regular (phone-shaped) launcher icon. loadBanner() returns null
+                    // rather than a default, unlike loadIcon(), so apps without one
+                    // (most sideloaded/phone-only apps) still fall back to their icon.
+                    icon = resolveInfo.activityInfo.loadBanner(pm) ?: resolveInfo.loadIcon(pm),
                 )
             } catch (_: Exception) {
                 null // a broken/uninstalling package shouldn't crash the whole grid
