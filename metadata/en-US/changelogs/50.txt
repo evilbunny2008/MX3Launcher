@@ -1,0 +1,5 @@
+* Description now explains the optional online features (online backup
+  and soundbar wake): what is sent, where, and when.
+* Explains why local backups to Downloads were replaced: Google TV has
+  no Storage Access Framework picker, and files saved by other apps or
+  earlier installs can't be read back, so restores didn't work.
