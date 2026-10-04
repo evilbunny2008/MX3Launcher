@@ -64,6 +64,14 @@ developer. Everything else in the launcher works fully offline.
   plus the IR code name and a `check_current` flag, and waits for it to
   succeed before launching. Which app you're launching is not sent.
 
+  *Server requirement:* the receiving end is
+  [`website_lan/send_ir.php`](website_lan/send_ir.php), run on your own
+  LAN web server. It needs the
+  [MQTTv5Client](https://github.com/evilbunny2008/MQTTv5Client) PHP class
+  (expected at `/usr/src/MQTTv5Client/MQTThelper.php`) plus your broker
+  details in `/var/www/mqtt-creds.php` to read the smart socket's current
+  draw and send the IR command. Without it, soundbar wake won't work.
+
 ## Screen Shots
 
 ![Home Screen](metadata/en-US/images/tvScreenShots/1.png)<br>

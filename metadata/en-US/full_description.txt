@@ -61,3 +61,7 @@ short code at sync.odiousapps.com, where you sign in to your account):
   sync.odiousapps.com) with ?key=<your secret>, plus the IR code name
   and a "check current" flag, and waits for it to succeed before
   launching. No information about which app is being launched is sent.
+  The server side needs the example script from the source repository
+  (website_lan/send_ir.php), which relies on the MQTTv5Client PHP class
+  (https://github.com/evilbunny2008/MQTTv5Client) to talk to the smart
+  socket and IR blaster over MQTT. Without it, soundbar wake won't work.

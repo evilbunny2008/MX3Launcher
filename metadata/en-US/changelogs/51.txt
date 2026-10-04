@@ -1,0 +1,3 @@
+* Description now notes that soundbar wake needs the example server
+  script (website_lan/send_ir.php) and the MQTTv5Client PHP class
+  (https://github.com/evilbunny2008/MQTTv5Client) on your own server.
