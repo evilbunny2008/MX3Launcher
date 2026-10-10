@@ -1,0 +1,8 @@
+* Translated into 49 languages.
+* Backups now include soundbar wake settings; restoring an older backup
+  keeps this device's current soundbar pairing.
+* Soundbar wake now works with plain http:// URLs (e.g. on your LAN).
+* Fixed crashes on Android 10-12, when opening App display with some app
+  icons, and when restoring a backup with an invalid column count.
+* Fixed quick repeated presses when reordering or hiding apps being lost.
+* More reliable return to the launcher after standby.

@@ -36,8 +36,8 @@ android {
         applicationId = "com.odiousapps.mx3launcher"
         minSdk = 29
         targetSdk = 37
-        versionCode = 51
-        versionName = "0.0.51"
+        versionCode = 52
+        versionName = "0.0.52"
     }
 
     buildTypes {
