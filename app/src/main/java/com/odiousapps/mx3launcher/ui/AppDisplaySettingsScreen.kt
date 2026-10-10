@@ -21,11 +21,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.tv.material3.Button
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
+import com.odiousapps.mx3launcher.R
 import com.odiousapps.mx3launcher.data.AppEntry
 
 /**
@@ -60,8 +62,8 @@ fun AppDisplaySettingsScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
-        Text(text = "App display")
-        Text(text = "Choose which apps appear on the home screen and their order.")
+        Text(text = stringResource(R.string.app_display_title))
+        Text(text = stringResource(R.string.app_display_description))
 
         LazyColumn(
             state = listState,
@@ -86,7 +88,7 @@ fun AppDisplaySettingsScreen(
         }
 
         Button(onClick = onBack, modifier = Modifier.padding(top = 16.dp)) {
-            Text(text = "Back")
+            Text(text = stringResource(R.string.back))
         }
     }
 }
@@ -113,10 +115,10 @@ private fun AppRow(
                 modifier = Modifier.weight(1f),
             )
 
-            Button(onClick = onMoveUp) { Text(text = "↑") }
-            Button(onClick = onMoveDown) { Text(text = "↓") }
+            Button(onClick = onMoveUp) { Text(text = stringResource(R.string.move_up)) }
+            Button(onClick = onMoveDown) { Text(text = stringResource(R.string.move_down)) }
             Button(onClick = onToggleVisibility) {
-                Text(text = if (hidden) "Show" else "Hide")
+                Text(text = stringResource(if (hidden) R.string.show else R.string.hide))
             }
         }
     }

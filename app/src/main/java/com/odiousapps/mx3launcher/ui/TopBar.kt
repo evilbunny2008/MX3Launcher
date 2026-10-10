@@ -22,10 +22,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.IconButton
 import androidx.tv.material3.Text
 import androidx.compose.material3.Icon
+import com.odiousapps.mx3launcher.R
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -49,10 +51,10 @@ fun TopBar(onOpenAppSettings: () -> Unit) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             WifiStatusButton(context)
             IconButton(onClick = { openOsSettings(context) }) {
-                Icon(Icons.Filled.SettingsApplications, contentDescription = "System settings")
+                Icon(Icons.Filled.SettingsApplications, contentDescription = stringResource(R.string.cd_system_settings))
             }
             IconButton(onClick = onOpenAppSettings) {
-                Icon(Icons.Filled.Tune, contentDescription = "Launcher settings")
+                Icon(Icons.Filled.Tune, contentDescription = stringResource(R.string.cd_launcher_settings))
             }
         }
     }
@@ -85,7 +87,7 @@ private fun WifiStatusButton(context: Context) {
     IconButton(onClick = { openWifiSettings(context) }) {
         Icon(
             if (connected) Icons.Filled.Wifi else Icons.Filled.WifiOff,
-            contentDescription = if (connected) "Wi-Fi connected, open network settings" else "Wi-Fi not connected, open network settings",
+            contentDescription = stringResource(if (connected) R.string.cd_wifi_connected else R.string.cd_wifi_disconnected),
         )
     }
 }

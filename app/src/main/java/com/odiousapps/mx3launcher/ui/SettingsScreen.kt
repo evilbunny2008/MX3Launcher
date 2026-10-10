@@ -22,12 +22,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Button
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
+import com.odiousapps.mx3launcher.R
 import com.odiousapps.mx3launcher.data.GRADIENT_PRESETS
 import com.odiousapps.mx3launcher.data.LauncherConfigSync
 import com.odiousapps.mx3launcher.data.LauncherSettings
@@ -66,21 +69,29 @@ fun SettingsScreen(
             .padding(32.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp),
     ) {
-        Text(text = "Launcher settings")
+        Text(text = stringResource(R.string.settings_title))
 
-        SettingsSection(title = "Theme") {
+        SettingsSection(title = stringResource(R.string.settings_theme)) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 ThemeMode.entries.forEach { mode ->
                     Button(
                         onClick = { onThemeModeChange(mode) },
                     ) {
-                        Text(text = mode.name.lowercase().replaceFirstChar { it.uppercase() })
+                        Text(
+                            text = stringResource(
+                                when (mode) {
+                                    ThemeMode.SYSTEM -> R.string.theme_system
+                                    ThemeMode.LIGHT -> R.string.theme_light
+                                    ThemeMode.DARK -> R.string.theme_dark
+                                }
+                            )
+                        )
                     }
                 }
             }
         }
 
-        SettingsSection(title = "Background gradient") {
+        SettingsSection(title = stringResource(R.string.settings_background_gradient)) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 GRADIENT_PRESETS.forEach { preset ->
                     GradientSwatch(
@@ -92,28 +103,34 @@ fun SettingsScreen(
             }
         }
 
-        SettingsSection(title = "App columns per row") {
+        SettingsSection(title = stringResource(R.string.settings_columns)) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 COLUMN_OPTIONS.forEach { option ->
                     Button(
                         onClick = { onColumnsChange(option) },
                     ) {
-                        Text(text = "$option${if (option == settings.columns) " ✓" else ""}")
+                        Text(
+                            text = if (option == settings.columns) {
+                                stringResource(R.string.settings_columns_selected, option)
+                            } else {
+                                option.toString()
+                            }
+                        )
                     }
                 }
             }
         }
 
-        SettingsSection(title = "App display") {
+        SettingsSection(title = stringResource(R.string.settings_app_display)) {
             Button(onClick = onOpenAppDisplaySettings) {
-                Text(text = "Show/hide apps and set their order")
+                Text(text = stringResource(R.string.settings_app_display_button))
             }
         }
 
         // See checkSoundbarWake() in AppGridScreen.kt.
-        SettingsSection(title = "Soundbar wake") {
+        SettingsSection(title = stringResource(R.string.settings_soundbar_wake)) {
             Button(onClick = { onSoundbarWakeEnabledChange(!settings.soundbarWakeEnabled) }) {
-                Text(text = if (settings.soundbarWakeEnabled) "Enabled ✓" else "Disabled")
+                Text(text = stringResource(if (settings.soundbarWakeEnabled) R.string.enabled else R.string.disabled))
             }
 
             SoundbarPairingSection(
@@ -126,7 +143,7 @@ fun SettingsScreen(
         // sync.odiousapps.com credential relay SoundbarPairingSection
         // uses below, then back up/restore directly - no code/QR per
         // operation, unlike soundbar pairing.
-        SettingsSection(title = "Backup & restore") {
+        SettingsSection(title = stringResource(R.string.settings_backup_restore)) {
             ConfigSyncSection(
                 settings = settings,
                 deviceToken = configSyncDeviceToken,
@@ -141,12 +158,12 @@ fun SettingsScreen(
                     onRestore(LauncherSettings(ThemeMode.SYSTEM, GRADIENT_PRESETS.first().id, 6, emptySet(), emptyList()))
                 }
             }) {
-                Text(text = "Reset to defaults")
+                Text(text = stringResource(R.string.reset_to_defaults))
             }
         }
 
         Button(onClick = onBack) {
-            Text(text = "Back")
+            Text(text = stringResource(R.string.back))
         }
     }
 }
@@ -181,7 +198,7 @@ private fun GradientSwatch(
                 )
         ) {
             if (selected) {
-                Text(text = "✓", modifier = Modifier.padding(4.dp))
+                Text(text = stringResource(R.string.checkmark), modifier = Modifier.padding(4.dp))
             }
         }
     }
@@ -221,16 +238,16 @@ private fun PairingCodeDisplay(state: PairingUiState.ShowingCode) {
         if (state.qrBitmap != null) {
             androidx.compose.foundation.Image(
                 bitmap = state.qrBitmap,
-                contentDescription = "QR code to open the pairing page",
+                contentDescription = stringResource(R.string.cd_pairing_qr),
                 modifier = Modifier.size(200.dp),
             )
-            Text(text = "Scan with your phone's camera, or go to:")
+            Text(text = stringResource(R.string.pairing_scan_or_go_to))
         } else {
             // QR generation failed — fall back to plain text.
-            Text(text = "On your phone, go to:")
+            Text(text = stringResource(R.string.pairing_go_to))
         }
-        Text(text = "sync.odiousapps.com/credential_view.php")
-        Text(text = "and enter this code:")
+        Text(text = stringResource(R.string.pairing_url))
+        Text(text = stringResource(R.string.pairing_enter_code))
         // Large, bold, and letter-spaced — this needs to be read at normal
         // TV sitting distance, not proofread up close like body text.
         Text(
@@ -257,14 +274,15 @@ private fun SoundbarPairingSection(
     val isPaired = settings.soundbarWakeUrl.isNotBlank() && settings.soundbarWakeSecret.isNotBlank()
     var pairingState by remember { mutableStateOf<PairingUiState>(PairingUiState.Idle) }
     val pairingScope = androidx.compose.runtime.rememberCoroutineScope()
+    val context = LocalContext.current
 
     if (isPaired) {
-        Text(text = "Paired ✓")
+        Text(text = stringResource(R.string.paired))
         Button(onClick = {
             onSoundbarWakePairingChange("", "", com.odiousapps.mx3launcher.data.DEFAULT_SOUNDBAR_IR_CODES, true)
             pairingState = PairingUiState.Idle
         }) {
-            Text(text = "Forget pairing")
+            Text(text = stringResource(R.string.forget_pairing))
         }
         return
     }
@@ -279,9 +297,7 @@ private fun SoundbarPairingSection(
                 pairingScope.launch {
                     val session = withContext(Dispatchers.IO) { SoundbarPairing.startPairing() }
                     if (session == null) {
-                        pairingState = PairingUiState.Failed(
-                            "Couldn't start pairing — check the server is reachable"
-                        )
+                        pairingState = PairingUiState.Failed(context.getString(R.string.pairing_start_failed))
                         return@launch
                     }
                     val approveUrl = "https://sync.odiousapps.com/credential_view.php?code=${session.code}"
@@ -305,7 +321,7 @@ private fun SoundbarPairingSection(
                                 return@launch
                             }
                             is SoundbarPairing.PollResult.Expired -> {
-                                pairingState = PairingUiState.Failed("Code expired — try again")
+                                pairingState = PairingUiState.Failed(context.getString(R.string.pairing_code_expired))
                                 return@launch
                             }
                             is SoundbarPairing.PollResult.Error -> {
@@ -316,14 +332,14 @@ private fun SoundbarPairingSection(
                             }
                         }
                     }
-                    pairingState = PairingUiState.Failed("Code expired — try again")
+                    pairingState = PairingUiState.Failed(context.getString(R.string.pairing_code_expired))
                 }
             }) {
-                Text(text = "Pair")
+                Text(text = stringResource(R.string.pair))
             }
         }
         is PairingUiState.Starting -> {
-            Text(text = "Starting...")
+            Text(text = stringResource(R.string.starting))
         }
         is PairingUiState.ShowingCode -> PairingCodeDisplay(state)
         is PairingUiState.Done -> {
@@ -359,51 +375,52 @@ private fun ConfigSyncSection(
     }
 
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     var syncStatus by remember { mutableStateOf<String?>(null) }
     var restoreState by remember { mutableStateOf<RestoreListUiState>(RestoreListUiState.Idle) }
 
-    Text(text = "Paired ✓")
+    Text(text = stringResource(R.string.paired))
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Button(onClick = {
             onDeviceTokenChange("")
             restoreState = RestoreListUiState.Idle
             syncStatus = null
         }) {
-            Text(text = "Forget pairing")
+            Text(text = stringResource(R.string.forget_pairing))
         }
         Button(onClick = {
             scope.launch {
-                syncStatus = "Backing up..."
+                syncStatus = context.getString(R.string.backing_up)
                 val ok = withContext(Dispatchers.IO) { LauncherConfigSync.uploadBackup(deviceToken, settings) }
-                syncStatus = if (ok) "Backed up" else "Backup failed — check the server is reachable"
+                syncStatus = context.getString(if (ok) R.string.backed_up else R.string.backup_failed)
             }
         }) {
-            Text(text = "Back up settings")
+            Text(text = stringResource(R.string.back_up_settings))
         }
         Button(onClick = {
             scope.launch {
                 restoreState = RestoreListUiState.Loading
                 val backups = withContext(Dispatchers.IO) { LauncherConfigSync.listBackups(deviceToken) }
                 restoreState = if (backups == null) {
-                    RestoreListUiState.Failed("Couldn't load backups — check the server is reachable")
+                    RestoreListUiState.Failed(context.getString(R.string.backups_load_failed))
                 } else {
                     RestoreListUiState.Loaded(backups)
                 }
             }
         }) {
-            Text(text = "Restore settings")
+            Text(text = stringResource(R.string.restore_settings))
         }
     }
-    Text(text = "Manage or revoke this pairing any time at sync.odiousapps.com/paired_devices.php")
+    Text(text = stringResource(R.string.manage_pairing_hint))
     syncStatus?.let { Text(text = it) }
 
     when (val s = restoreState) {
         RestoreListUiState.Idle -> {}
-        RestoreListUiState.Loading -> Text(text = "Loading...")
+        RestoreListUiState.Loading -> Text(text = stringResource(R.string.loading))
         is RestoreListUiState.Failed -> Text(text = s.message)
         is RestoreListUiState.Loaded -> {
             if (s.backups.isEmpty()) {
-                Text(text = "No backups yet")
+                Text(text = stringResource(R.string.no_backups))
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     s.backups.forEach { backup ->
@@ -418,9 +435,9 @@ private fun ConfigSyncSection(
                                     // write actually completing.
                                     onRestore(fetched)
                                     restoreState = RestoreListUiState.Idle
-                                    syncStatus = "Restored from ${backup.label}"
+                                    syncStatus = context.getString(R.string.restored_from, backup.label)
                                 } else {
-                                    restoreState = RestoreListUiState.Failed("Couldn't read that backup")
+                                    restoreState = RestoreListUiState.Failed(context.getString(R.string.backup_read_failed))
                                 }
                             }
                         }) {
@@ -437,21 +454,20 @@ private fun ConfigSyncSection(
 private fun DevicePairingSection(onPaired: (String) -> Unit) {
     var pairingState by remember { mutableStateOf<PairingUiState>(PairingUiState.Idle) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     when (val state = pairingState) {
         is PairingUiState.Idle, is PairingUiState.Failed -> {
             if (state is PairingUiState.Failed) {
                 Text(text = state.message)
             }
-            Text(text = "Pair once to back up/restore settings without a code each time.")
+            Text(text = stringResource(R.string.device_pairing_description))
             Button(onClick = {
                 pairingState = PairingUiState.Starting
                 scope.launch {
                     val session = withContext(Dispatchers.IO) { LauncherConfigSync.pairDevice() }
                     if (session == null) {
-                        pairingState = PairingUiState.Failed(
-                            "Couldn't start pairing — check the server is reachable"
-                        )
+                        pairingState = PairingUiState.Failed(context.getString(R.string.pairing_start_failed))
                         return@launch
                     }
                     val qrBitmap = withContext(Dispatchers.Default) { generateQrCodeBitmap(session.approveUrl) }
@@ -469,7 +485,7 @@ private fun DevicePairingSection(onPaired: (String) -> Unit) {
                                 return@launch
                             }
                             is LauncherConfigSync.PairingPollResult.Expired -> {
-                                pairingState = PairingUiState.Failed("Code expired — try again")
+                                pairingState = PairingUiState.Failed(context.getString(R.string.pairing_code_expired))
                                 return@launch
                             }
                             is LauncherConfigSync.PairingPollResult.Error -> {
@@ -480,14 +496,14 @@ private fun DevicePairingSection(onPaired: (String) -> Unit) {
                             }
                         }
                     }
-                    pairingState = PairingUiState.Failed("Code expired — try again")
+                    pairingState = PairingUiState.Failed(context.getString(R.string.pairing_code_expired))
                 }
             }) {
-                Text(text = "Pair")
+                Text(text = stringResource(R.string.pair))
             }
         }
         is PairingUiState.Starting -> {
-            Text(text = "Starting...")
+            Text(text = stringResource(R.string.starting))
         }
         is PairingUiState.ShowingCode -> PairingCodeDisplay(state)
         is PairingUiState.Done -> {

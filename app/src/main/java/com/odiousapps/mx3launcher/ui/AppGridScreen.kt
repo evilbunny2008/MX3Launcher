@@ -34,10 +34,12 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
+import com.odiousapps.mx3launcher.R
 import com.odiousapps.mx3launcher.data.AppEntry
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -85,6 +87,7 @@ fun AppGridScreen(
                             if (soundbarWakeEnabled && soundbarWakeUrl.isNotBlank()) {
                                 val error = withContext(kotlinx.coroutines.Dispatchers.IO) {
                                     checkSoundbarWake(
+                                        context,
                                         soundbarWakeUrl,
                                         soundbarWakeSecret,
                                         soundbarIrCodesToSend,
@@ -120,10 +123,10 @@ fun AppGridScreen(
             onDismissRequest = dismiss,
             confirmButton = {
                 androidx.compose.material3.TextButton(onClick = dismiss) {
-                    androidx.compose.material3.Text(text = "OK")
+                    androidx.compose.material3.Text(text = stringResource(R.string.ok))
                 }
             },
-            title = { androidx.compose.material3.Text(text = "Soundbar wake failed") },
+            title = { androidx.compose.material3.Text(text = stringResource(R.string.soundbar_wake_failed_title)) },
             text = { androidx.compose.material3.Text(text = message) },
         )
     }
@@ -247,6 +250,7 @@ private const val TAG = "SoundbarWake"
 // Dispatchers.IO) so the caller can decide whether to show a dialog or
 // launch; returns null on success, else a failure message.
 private fun checkSoundbarWake(
+    context: Context,
     url: String,
     secret: String,
     irCodesToSend: String,
@@ -297,7 +301,11 @@ private fun checkSoundbarWake(
             // (appended as ?key=...) into logcat.
             val logSuffix = if (errorBody.isNotEmpty()) ": $errorBody" else ""
             android.util.Log.w(TAG, "Wake failed for $url — server returned $responseCode$logSuffix")
-            if (errorBody.isNotEmpty()) "Server returned $responseCode: $errorBody" else "Server returned $responseCode"
+            if (errorBody.isNotEmpty()) {
+                context.getString(R.string.soundbar_wake_server_returned_with_body, responseCode, errorBody)
+            } else {
+                context.getString(R.string.soundbar_wake_server_returned, responseCode)
+            }
         }
         connection.disconnect()
         result

@@ -97,8 +97,8 @@ class ScreenWakeGuardService : Service() {
         )
 
         val notification = Notification.Builder(this, WAKE_CHANNEL_ID)
-            .setContentTitle("MX3 Launcher")
-            .setContentText("Returning to launcher")
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(getString(R.string.notification_returning))
             .setSmallIcon(android.R.drawable.ic_menu_view)
             .setFullScreenIntent(pendingIntent, true)
             .setAutoCancel(true)
@@ -112,14 +112,14 @@ class ScreenWakeGuardService : Service() {
         manager.createNotificationChannel(
             NotificationChannel(
                 PERSISTENT_CHANNEL_ID,
-                "Launcher wake guard (ongoing)",
+                getString(R.string.channel_wake_guard_ongoing),
                 NotificationManager.IMPORTANCE_LOW,
             )
         )
         manager.createNotificationChannel(
             NotificationChannel(
                 WAKE_CHANNEL_ID,
-                "Launcher wake guard (trigger)",
+                getString(R.string.channel_wake_guard_trigger),
                 NotificationManager.IMPORTANCE_HIGH,
             )
         )
@@ -127,8 +127,8 @@ class ScreenWakeGuardService : Service() {
 
     private fun buildPersistentNotification(): Notification {
         return Notification.Builder(this, PERSISTENT_CHANNEL_ID)
-            .setContentTitle("MX3 Launcher active")
-            .setContentText("Keeping the launcher ready after standby")
+            .setContentTitle(getString(R.string.notification_active_title))
+            .setContentText(getString(R.string.notification_active_text))
             .setSmallIcon(android.R.drawable.ic_menu_view)
             .setOngoing(true)
             .build()

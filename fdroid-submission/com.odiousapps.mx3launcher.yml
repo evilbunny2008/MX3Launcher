@@ -16,7 +16,7 @@ Binaries:
 Builds:
   - versionName: 0.0.51
     versionCode: 51
-    commit: 7c5300dffbf21b73b443bbb7fe633e9650698597
+    commit: 3172b6895ece0b658e0f2f322837aa7fbcf34da8
     subdir: app
     gradle:
       - yes
