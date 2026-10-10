@@ -1,5 +1,6 @@
 package com.odiousapps.mx3launcher
 
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -7,6 +8,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -46,6 +48,14 @@ class MainActivity : ComponentActivity() {
         // Requests opening straight to Settings instead of the home grid; set by
         // Button Mapper (see ButtonMapperService.kt's launchLauncherSettings()).
         const val EXTRA_OPEN_SETTINGS = "com.odiousapps.mx3launcher.OPEN_SETTINGS"
+
+        // Read by ScreenWakeGuardService (same process) to tell whether its
+        // direct startActivity() actually worked - see bringLauncherToFront().
+        @Volatile private var isResumed = false
+        @Volatile private var lastResumedAt = 0L
+
+        fun hasResumedSince(elapsedRealtime: Long): Boolean =
+            isResumed || lastResumedAt >= elapsedRealtime
     }
 
     // Held here rather than remember{} so onKeyDown() below, which is outside
@@ -63,6 +73,21 @@ class MainActivity : ComponentActivity() {
         setContent {
             LauncherApp(screenState)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        isResumed = true
+        lastResumedAt = SystemClock.elapsedRealtime()
+        // We're in front, so any pending full-screen-intent fallback from
+        // ScreenWakeGuardService is redundant - don't leave it in the shade.
+        getSystemService(NotificationManager::class.java)
+            ?.cancel(ScreenWakeGuardService.WAKE_NOTIFICATION_ID)
+    }
+
+    override fun onPause() {
+        isResumed = false
+        super.onPause()
     }
 
     /**
@@ -213,21 +238,29 @@ private fun LauncherApp(screenState: MutableState<Screen>) {
             Screen.AppDisplaySettings -> AppDisplaySettingsScreen(
                 allApps = orderApps(installedApps, settings.appOrder),
                 hiddenPackages = settings.hiddenPackages,
+                // Both compute from the stored value inside the DataStore
+                // transaction, not from the `settings` snapshot: rapid remote
+                // presses otherwise all start from the same stale snapshot
+                // before the first write lands, and all but one get lost.
                 onToggleVisibility = { packageName ->
-                    val newHidden = if (packageName in settings.hiddenPackages) {
-                        settings.hiddenPackages - packageName
-                    } else {
-                        settings.hiddenPackages + packageName
+                    scope.launch {
+                        LauncherPreferences.updateHiddenPackages(context) { hidden ->
+                            if (packageName in hidden) hidden - packageName else hidden + packageName
+                        }
                     }
-                    scope.launch { LauncherPreferences.setHiddenPackages(context, newHidden) }
                 },
                 onMove = { packageName, direction ->
-                    val current = orderApps(installedApps, settings.appOrder).map { it.packageName }.toMutableList()
-                    val index = current.indexOf(packageName)
-                    val newIndex = index + direction
-                    if (index >= 0 && newIndex in current.indices) {
-                        current[index] = current[newIndex].also { current[newIndex] = current[index] }
-                        scope.launch { LauncherPreferences.setAppOrder(context, current) }
+                    val installed = installedApps
+                    scope.launch {
+                        LauncherPreferences.updateAppOrder(context) { storedOrder ->
+                            val current = orderApps(installed, storedOrder).map { it.packageName }.toMutableList()
+                            val index = current.indexOf(packageName)
+                            val newIndex = index + direction
+                            if (index >= 0 && newIndex in current.indices) {
+                                current[index] = current[newIndex].also { current[newIndex] = current[index] }
+                            }
+                            current
+                        }
                     }
                 },
                 onBack = { screen = Screen.Settings },

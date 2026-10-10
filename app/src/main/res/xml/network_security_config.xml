@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The soundbar wake URL is user-supplied (via pairing) and commonly points at a
+  plain-HTTP server on the local network, which Android blocks by default - so
+  cleartext is allowed in general. The app's own sync server stays HTTPS-only.
+-->
+<network-security-config xmlns:tools="http://schemas.android.com/tools">
+    <base-config
+        cleartextTrafficPermitted="true"
+        tools:ignore="InsecureBaseConfiguration" />
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">odiousapps.com</domain>
+    </domain-config>
+</network-security-config>

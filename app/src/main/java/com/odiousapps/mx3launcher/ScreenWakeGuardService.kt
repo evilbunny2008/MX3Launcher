@@ -10,7 +10,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 
 /**
@@ -31,8 +34,13 @@ class ScreenWakeGuardService : Service() {
         private const val PERSISTENT_CHANNEL_ID = "mx3launcher_wake_guard"
         private const val WAKE_CHANNEL_ID = "mx3launcher_wake_trigger"
         private const val PERSISTENT_NOTIFICATION_ID = 1
-        private const val WAKE_NOTIFICATION_ID = 2
+        const val WAKE_NOTIFICATION_ID = 2
+        // How long a direct startActivity() gets to bring MainActivity to the
+        // front before the full-screen-intent fallback is used instead.
+        private const val LAUNCH_CHECK_DELAY_MS = 1_500L
     }
+
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     private var screenOnReceiver: BroadcastReceiver? = null
 
@@ -65,11 +73,15 @@ class ScreenWakeGuardService : Service() {
     }
 
     /**
-     * Tries a direct startActivity() first (cheap, and usually works despite
-     * the theoretical background-launch restriction risk), falling back to a
-     * full-screen-intent notification — the Android-sanctioned way to force
-     * an activity to the foreground from a background trigger, exempted from
-     * those restrictions.
+     * Tries a direct startActivity() first (cheap, and allowed while this app
+     * is the default Home app), falling back to a full-screen-intent
+     * notification — the Android-sanctioned way to force an activity to the
+     * foreground from a background trigger, exempted from those restrictions.
+     *
+     * A blocked background launch doesn't throw — Android just drops it and
+     * logs "Background activity start ... blocked" — so success is checked
+     * after LAUNCH_CHECK_DELAY_MS against MainActivity's own resume tracking
+     * rather than relying on an exception.
      *
      * Needs USE_FULL_SCREEN_INTENT in the manifest, which isn't auto-granted
      * on Android 14+; if the fallback fails too, check Settings -> Apps ->
@@ -82,13 +94,25 @@ class ScreenWakeGuardService : Service() {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
         }
 
+        val attemptedAt = SystemClock.elapsedRealtime()
         try {
             startActivity(activityIntent)
-            return
         } catch (e: Exception) {
             Log.w(TAG, "Direct startActivity() failed, falling back to full-screen intent", e)
+            showFullScreenIntent(activityIntent)
+            return
         }
 
+        mainHandler.postDelayed({
+            if (!MainActivity.hasResumedSince(attemptedAt)) {
+                Log.w(TAG, "Direct startActivity() was silently blocked, falling back to full-screen intent")
+                showFullScreenIntent(activityIntent)
+            }
+        }, LAUNCH_CHECK_DELAY_MS)
+    }
+
+    @SuppressLint("FullScreenIntentPolicy")
+    private fun showFullScreenIntent(activityIntent: Intent) {
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
@@ -135,6 +159,7 @@ class ScreenWakeGuardService : Service() {
     }
 
     override fun onDestroy() {
+        mainHandler.removeCallbacksAndMessages(null)
         screenOnReceiver?.let { unregisterReceiver(it) }
         screenOnReceiver = null
         super.onDestroy()

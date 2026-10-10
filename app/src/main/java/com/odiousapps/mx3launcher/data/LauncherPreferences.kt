@@ -85,10 +85,7 @@ object LauncherPreferences {
                 gradientId = prefs[KEY_GRADIENT_ID] ?: GRADIENT_PRESETS.first().id,
                 columns = sanitizeColumns(prefs[KEY_COLUMNS] ?: DEFAULT_COLUMNS),
                 hiddenPackages = prefs[KEY_HIDDEN_PACKAGES] ?: emptySet(),
-                appOrder = prefs[KEY_APP_ORDER]
-                    ?.split(ORDER_DELIMITER)
-                    ?.filter { it.isNotBlank() }
-                    ?: emptyList(),
+                appOrder = decodeOrder(prefs[KEY_APP_ORDER]),
                 soundbarWakeEnabled = prefs[KEY_SOUNDBAR_WAKE_ENABLED] ?: false,
                 soundbarWakeUrl = prefs[KEY_SOUNDBAR_WAKE_URL] ?: "",
                 soundbarWakeSecret = prefs[KEY_SOUNDBAR_WAKE_SECRET] ?: "",
@@ -116,6 +113,24 @@ object LauncherPreferences {
     suspend fun setAppOrder(context: Context, order: List<String>) {
         context.dataStore.edit { it[KEY_APP_ORDER] = order.joinToString(ORDER_DELIMITER) }
     }
+
+    /** Read-modify-write in one transaction, so concurrent callers each see
+     *  the previous one's result rather than a stale snapshot. */
+    suspend fun updateHiddenPackages(context: Context, transform: (Set<String>) -> Set<String>) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_HIDDEN_PACKAGES] = transform(prefs[KEY_HIDDEN_PACKAGES] ?: emptySet())
+        }
+    }
+
+    /** As [updateHiddenPackages], for the app order. */
+    suspend fun updateAppOrder(context: Context, transform: (List<String>) -> List<String>) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_APP_ORDER] = transform(decodeOrder(prefs[KEY_APP_ORDER])).joinToString(ORDER_DELIMITER)
+        }
+    }
+
+    private fun decodeOrder(raw: String?): List<String> =
+        raw?.split(ORDER_DELIMITER)?.filter { it.isNotBlank() } ?: emptyList()
 
     suspend fun setSoundbarWakeEnabled(context: Context, enabled: Boolean) {
         context.dataStore.edit { it[KEY_SOUNDBAR_WAKE_ENABLED] = enabled }
