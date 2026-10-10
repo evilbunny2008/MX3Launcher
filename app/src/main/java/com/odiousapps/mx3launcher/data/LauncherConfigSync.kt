@@ -38,7 +38,6 @@ object LauncherConfigSync {
     // Kept in sync with credential_view.php's own copy of this constant.
     private const val DEVICE_PAIR_APP_NAME = "MX3Launcher Device"
     private const val FIELD_DEVICE_TOKEN = "DeviceToken"
-    private const val FIELD_CONFIG = "Config"
 
     private const val KEY_THEME_MODE = "themeMode"
     private const val KEY_GRADIENT_ID = "gradientId"
@@ -64,10 +63,11 @@ object LauncherConfigSync {
         object Pending : PairingPollResult()
         object Expired : PairingPollResult()
         data class Paired(val deviceToken: String) : PairingPollResult()
-        data class Error(val message: String) : PairingPollResult()
+        /** Transient - logged here, and the caller keeps polling. */
+        object Error : PairingPollResult()
     }
 
-    data class RemoteBackup(val id: Int, val label: String, val createdAt: String)
+    data class RemoteBackup(val id: Int, val label: String)
 
     /** Starts a one-time "pull" share asking the account holder to pair
      *  this device. See credential_view.php's DEVICE_PAIR_APP_NAME branch. */
@@ -87,18 +87,22 @@ object LauncherConfigSync {
                 "viewed" -> {
                     val deviceToken = (json.optJSONObject("fields") ?: JSONObject()).optString(FIELD_DEVICE_TOKEN)
                     if (deviceToken.isBlank()) {
-                        PairingPollResult.Error("Approval didn't include a device token")
+                        Log.w(TAG, "pollPairing: approval didn't include a device token")
+                        PairingPollResult.Error
                     } else {
                         PairingPollResult.Paired(deviceToken)
                     }
                 }
                 "pending" -> PairingPollResult.Pending
                 "expired" -> PairingPollResult.Expired
-                else -> PairingPollResult.Error(json.optString("error", "Unknown error"))
+                else -> {
+                    Log.w(TAG, "pollPairing: server error: ${json.optString("error", "unknown")}")
+                    PairingPollResult.Error
+                }
             }
         } catch (e: Exception) {
             Log.w(TAG, "pollPairing: request failed", e)
-            PairingPollResult.Error(e.message ?: "Network error")
+            PairingPollResult.Error
         }
     }
 
@@ -146,7 +150,6 @@ object LauncherConfigSync {
                 RemoteBackup(
                     id = entry.optInt("id"),
                     label = entry.optString("label"),
-                    createdAt = entry.optString("created_at"),
                 )
             }
         } catch (e: Exception) {

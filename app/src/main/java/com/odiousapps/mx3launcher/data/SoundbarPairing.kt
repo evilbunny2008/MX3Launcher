@@ -39,7 +39,8 @@ object SoundbarPairing {
             val irCodesToSend: String,
             val checkCurrent: Boolean,
         ) : PollResult()
-        data class Error(val message: String) : PollResult()
+        /** Transient - logged here, and the caller keeps polling. */
+        object Error : PollResult()
     }
 
     fun startPairing(): PairingSession? {
@@ -84,7 +85,8 @@ object SoundbarPairing {
                     val checkCurrent = checkCurrentRaw.isBlank() || checkCurrentRaw.equals("true", ignoreCase = true)
                     if (url.isBlank() || secret.isBlank()) {
                         // Don't silently pair with a blank URL/secret.
-                        PollResult.Error("Saved preset is missing a URL or Secret field")
+                        Log.w(TAG, "pollPairing: saved preset is missing a URL or Secret field")
+                        PollResult.Error
                     } else {
                         PollResult.Approved(
                             url = url,
@@ -96,11 +98,14 @@ object SoundbarPairing {
                 }
                 "pending" -> PollResult.Pending
                 "expired" -> PollResult.Expired
-                else -> PollResult.Error(json.optString("error", "Unknown error"))
+                else -> {
+                    Log.w(TAG, "pollPairing: server error: ${json.optString("error", "unknown")}")
+                    PollResult.Error
+                }
             }
         } catch (e: Exception) {
             Log.w(TAG, "pollPairing: request to $STATUS_URL failed", e)
-            PollResult.Error(e.message ?: "Network error")
+            PollResult.Error
         }
     }
 

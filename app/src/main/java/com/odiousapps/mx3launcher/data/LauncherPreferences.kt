@@ -19,15 +19,15 @@ enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
 /** A selectable background gradient. Curated presets rather than a full
  *  RGB picker — much easier to navigate with a D-pad than a colour wheel. */
-data class GradientPreset(val id: String, val label: String, val start: Color, val end: Color)
+data class GradientPreset(val id: String, val start: Color, val end: Color)
 
 val GRADIENT_PRESETS = listOf(
-    GradientPreset("slate", "Slate", Color(0xFF1F2430), Color(0xFF3A4152)),
-    GradientPreset("indigo", "Indigo", Color(0xFF2B2F77), Color(0xFF5B4FE0)),
-    GradientPreset("teal", "Teal", Color(0xFF0F3D3E), Color(0xFF17836F)),
-    GradientPreset("sunset", "Sunset", Color(0xFF3A1C4D), Color(0xFFB5482A)),
-    GradientPreset("forest", "Forest", Color(0xFF16301F), Color(0xFF3C7A4E)),
-    GradientPreset("mono", "Monochrome", Color(0xFF101014), Color(0xFF2C2C34)),
+    GradientPreset("slate", Color(0xFF1F2430), Color(0xFF3A4152)),
+    GradientPreset("indigo", Color(0xFF2B2F77), Color(0xFF5B4FE0)),
+    GradientPreset("teal", Color(0xFF0F3D3E), Color(0xFF17836F)),
+    GradientPreset("sunset", Color(0xFF3A1C4D), Color(0xFFB5482A)),
+    GradientPreset("forest", Color(0xFF16301F), Color(0xFF3C7A4E)),
+    GradientPreset("mono", Color(0xFF101014), Color(0xFF2C2C34)),
 )
 
 data class LauncherSettings(
@@ -136,18 +136,9 @@ object LauncherPreferences {
         context.dataStore.edit { it[KEY_SOUNDBAR_WAKE_ENABLED] = enabled }
     }
 
-    suspend fun setSoundbarWakeUrl(context: Context, url: String) {
-        context.dataStore.edit { it[KEY_SOUNDBAR_WAKE_URL] = url }
-    }
-
-    suspend fun setSoundbarWakeSecret(context: Context, secret: String) {
-        context.dataStore.edit { it[KEY_SOUNDBAR_WAKE_SECRET] = secret }
-    }
-
-    /** Used once pairing resolves, instead of separate setSoundbarWakeUrl()/
-     *  setSoundbarWakeSecret() calls - those are two independent DataStore
-     *  transactions, so there's a real window between them where only one
-     *  of the two is set. This writes all four in one transaction instead. */
+    /** Used once pairing resolves. Writes all four fields in one DataStore
+     *  transaction - separate per-field writes would leave a window where
+     *  only some of them (e.g. the URL but not the secret) are set. */
     suspend fun setSoundbarWakePairing(
         context: Context,
         url: String,

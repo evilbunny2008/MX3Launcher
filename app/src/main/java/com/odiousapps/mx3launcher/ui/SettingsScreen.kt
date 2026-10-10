@@ -208,15 +208,9 @@ private sealed class PairingUiState {
     object Starting : PairingUiState()
     data class ShowingCode(
         val code: String,
-        val token: String,
         val qrBitmap: androidx.compose.ui.graphics.ImageBitmap?,
     ) : PairingUiState()
     data class Failed(val message: String) : PairingUiState()
-    // Only used by BackupSyncSection/RestoreSyncSection below — a transient
-    // success message shown alongside the next "start again" button, unlike
-    // SoundbarPairingSection, whose success instead flips settings into a
-    // persistent "Paired ✓" state.
-    data class Done(val message: String) : PairingUiState()
 }
 
 /** The QR/code display shared by every PairingUiState.ShowingCode, below. */
@@ -301,7 +295,7 @@ private fun SoundbarPairingSection(
                     }
                     val approveUrl = "https://sync.odiousapps.com/credential_view.php?code=${session.code}"
                     val qrBitmap = withContext(Dispatchers.Default) { generateQrCodeBitmap(approveUrl) }
-                    pairingState = PairingUiState.ShowingCode(session.code, session.token, qrBitmap)
+                    pairingState = PairingUiState.ShowingCode(session.code, qrBitmap)
 
                     val deadlineMs = System.currentTimeMillis() + session.expiresInSeconds * 1000L
                     while (System.currentTimeMillis() < deadlineMs) {
@@ -323,7 +317,7 @@ private fun SoundbarPairingSection(
                                 pairingState = PairingUiState.Failed(resources.getString(R.string.pairing_code_expired))
                                 return@launch
                             }
-                            is SoundbarPairing.PollResult.Error -> {
+                            SoundbarPairing.PollResult.Error -> {
                                 // Keep polling; don't give up on a transient blip.
                             }
                             SoundbarPairing.PollResult.Pending -> {
@@ -341,10 +335,6 @@ private fun SoundbarPairingSection(
             Text(text = stringResource(R.string.starting))
         }
         is PairingUiState.ShowingCode -> PairingCodeDisplay(state)
-        is PairingUiState.Done -> {
-            // SoundbarPairingSection never produces this state — success
-            // flips settings into the "Paired ✓" branch above instead.
-        }
     }
 }
 
@@ -470,7 +460,7 @@ private fun DevicePairingSection(onPaired: (String) -> Unit) {
                         return@launch
                     }
                     val qrBitmap = withContext(Dispatchers.Default) { generateQrCodeBitmap(session.approveUrl) }
-                    pairingState = PairingUiState.ShowingCode(session.code, session.token, qrBitmap)
+                    pairingState = PairingUiState.ShowingCode(session.code, qrBitmap)
 
                     val deadlineMs = System.currentTimeMillis() + session.expiresInSeconds * 1000L
                     while (System.currentTimeMillis() < deadlineMs) {
@@ -487,7 +477,7 @@ private fun DevicePairingSection(onPaired: (String) -> Unit) {
                                 pairingState = PairingUiState.Failed(resources.getString(R.string.pairing_code_expired))
                                 return@launch
                             }
-                            is LauncherConfigSync.PairingPollResult.Error -> {
+                            LauncherConfigSync.PairingPollResult.Error -> {
                                 // Keep polling; don't give up on a transient blip.
                             }
                             LauncherConfigSync.PairingPollResult.Pending -> {
@@ -505,9 +495,5 @@ private fun DevicePairingSection(onPaired: (String) -> Unit) {
             Text(text = stringResource(R.string.starting))
         }
         is PairingUiState.ShowingCode -> PairingCodeDisplay(state)
-        is PairingUiState.Done -> {
-            // DevicePairingSection never produces this state — success
-            // flips deviceToken non-blank via onPaired instead.
-        }
     }
 }
