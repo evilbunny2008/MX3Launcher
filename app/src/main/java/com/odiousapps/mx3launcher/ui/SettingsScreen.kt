@@ -22,7 +22,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -274,7 +274,7 @@ private fun SoundbarPairingSection(
     val isPaired = settings.soundbarWakeUrl.isNotBlank() && settings.soundbarWakeSecret.isNotBlank()
     var pairingState by remember { mutableStateOf<PairingUiState>(PairingUiState.Idle) }
     val pairingScope = androidx.compose.runtime.rememberCoroutineScope()
-    val context = LocalContext.current
+    val resources = LocalResources.current
 
     if (isPaired) {
         Text(text = stringResource(R.string.paired))
@@ -297,7 +297,7 @@ private fun SoundbarPairingSection(
                 pairingScope.launch {
                     val session = withContext(Dispatchers.IO) { SoundbarPairing.startPairing() }
                     if (session == null) {
-                        pairingState = PairingUiState.Failed(context.getString(R.string.pairing_start_failed))
+                        pairingState = PairingUiState.Failed(resources.getString(R.string.pairing_start_failed))
                         return@launch
                     }
                     val approveUrl = "https://sync.odiousapps.com/credential_view.php?code=${session.code}"
@@ -321,7 +321,7 @@ private fun SoundbarPairingSection(
                                 return@launch
                             }
                             is SoundbarPairing.PollResult.Expired -> {
-                                pairingState = PairingUiState.Failed(context.getString(R.string.pairing_code_expired))
+                                pairingState = PairingUiState.Failed(resources.getString(R.string.pairing_code_expired))
                                 return@launch
                             }
                             is SoundbarPairing.PollResult.Error -> {
@@ -332,7 +332,7 @@ private fun SoundbarPairingSection(
                             }
                         }
                     }
-                    pairingState = PairingUiState.Failed(context.getString(R.string.pairing_code_expired))
+                    pairingState = PairingUiState.Failed(resources.getString(R.string.pairing_code_expired))
                 }
             }) {
                 Text(text = stringResource(R.string.pair))
@@ -375,7 +375,7 @@ private fun ConfigSyncSection(
     }
 
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+    val resources = LocalResources.current
     var syncStatus by remember { mutableStateOf<String?>(null) }
     var restoreState by remember { mutableStateOf<RestoreListUiState>(RestoreListUiState.Idle) }
 
@@ -390,9 +390,9 @@ private fun ConfigSyncSection(
         }
         Button(onClick = {
             scope.launch {
-                syncStatus = context.getString(R.string.backing_up)
+                syncStatus = resources.getString(R.string.backing_up)
                 val ok = withContext(Dispatchers.IO) { LauncherConfigSync.uploadBackup(deviceToken, settings) }
-                syncStatus = context.getString(if (ok) R.string.backed_up else R.string.backup_failed)
+                syncStatus = resources.getString(if (ok) R.string.backed_up else R.string.backup_failed)
             }
         }) {
             Text(text = stringResource(R.string.back_up_settings))
@@ -402,7 +402,7 @@ private fun ConfigSyncSection(
                 restoreState = RestoreListUiState.Loading
                 val backups = withContext(Dispatchers.IO) { LauncherConfigSync.listBackups(deviceToken) }
                 restoreState = if (backups == null) {
-                    RestoreListUiState.Failed(context.getString(R.string.backups_load_failed))
+                    RestoreListUiState.Failed(resources.getString(R.string.backups_load_failed))
                 } else {
                     RestoreListUiState.Loaded(backups)
                 }
@@ -435,9 +435,9 @@ private fun ConfigSyncSection(
                                     // write actually completing.
                                     onRestore(fetched)
                                     restoreState = RestoreListUiState.Idle
-                                    syncStatus = context.getString(R.string.restored_from, backup.label)
+                                    syncStatus = resources.getString(R.string.restored_from, backup.label)
                                 } else {
-                                    restoreState = RestoreListUiState.Failed(context.getString(R.string.backup_read_failed))
+                                    restoreState = RestoreListUiState.Failed(resources.getString(R.string.backup_read_failed))
                                 }
                             }
                         }) {
@@ -454,7 +454,7 @@ private fun ConfigSyncSection(
 private fun DevicePairingSection(onPaired: (String) -> Unit) {
     var pairingState by remember { mutableStateOf<PairingUiState>(PairingUiState.Idle) }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+    val resources = LocalResources.current
 
     when (val state = pairingState) {
         is PairingUiState.Idle, is PairingUiState.Failed -> {
@@ -467,7 +467,7 @@ private fun DevicePairingSection(onPaired: (String) -> Unit) {
                 scope.launch {
                     val session = withContext(Dispatchers.IO) { LauncherConfigSync.pairDevice() }
                     if (session == null) {
-                        pairingState = PairingUiState.Failed(context.getString(R.string.pairing_start_failed))
+                        pairingState = PairingUiState.Failed(resources.getString(R.string.pairing_start_failed))
                         return@launch
                     }
                     val qrBitmap = withContext(Dispatchers.Default) { generateQrCodeBitmap(session.approveUrl) }
@@ -485,7 +485,7 @@ private fun DevicePairingSection(onPaired: (String) -> Unit) {
                                 return@launch
                             }
                             is LauncherConfigSync.PairingPollResult.Expired -> {
-                                pairingState = PairingUiState.Failed(context.getString(R.string.pairing_code_expired))
+                                pairingState = PairingUiState.Failed(resources.getString(R.string.pairing_code_expired))
                                 return@launch
                             }
                             is LauncherConfigSync.PairingPollResult.Error -> {
@@ -496,7 +496,7 @@ private fun DevicePairingSection(onPaired: (String) -> Unit) {
                             }
                         }
                     }
-                    pairingState = PairingUiState.Failed(context.getString(R.string.pairing_code_expired))
+                    pairingState = PairingUiState.Failed(resources.getString(R.string.pairing_code_expired))
                 }
             }) {
                 Text(text = stringResource(R.string.pair))

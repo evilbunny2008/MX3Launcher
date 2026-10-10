@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MX3 Launcher</string>
+    <string name="app_name" translatable="false">MX3 Launcher</string>
 
     <!-- Common -->
-    <string name="checkmark">✓</string>
+    <string name="checkmark" translatable="false">✓</string>
     <string name="back">Back</string>
     <string name="ok">OK</string>
     <string name="pair">Pair</string>
     <string name="paired">Paired ✓</string>
     <string name="forget_pairing">Forget pairing</string>
-    <string name="starting">Starting...</string>
-    <string name="loading">Loading...</string>
+    <string name="starting">Starting…</string>
+    <string name="loading">Loading…</string>
 
     <!-- Top bar -->
     <string name="cd_system_settings">System settings</string>
@@ -26,8 +26,8 @@
     <!-- App display settings -->
     <string name="app_display_title">App display</string>
     <string name="app_display_description">Choose which apps appear on the home screen and their order.</string>
-    <string name="move_up">↑</string>
-    <string name="move_down">↓</string>
+    <string name="move_up" translatable="false">↑</string>
+    <string name="move_down" translatable="false">↓</string>
     <string name="show">Show</string>
     <string name="hide">Hide</string>
 
@@ -39,7 +39,7 @@
     <string name="theme_dark">Dark</string>
     <string name="settings_background_gradient">Background gradient</string>
     <string name="settings_columns">App columns per row</string>
-    <string name="settings_columns_selected">%1$d ✓</string>
+    <string name="settings_columns_selected" translatable="false">%1$d ✓</string>
     <string name="settings_app_display">App display</string>
     <string name="settings_app_display_button">Show/hide apps and set their order</string>
     <string name="settings_soundbar_wake">Soundbar wake</string>
@@ -61,7 +61,7 @@
     <!-- Backup & restore -->
     <string name="back_up_settings">Back up settings</string>
     <string name="restore_settings">Restore settings</string>
-    <string name="backing_up">Backing up...</string>
+    <string name="backing_up">Backing up…</string>
     <string name="backed_up">Backed up</string>
     <string name="backup_failed">Backup failed — check the server is reachable</string>
     <string name="backups_load_failed">Couldn\'t load backups — check the server is reachable</string>
