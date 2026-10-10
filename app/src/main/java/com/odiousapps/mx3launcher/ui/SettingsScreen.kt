@@ -31,6 +31,7 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.odiousapps.mx3launcher.R
+import com.odiousapps.mx3launcher.data.COLUMN_OPTIONS
 import com.odiousapps.mx3launcher.data.GRADIENT_PRESETS
 import com.odiousapps.mx3launcher.data.LauncherConfigSync
 import com.odiousapps.mx3launcher.data.LauncherSettings
@@ -41,8 +42,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
-
-private val COLUMN_OPTIONS = listOf(5, 6, 7)
 
 @Composable
 fun SettingsScreen(
@@ -273,7 +272,7 @@ private fun SoundbarPairingSection(
 ) {
     val isPaired = settings.soundbarWakeUrl.isNotBlank() && settings.soundbarWakeSecret.isNotBlank()
     var pairingState by remember { mutableStateOf<PairingUiState>(PairingUiState.Idle) }
-    val pairingScope = androidx.compose.runtime.rememberCoroutineScope()
+    val pairingScope = rememberCoroutineScope()
     val resources = LocalResources.current
 
     if (isPaired) {
@@ -427,7 +426,7 @@ private fun ConfigSyncSection(
                         Button(onClick = {
                             scope.launch {
                                 val fetched = withContext(Dispatchers.IO) {
-                                    LauncherConfigSync.fetchBackup(deviceToken, backup.id)
+                                    LauncherConfigSync.fetchBackup(deviceToken, backup.id, settings)
                                 }
                                 if (fetched != null) {
                                     // Awaited, not fired-and-forgotten, so this

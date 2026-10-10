@@ -43,6 +43,14 @@ data class LauncherSettings(
     val soundbarCheckCurrent: Boolean = true,
 )
 
+val COLUMN_OPTIONS = listOf(5, 6, 7)
+const val DEFAULT_COLUMNS = 6
+
+/** Anything outside [COLUMN_OPTIONS] (e.g. 0 from a malformed backup) would
+ *  crash the home grid - GridCells.Fixed(0) throws and AppTile divides by
+ *  it - and since this app *is* the home screen, that's a crash loop. */
+fun sanitizeColumns(columns: Int): Int = if (columns in COLUMN_OPTIONS) columns else DEFAULT_COLUMNS
+
 // wake_soundbar.php's default IR code for the Philips 6000 soundbar this was
 // built for - see SoundbarPairing.kt for where a paired preset can override it.
 const val DEFAULT_SOUNDBAR_IR_CODES = "P6000_ON"
@@ -67,7 +75,6 @@ object LauncherPreferences {
     // backed-up device's identity/token).
     private val KEY_CONFIG_SYNC_DEVICE_TOKEN = stringPreferencesKey("config_sync_device_token")
 
-    private const val DEFAULT_COLUMNS = 6
     private const val ORDER_DELIMITER = ","
 
     fun observe(context: Context): Flow<LauncherSettings> =
@@ -76,7 +83,7 @@ object LauncherPreferences {
                 themeMode = prefs[KEY_THEME_MODE]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() }
                     ?: ThemeMode.SYSTEM,
                 gradientId = prefs[KEY_GRADIENT_ID] ?: GRADIENT_PRESETS.first().id,
-                columns = prefs[KEY_COLUMNS] ?: DEFAULT_COLUMNS,
+                columns = sanitizeColumns(prefs[KEY_COLUMNS] ?: DEFAULT_COLUMNS),
                 hiddenPackages = prefs[KEY_HIDDEN_PACKAGES] ?: emptySet(),
                 appOrder = prefs[KEY_APP_ORDER]
                     ?.split(ORDER_DELIMITER)

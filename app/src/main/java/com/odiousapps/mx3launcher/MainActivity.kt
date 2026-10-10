@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.core.content.ContextCompat
 import com.odiousapps.mx3launcher.data.AppEntry
 import com.odiousapps.mx3launcher.data.AppRepository
 import com.odiousapps.mx3launcher.data.LauncherPreferences
@@ -125,9 +126,10 @@ private fun LauncherApp(screenState: MutableState<Screen>) {
             addAction(Intent.ACTION_PACKAGE_REPLACED)
             addDataScheme("package")
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
-        }
+        // ContextCompat handles the API 33+ export flag and plain registration
+        // below that alike, so the receiver is always registered - matching the
+        // unconditional unregister below, which would otherwise throw.
+        ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
         onDispose { context.unregisterReceiver(receiver) }
     }
 

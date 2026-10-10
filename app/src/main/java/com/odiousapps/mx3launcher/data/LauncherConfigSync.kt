@@ -45,7 +45,16 @@ object LauncherConfigSync {
     private const val KEY_COLUMNS = "columns"
     private const val KEY_HIDDEN_PACKAGES = "hiddenPackages"
     private const val KEY_APP_ORDER = "appOrder"
-    private val KNOWN_KEYS = listOf(KEY_THEME_MODE, KEY_GRADIENT_ID, KEY_COLUMNS, KEY_HIDDEN_PACKAGES, KEY_APP_ORDER)
+    private const val KEY_SOUNDBAR_WAKE_ENABLED = "soundbarWakeEnabled"
+    private const val KEY_SOUNDBAR_WAKE_URL = "soundbarWakeUrl"
+    private const val KEY_SOUNDBAR_WAKE_SECRET = "soundbarWakeSecret"
+    private const val KEY_SOUNDBAR_IR_CODES = "soundbarIrCodesToSend"
+    private const val KEY_SOUNDBAR_CHECK_CURRENT = "soundbarCheckCurrent"
+    private val KNOWN_KEYS = listOf(
+        KEY_THEME_MODE, KEY_GRADIENT_ID, KEY_COLUMNS, KEY_HIDDEN_PACKAGES, KEY_APP_ORDER,
+        KEY_SOUNDBAR_WAKE_ENABLED, KEY_SOUNDBAR_WAKE_URL, KEY_SOUNDBAR_WAKE_SECRET,
+        KEY_SOUNDBAR_IR_CODES, KEY_SOUNDBAR_CHECK_CURRENT,
+    )
 
     data class PairingSession(val code: String, val token: String, val expiresInSeconds: Int) {
         val approveUrl: String get() = "$VIEW_URL_PREFIX$code"
@@ -147,13 +156,14 @@ object LauncherConfigSync {
     }
 
     /** Returns the parsed settings on success, or null if the fetch or
-     *  parse failed. */
-    fun fetchBackup(deviceToken: String, id: Int): LauncherSettings? {
+     *  parse failed. [current] supplies the soundbar fields for backups made
+     *  before those were included - see fromJson(). */
+    fun fetchBackup(deviceToken: String, id: Int, current: LauncherSettings): LauncherSettings? {
         return try {
             val encodedToken = java.net.URLEncoder.encode(deviceToken, "UTF-8")
             val json = JSONObject(PairingHttp.get("$GET_URL?token=$encodedToken&id=$id"))
             if (!json.optBoolean("ok", false)) return null
-            fromJson(json.optString("config"))
+            fromJson(json.optString("config"), current)
         } catch (e: Exception) {
             Log.w(TAG, "fetchBackup failed", e)
             null
@@ -167,6 +177,11 @@ object LauncherConfigSync {
         json.put(KEY_COLUMNS, settings.columns)
         json.put(KEY_HIDDEN_PACKAGES, JSONArray(settings.hiddenPackages.toList()))
         json.put(KEY_APP_ORDER, JSONArray(settings.appOrder))
+        json.put(KEY_SOUNDBAR_WAKE_ENABLED, settings.soundbarWakeEnabled)
+        json.put(KEY_SOUNDBAR_WAKE_URL, settings.soundbarWakeUrl)
+        json.put(KEY_SOUNDBAR_WAKE_SECRET, settings.soundbarWakeSecret)
+        json.put(KEY_SOUNDBAR_IR_CODES, settings.soundbarIrCodesToSend)
+        json.put(KEY_SOUNDBAR_CHECK_CURRENT, settings.soundbarCheckCurrent)
         return json.toString()
     }
 
@@ -179,15 +194,20 @@ object LauncherConfigSync {
      *  means a JSON object with none of our keys would otherwise parse
      *  "successfully" into all-default settings with no way to tell that
      *  apart from a real restore — so that case is rejected explicitly
-     *  up front instead. */
-    private fun fromJson(raw: String): LauncherSettings? {
+     *  up front instead.
+     *
+     *  The soundbar fields are the exception to defaulting: backups made
+     *  before they were included fall back to [current] instead, so
+     *  restoring an old backup doesn't silently wipe this device's
+     *  soundbar pairing. */
+    private fun fromJson(raw: String, current: LauncherSettings): LauncherSettings? {
         return try {
             val json = JSONObject(raw)
             if (KNOWN_KEYS.none { json.has(it) }) return null
             val themeMode = json.optString(KEY_THEME_MODE, ThemeMode.SYSTEM.name)
                 .let { name -> runCatching { ThemeMode.valueOf(name) }.getOrDefault(ThemeMode.SYSTEM) }
             val gradientId = json.optString(KEY_GRADIENT_ID, GRADIENT_PRESETS.first().id)
-            val columns = json.optInt(KEY_COLUMNS, 6)
+            val columns = sanitizeColumns(json.optInt(KEY_COLUMNS, DEFAULT_COLUMNS))
             val hiddenPackages = json.optJSONArray(KEY_HIDDEN_PACKAGES)?.toStringSet() ?: emptySet()
             val appOrder = json.optJSONArray(KEY_APP_ORDER)?.toStringList() ?: emptyList()
 
@@ -197,6 +217,11 @@ object LauncherConfigSync {
                 columns = columns,
                 hiddenPackages = hiddenPackages,
                 appOrder = appOrder,
+                soundbarWakeEnabled = json.optBoolean(KEY_SOUNDBAR_WAKE_ENABLED, current.soundbarWakeEnabled),
+                soundbarWakeUrl = json.optString(KEY_SOUNDBAR_WAKE_URL, current.soundbarWakeUrl),
+                soundbarWakeSecret = json.optString(KEY_SOUNDBAR_WAKE_SECRET, current.soundbarWakeSecret),
+                soundbarIrCodesToSend = json.optString(KEY_SOUNDBAR_IR_CODES, current.soundbarIrCodesToSend),
+                soundbarCheckCurrent = json.optBoolean(KEY_SOUNDBAR_CHECK_CURRENT, current.soundbarCheckCurrent),
             )
         } catch (_: Exception) {
             null

@@ -3,6 +3,7 @@ package com.odiousapps.mx3launcher.ui
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.Image
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
@@ -187,17 +189,7 @@ private fun AppTile(
             modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Preserves the drawable's natural aspect ratio (a fixed square
-            // would squish non-square icons); falls back to a fixed size only
-            // when the intrinsic size is invalid (some adaptive icons report -1).
-            val bitmap = remember(app.packageName) {
-                val hasValidIntrinsicSize = app.icon.intrinsicWidth > 0 && app.icon.intrinsicHeight > 0
-                if (hasValidIntrinsicSize) {
-                    app.icon.toBitmap().asImageBitmap()
-                } else {
-                    app.icon.toBitmap(108, 108).asImageBitmap()
-                }
-            }
+            val bitmap = remember(app.packageName) { app.icon.toImageBitmapSafely() }
 
             // Square backdrop spanning the tile's full width; one subtle tint
             // works in both themes without needing per-theme colours. The
@@ -222,6 +214,20 @@ private fun AppTile(
 
             Text(text = app.label, maxLines = 1, modifier = Modifier.padding(top = 4.dp))
         }
+    }
+}
+
+/**
+ * Preserves the drawable's natural aspect ratio (a fixed square would squish
+ * non-square icons); falls back to a fixed size only when the intrinsic size
+ * is invalid (some adaptive icons report -1, which toBitmap() throws on).
+ */
+internal fun Drawable.toImageBitmapSafely(): ImageBitmap {
+    val hasValidIntrinsicSize = intrinsicWidth > 0 && intrinsicHeight > 0
+    return if (hasValidIntrinsicSize) {
+        toBitmap().asImageBitmap()
+    } else {
+        toBitmap(108, 108).asImageBitmap()
     }
 }
 
