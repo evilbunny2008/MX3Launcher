@@ -1,0 +1,21 @@
+Een minimale Google TV-launcher: een plat appraster en verder niets. Een lichter alternatief voor uitgebreide tv-launchers, zonder live-tv-integratie, aanbevelingsrijen of zoeken/spraak.
+
+Functies:
+
+* Plat raster van 5, 6 of 7 kolommen met elke geïnstalleerde startbare app.
+* Bovenbalk met live klok, een wifi-statuspictogram dat de netwerkinstellingen opent, en snelkoppelingen naar de systeem- en launcherinstellingen.
+* Thema: systeem volgen, licht of donker, met vooraf ingestelde achtergrondverlopen.
+* Apps tonen/verbergen en herschikken met omhoog-/omlaagknoppen, omdat sleepgebaren geen zinnig equivalent op de D-pad hebben.
+* Druk op Menu op een geselecteerd appicoon om direct naar de systeempagina 'App-info' te gaan (machtigingen, opslag, verwijderen).
+* Optionele online back-up en herstel via sync.odiousapps.com, met meerdere back-ups met tijdstempel, plus terugzetten naar standaardwaarden met één druk op de knop (werkt offline).
+* Optioneel 'Soundbar wekken': roept vóór het starten van een app een URL op je eigen server aan om een soundbar uit stand-by te wekken.
+* Een achtergrondservice detecteert wanneer het apparaat uit stand-by ontwaakt en brengt de launcher terug als iets anders het heeft overgenomen.
+
+MX3 Launcher bevoordeelt, vereist of bevat geen enkele app van derden; het toont gewoon wat er is geïnstalleerd.
+
+Onlinediensten (beide optioneel, uit totdat je ze koppelt):
+
+Al het andere werkt volledig offline. Twee functies communiceren met sync.odiousapps.com, een koppel- en back-updienst van de ontwikkelaar, en pas nadat je in de instellingen op 'Koppelen' hebt gedrukt en het verzoek op een ander apparaat hebt goedgekeurd (scan de QR-code of voer de korte code in op sync.odiousapps.com, waar je inlogt op je account).
+
+* Online back-up: door te koppelen krijgt de tv een apparaattoken. Bij een back-up uploadt de tv je thema, achtergrondverloop, aantal kolommen, lijst met verborgen apps en aangepaste appvolgorde naar sync.odiousapps.com, waar ze bij je account worden opgeslagen. De lijst en volgorde zijn pakketnamen van geïnstalleerde apps (bijvoorbeeld com.example.app). Bij herstel wordt de gekozen back-up van dezelfde server gedownload. Er wordt niets geüpload tenzij je op 'Instellingen back-uppen' drukt.
+* Soundbar wekken: bij het koppelen worden een URL en geheime sleutel opgehaald die je eerder in je sync.odiousapps.com-account hebt opgeslagen; deze worden op de tv bewaard. Eenmaal ingeschakeld stuurt de tv bij elke appstart een verzoek naar die URL (je eigen server, niet sync.odiousapps.com) met ?key=<je geheim>, de IR-codenaam en een vlag 'huidige status controleren', en wacht op succes voordat de app start. Er wordt niets verstuurd over welke app wordt gestart. De server heeft het voorbeeldscript uit de broncoderepository nodig (website_lan/send_ir.php), dat de PHP-klasse MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) gebruikt om de slimme stekker en IR-blaster via MQTT aan te sturen.

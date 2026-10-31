@@ -1,0 +1,1 @@
+* Zaktualizowano narzędzia kompilacji i biblioteki.

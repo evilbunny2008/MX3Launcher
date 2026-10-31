@@ -1,0 +1,21 @@
+En minimal Google TV-launcher: et fladt app-gitter og intet andet. Et lettere alternativ til funktionsrige tv-launchere, uden live-tv-integration, anbefalingsrækker eller søgning/stemme.
+
+Funktioner:
+
+* Fladt gitter med 5, 6 eller 7 kolonner, der viser alle installerede apps, som kan startes.
+* Topbjælke med ur, et Wi-Fi-statusikon, der åbner netværksindstillingerne, og genveje til system- og launcherindstillinger.
+* Tema: følg system, lyst eller mørkt, med forudindstillede baggrundsgradienter.
+* Vis/skjul og omarranger apps med flyt op/ned-knapper, da trækbevægelser ikke har en fornuftig pendant på D-pad'en.
+* Tryk på Menu på et markeret app-ikon for at gå direkte til systemsiden "Appinfo" (tilladelser, lagerplads, afinstallation).
+* Valgfri onlinesikkerhedskopiering og -gendannelse via sync.odiousapps.com med flere tidsstemplede sikkerhedskopier samt nulstilling til standard med ét tryk (virker offline).
+* Valgfri "Vækning af soundbar": før en app startes, kaldes en URL på din egen server for at vække en soundbar fra standby.
+* En baggrundstjeneste registrerer, når enheden vågner fra standby, og henter launcheren tilbage, hvis noget andet har overtaget.
+
+MX3 Launcher favoriserer, kræver eller indeholder ingen tredjepartsapps; den viser blot det, der er installeret.
+
+Onlinetjenester (begge valgfri, slået fra, indtil du parrer dem):
+
+Alt andet fungerer fuldt ud offline. To funktioner kommunikerer med sync.odiousapps.com, en parrings- og backuptjeneste drevet af udvikleren, og kun efter du har trykket på "Par" i indstillingerne og godkendt anmodningen på en anden enhed (scan QR-koden, eller indtast kortkoden på sync.odiousapps.com, hvor du logger ind på din konto).
+
+* Onlinesikkerhedskopiering: parring giver tv'et et enhedstoken. Ved sikkerhedskopiering uploader tv'et dit tema, baggrundsgradient, antal kolonner, listen over skjulte apps og din apprækkefølge til sync.odiousapps.com, hvor de gemmes på din konto. Listen og rækkefølgen er pakkenavne på installerede apps (for eksempel com.example.app). Gendannelse henter den valgte sikkerhedskopi fra samme server. Intet uploades, medmindre du trykker på "Sikkerhedskopiér indstillinger".
+* Vækning af soundbar: parring henter en URL og en hemmelig nøgle, som du tidligere har gemt på din sync.odiousapps.com-konto; de gemmes på tv'et. Når funktionen er aktiveret, sender tv'et ved hver appstart en anmodning til den URL (din egen server, ikke sync.odiousapps.com) med ?key=<din hemmelighed>, IR-kodenavnet og flaget "tjek aktuel tilstand" og venter på, at den lykkes, før appen startes. Der sendes intet om, hvilken app der startes. Serveren kræver eksempelscriptet fra kildekodelageret (website_lan/send_ir.php), som bruger PHP-klassen MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) til at nå den smarte stikkontakt og IR-senderen via MQTT.

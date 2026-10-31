@@ -1,0 +1,21 @@
+Minimalističen zaganjalnik za Google TV: ploščata mreža aplikacij in nič drugega. Lažja alternativa obsežnim TV-zaganjalnikom, brez integracije televizije v živo, vrstic priporočil in iskanja/glasu.
+
+Funkcije:
+
+* Ploščata mreža s 5, 6 ali 7 stolpci, ki prikazuje vse nameščene aplikacije, ki jih je mogoče zagnati.
+* Zgornja vrstica z uro, ikono stanja Wi-Fi, ki odpre omrežne nastavitve, ter bližnjicami do nastavitev sistema in zaganjalnika.
+* Tema: po sistemu, svetla ali temna, s prednastavljenimi prelivi ozadja.
+* Prikaz/skrivanje in spreminjanje vrstnega reda aplikacij z gumboma gor/dol, saj poteze vlečenja nimajo smiselnega ustreznika na smernem gumbu.
+* Pritisnite Meni na izbrani ikoni aplikacije, da odprete sistemsko stran »Podatki o aplikaciji« (dovoljenja, shramba, odstranitev).
+* Izbirno spletno varnostno kopiranje in obnovitev prek sync.odiousapps.com, z več kopijami s časovnim žigom, ter ponastavitev na privzeto z enim pritiskom (deluje brez povezave).
+* Izbirno »Bujenje soundbara«: pred zagonom aplikacije pokliče URL na vašem strežniku, da zbudi soundbar iz stanja pripravljenosti.
+* Storitev v ozadju zazna prebujanje naprave iz stanja pripravljenosti in vrne zaganjalnik, če je medtem prevzelo nekaj drugega.
+
+MX3 Launcher ne daje prednosti, ne zahteva in ne vključuje nobene aplikacije tretjih oseb; le prikaže, kar je nameščeno.
+
+Spletne storitve (obe izbirni, izklopljeni, dokler ju ne seznanite):
+
+Vse drugo deluje povsem brez povezave. Dve funkciji komunicirata s sync.odiousapps.com, storitvijo za seznanjanje in varnostno kopiranje, ki jo upravlja razvijalec, in sicer šele potem, ko v nastavitvah pritisnete »Seznani« in odobrite zahtevo v drugi napravi (optično preberite kodo QR ali vnesite kratko kodo na sync.odiousapps.com, kjer se prijavite v svoj račun).
+
+* Spletno varnostno kopiranje: seznanjanje televizorju dodeli žeton naprave. Pri kopiranju televizor naloži temo, preliv ozadja, število stolpcev, seznam skritih aplikacij in vaš vrstni red aplikacij na sync.odiousapps.com, kjer se shranijo v vaš račun. Seznam in vrstni red sta imena paketov nameščenih aplikacij (na primer com.example.app). Obnovitev prenese izbrano kopijo z istega strežnika. Nič se ne naloži, razen če pritisnete »Varnostno kopiraj nastavitve«.
+* Bujenje soundbara: seznanjanje pridobi URL in skrivni ključ, ki ste ju prej shranili v račun sync.odiousapps.com; shranita se v televizor. Ko je funkcija vklopljena, televizor ob vsakem zagonu aplikacije pošlje zahtevo na ta URL (vaš strežnik, ne sync.odiousapps.com) s ?key=<vaša skrivnost>, imenom kode IR in zastavico »preveri trenutno stanje« ter pred zagonom počaka na uspeh. Podatki o tem, katera aplikacija se zaganja, se ne pošiljajo. Strežnik potrebuje vzorčni skript iz izvornega skladišča (website_lan/send_ir.php), ki z razredom PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) prek MQTT dostopa do pametne vtičnice in oddajnika IR.

@@ -1,0 +1,1 @@
+* Konpilazio-tresnak eta liburutegiak eguneratu dira.

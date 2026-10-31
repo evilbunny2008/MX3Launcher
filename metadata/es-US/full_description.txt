@@ -1,0 +1,21 @@
+Un launcher minimalista para Google TV: una cuadrícula plana de aplicaciones y nada más. Una alternativa ligera a los launchers de TV completos, sin integración de TV en directo, filas de recomendaciones ni búsqueda/voz.
+
+Características:
+
+* Cuadrícula de 5, 6 o 7 columnas que muestra todas las aplicaciones instaladas que se pueden abrir.
+* Barra superior con reloj en vivo, un icono de estado de Wi-Fi que abre los ajustes de red, y accesos directos a los ajustes del sistema y del launcher.
+* Tema: según el sistema, claro u oscuro, con degradados de fondo predefinidos.
+* Mostrar/ocultar y reordenar aplicaciones con controles de subir/bajar, ya que los gestos de arrastre no tienen un equivalente razonable en el mando direccional.
+* Pulsa Menú sobre un icono seleccionado para ir a su página «Información de la aplicación» del sistema (permisos, almacenamiento, desinstalación).
+* Copia de seguridad y restauración en línea opcionales mediante sync.odiousapps.com, con varias copias con fecha y hora, y restablecimiento de valores predeterminados con una pulsación (funciona sin conexión).
+* «Activación de la barra de sonido» opcional: antes de abrir una aplicación, llama a una URL de tu propio servidor para sacar una barra de sonido del reposo.
+* Un servicio en segundo plano detecta cuando el dispositivo sale del reposo y devuelve el launcher si otra cosa ha tomado el control.
+
+MX3 Launcher no favorece, exige ni incluye ninguna aplicación de terceros; simplemente enumera lo que está instalado.
+
+Servicios en línea (ambos opcionales, desactivados hasta que los vincules):
+
+Todo lo demás funciona completamente sin conexión. Dos funciones se comunican con sync.odiousapps.com, un servicio de vinculación y copias de seguridad gestionado por el desarrollador, y solo después de que pulses «Vincular» en los ajustes y apruebes la solicitud en otro dispositivo (escanea el código QR o introduce el código corto en sync.odiousapps.com, donde inicias sesión en tu cuenta).
+
+* Copia de seguridad en línea: la vinculación da al televisor un token de dispositivo. Al hacer una copia, el televisor sube tu tema, el degradado de fondo, el número de columnas, la lista de aplicaciones ocultas y tu orden personalizado a sync.odiousapps.com, donde se guardan en tu cuenta. La lista y el orden son nombres de paquete de aplicaciones instaladas (por ejemplo, com.example.app). Al restaurar se descarga la copia elegida desde el mismo servidor. No se sube nada a menos que pulses «Hacer copia de seguridad».
+* Activación de la barra de sonido: la vinculación obtiene una URL y una clave secreta que guardaste antes en tu cuenta de sync.odiousapps.com; se almacenan en el televisor. Una vez activada, cada vez que abres una aplicación el televisor envía una solicitud a esa URL (tu propio servidor, no sync.odiousapps.com) con ?key=<tu secreto>, el nombre del código IR y un indicador de «comprobar estado actual», y espera a que tenga éxito antes de abrirla. No se envía nada sobre qué aplicación se abre. El servidor necesita el script de ejemplo del repositorio de código fuente (website_lan/send_ir.php), que usa la clase PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) para comunicarse con el enchufe inteligente y el emisor de IR mediante MQTT.

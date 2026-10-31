@@ -1,0 +1,21 @@
+Un launcher minimalist pentru Google TV: o grilă plată de aplicații și nimic altceva. O alternativă mai ușoară la launcherele TV complexe, fără integrare TV live, rânduri de recomandări sau căutare/voce.
+
+Funcții:
+
+* Grilă plată cu 5, 6 sau 7 coloane care afișează toate aplicațiile instalate ce pot fi lansate.
+* Bară superioară cu ceas, o pictogramă de stare Wi-Fi care deschide setările de rețea și comenzi rapide către setările sistemului și ale launcherului.
+* Temă: după sistem, deschisă sau întunecată, cu degradeuri de fundal predefinite.
+* Afișează/ascunde și reordonează aplicațiile cu butoane sus/jos, deoarece gesturile de tragere nu au un echivalent rezonabil pe D-pad.
+* Apasă Meniu pe o pictogramă selectată pentru a merge direct la pagina de sistem „Informații despre aplicație” (permisiuni, stocare, dezinstalare).
+* Backup și restaurare online opționale prin sync.odiousapps.com, cu mai multe copii cu marcaj de timp, plus resetare la valorile implicite dintr-o apăsare (funcționează offline).
+* „Trezirea soundbarului” opțională: înainte de a lansa o aplicație, apelează un URL de pe propriul tău server pentru a scoate un soundbar din standby.
+* Un serviciu de fundal detectează ieșirea dispozitivului din standby și readuce launcherul dacă altceva a preluat controlul.
+
+MX3 Launcher nu favorizează, nu necesită și nu include nicio aplicație terță; afișează pur și simplu ce este instalat.
+
+Servicii online (ambele opționale, oprite până le asociezi):
+
+Tot restul funcționează complet offline. Două funcții comunică cu sync.odiousapps.com, un serviciu de asociere și backup administrat de dezvoltator, și doar după ce apeși „Asociază” în setări și aprobi cererea pe alt dispozitiv (scanează codul QR sau introdu codul scurt pe sync.odiousapps.com, unde te conectezi la cont).
+
+* Backup online: asocierea îi oferă televizorului un token de dispozitiv. La backup, televizorul încarcă tema, degradeul de fundal, numărul de coloane, lista aplicațiilor ascunse și ordinea personalizată pe sync.odiousapps.com, unde sunt stocate în contul tău. Lista și ordinea sunt nume de pachete ale aplicațiilor instalate (de exemplu, com.example.app). Restaurarea descarcă backupul ales de pe același server. Nimic nu se încarcă dacă nu apeși „Fă backup setărilor”.
+* Trezirea soundbarului: asocierea preia un URL și o cheie secretă salvate anterior în contul tău sync.odiousapps.com; acestea sunt stocate pe televizor. Odată activată, la fiecare lansare de aplicație televizorul trimite o solicitare la acel URL (serverul tău, nu sync.odiousapps.com) cu ?key=<secretul tău>, numele codului IR și un indicator „verifică starea curentă” și așteaptă reușita înainte de lansare. Nu se trimite nimic despre aplicația lansată. Serverul are nevoie de scriptul exemplu din depozitul sursă (website_lan/send_ir.php), care folosește clasa PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) pentru a comunica prin MQTT cu priza inteligentă și emițătorul IR.

@@ -1,0 +1,21 @@
+Minimalistinė Google TV paleidimo programa: plokščias programų tinklelis ir nieko daugiau. Lengvesnė alternatyva daug funkcijų turinčioms TV paleidimo programoms, be tiesioginės TV integracijos, rekomendacijų eilučių ir paieškos/balso.
+
+Funkcijos:
+
+* Plokščias 5, 6 arba 7 stulpelių tinklelis, rodantis visas įdiegtas paleidžiamas programas.
+* Viršutinė juosta su laikrodžiu, tinklo nustatymus atveriančia „Wi-Fi“ būsenos piktograma ir sistemos bei paleidimo programos nustatymų nuorodomis.
+* Tema: pagal sistemą, šviesi arba tamsi, su iš anksto nustatytais fono gradientais.
+* Programų rodymas/slėpimas ir pertvarkymas mygtukais aukštyn/žemyn, nes vilkimo gestai neturi prasmingo atitikmens D-pad valdiklyje.
+* Paspauskite Meniu ant pasirinktos piktogramos, kad patektumėte tiesiai į sistemos puslapį „Programos informacija“ (leidimai, saugykla, pašalinimas).
+* Pasirenkamas internetinis atsarginis kopijavimas ir atkūrimas per sync.odiousapps.com, su keliomis kopijomis su laiko žyma, taip pat numatytųjų nustatymų atkūrimas vienu paspaudimu (veikia neprisijungus).
+* Pasirenkamas „Garso juostos žadinimas“: prieš paleidžiant programą iškviečiamas URL jūsų serveryje, kad garso juosta būtų pažadinta iš budėjimo režimo.
+* Fono paslauga aptinka įrenginio pabudimą iš budėjimo režimo ir sugrąžina paleidimo programą, jei kažkas kita perėmė ekraną.
+
+MX3 Launcher neteikia pirmenybės jokiai trečiųjų šalių programai, jos nereikalauja ir neapima; tiesiog išvardija tai, kas įdiegta.
+
+Internetinės paslaugos (abi pasirenkamos, išjungtos, kol jų nesusiesite):
+
+Visa kita visiškai veikia neprisijungus. Dvi funkcijos jungiasi prie sync.odiousapps.com, kūrėjo valdomos susiejimo ir atsarginių kopijų paslaugos, ir tik po to, kai nustatymuose paspaudžiate „Susieti“ ir patvirtinate užklausą kitame įrenginyje (nuskaitykite QR kodą arba įveskite trumpąjį kodą sync.odiousapps.com, kur prisijungiate prie savo paskyros).
+
+* Internetinė atsarginė kopija: susiejus televizorius gauna įrenginio prieigos raktą. Kuriant kopiją televizorius įkelia temą, fono gradientą, stulpelių skaičių, paslėptų programų sąrašą ir jūsų programų tvarką į sync.odiousapps.com, kur jie saugomi jūsų paskyroje. Sąrašas ir tvarka yra įdiegtų programų paketų pavadinimai (pavyzdžiui, com.example.app). Atkūrimas atsisiunčia pasirinktą kopiją iš to paties serverio. Niekas neįkeliama, kol nepaspaudžiate „Kurti nustatymų atsarginę kopiją“.
+* Garso juostos žadinimas: susiejus gaunamas URL ir slaptas raktas, kuriuos anksčiau išsaugojote savo sync.odiousapps.com paskyroje; jie saugomi televizoriuje. Įjungus, kiekvieną kartą paleidžiant programą televizorius siunčia užklausą tuo URL (jūsų serveris, ne sync.odiousapps.com) su ?key=<jūsų paslaptis>, IR kodo pavadinimu ir žyma „tikrinti dabartinę būseną“ ir laukia sėkmės prieš paleisdamas. Apie paleidžiamą programą nieko nesiunčiama. Serveriui reikia pavyzdinio scenarijaus iš šaltinio saugyklos (website_lan/send_ir.php), kuris per PHP klasę MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) MQTT protokolu pasiekia išmanųjį lizdą ir IR siųstuvą.

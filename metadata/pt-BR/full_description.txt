@@ -1,0 +1,21 @@
+Um launcher minimalista para Google TV: uma grade simples de apps e nada mais. Uma alternativa leve aos launchers de TV completos, sem integração com TV ao vivo, fileiras de recomendações ou busca/voz.
+
+Recursos:
+
+* Grade de 5, 6 ou 7 colunas mostrando todos os apps instalados que podem ser abertos.
+* Barra superior com relógio ao vivo, um ícone de status do Wi-Fi que abre as configurações de rede e atalhos para as configurações do sistema e do launcher.
+* Tema: seguir o sistema, claro ou escuro, com gradientes de fundo predefinidos.
+* Mostre/oculte e reordene apps com controles de mover para cima/baixo, já que gestos de arrastar não têm equivalente razoável no direcional do controle.
+* Pressione Menu em um ícone selecionado para ir à página "Informações do app" do sistema (permissões, armazenamento, desinstalação).
+* Backup e restauração on-line opcionais via sync.odiousapps.com, com vários backups com data e hora, além de redefinição para o padrão com um toque (funciona off-line).
+* "Ativação da soundbar" opcional: antes de abrir um app, chama um URL no seu próprio servidor para tirar uma soundbar do modo de espera.
+* Um serviço em segundo plano detecta quando o dispositivo sai do modo de espera e traz o launcher de volta se outra coisa tiver assumido.
+
+O MX3 Launcher não favorece, exige nem inclui nenhum app de terceiros; ele simplesmente lista o que está instalado.
+
+Serviços on-line (ambos opcionais, desativados até você emparelhar):
+
+Todo o resto funciona totalmente off-line. Dois recursos se comunicam com sync.odiousapps.com, um serviço de emparelhamento e backup mantido pelo desenvolvedor, e somente depois que você pressiona "Emparelhar" nas configurações e aprova a solicitação em outro dispositivo (leia o QR code ou digite o código curto em sync.odiousapps.com, onde você entra na sua conta).
+
+* Backup on-line: o emparelhamento dá à TV um token de dispositivo. Ao fazer backup, a TV envia seu tema, gradiente de fundo, número de colunas, lista de apps ocultos e ordem personalizada para sync.odiousapps.com, onde ficam salvos na sua conta. A lista e a ordem são nomes de pacote de apps instalados (por exemplo, com.example.app). A restauração baixa o backup escolhido do mesmo servidor. Nada é enviado a menos que você pressione "Fazer backup das configurações".
+* Ativação da soundbar: o emparelhamento busca um URL e uma chave secreta que você salvou antes na sua conta sync.odiousapps.com; eles ficam armazenados na TV. Depois de ativada, a cada abertura de app a TV envia uma solicitação a esse URL (seu próprio servidor, não sync.odiousapps.com) com ?key=<seu segredo>, o nome do código IR e um sinalizador "verificar estado atual", e aguarda o sucesso antes de abrir. Nada sobre qual app está sendo aberto é enviado. O servidor precisa do script de exemplo do repositório de código-fonte (website_lan/send_ir.php), que usa a classe PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) para se comunicar com a tomada inteligente e o emissor IR por MQTT.

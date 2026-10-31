@@ -1,0 +1,21 @@
+I-launcher ye-Google TV elula: igridi eyisicaba yama-app, akukho okunye. Enye indlela elula kuma-launcher e-TV agcwele, engenakho ukuhlanganiswa kwe-TV ebukhoma, imigqa yezincomo, noma ukusesha/izwi.
+
+Izici:
+
+* Igridi eyisicaba yamakholomu angu-5, 6 noma 7 ebonisa wonke ama-app afakiwe angavulwa.
+* Ibha ephezulu enewashi, isithonjana sesimo se-Wi-Fi esivula izilungiselelo zenethiwekhi, nezinqamuleli eziya kuzilungiselelo zesistimu nezise-launcher.
+* Itimu: landela isistimu, ekhanyayo noma emnyama, enama-gradient angemuva asethiwe.
+* Bonisa/fihla futhi uhlele kabusha ama-app ngezinkinobho zokuya phezulu/phansi, ngoba ukudonsa akunakho okulinganayo okunengqondo ku-D-pad.
+* Cindezela Imenyu esithonjaneni esikhethiwe ukuze uye ngqo ekhasini lesistimu "Ulwazi lwe-app" (izimvume, isitoreji, ukukhipha).
+* Isipele ku-inthanethi nokubuyisela ngokuzithandela nge-sync.odiousapps.com, nezipele eziningi ezinesikhathi, kanye nokusetha kabusha kokuzenzakalelayo ngokucindezela kanye (kusebenza ungaxhunyiwe ku-inthanethi).
+* "Ukuvusa i-soundbar" ngokuzithandela: ngaphambi kokuvula i-app, kubiza i-URL kuseva yakho ukuze kuvuswe i-soundbar elele.
+* Isevisi yangemuva ithola lapho idivayisi ivuka ekulaleni bese ibuyisa i-launcher uma kukhona okunye okuthathe indawo.
+
+I-MX3 Launcher ayikhethi, ayidingi futhi ayifaki noma iyiphi i-app yenkampani yangaphandle; imane ibhale lokho okufakiwe.
+
+Amasevisi aku-inthanethi (womabili angokuzithandela, avaliwe uze uwabhanqe):
+
+Konke okunye kusebenza ngokuphelele ungaxhunyiwe ku-inthanethi. Izici ezimbili zixhumana ne-sync.odiousapps.com, isevisi yokubhanqa/yesipele eqhutshwa unjiniyela, futhi kuphela ngemva kokucindezela "Bhanqa" kuZilungiselelo nokugunyaza isicelo kwenye idivayisi (skena ikhodi ye-QR noma ufake ikhodi emfushane ku-sync.odiousapps.com, lapho ungena khona ku-akhawunti yakho).
+
+* Isipele ku-inthanethi: ukubhanqa kunika i-TV ithokheni yedivayisi. Lapho wenza isipele, i-TV ilayisha itimu yakho, i-gradient yangemuva, inani lamakholomu, uhlu lwama-app afihliwe nokuhleleka kwakho kwama-app ku-sync.odiousapps.com, lapho kugcinwa khona ku-akhawunti yakho. Uhlu nokuhleleka kungamagama amaphakheji ama-app afakiwe (isibonelo com.example.app). Ukubuyisela kulanda isipele esikhethiwe kuseva efanayo. Akukho okulayishwayo ngaphandle uma ucindezela "Yenza isipele sezilungiselelo".
+* Ukuvusa i-soundbar: ukubhanqa kulanda i-URL nokhiye oyimfihlo owalondoloza ngaphambilini ku-akhawunti yakho ye-sync.odiousapps.com; kugcinwa ku-TV. Uma kuvuliwe, njalo lapho kuvulwa i-app i-TV ithumela isicelo kuleyo URL (iseva yakho, hhayi i-sync.odiousapps.com) nge-?key=<imfihlo yakho>, igama lekhodi ye-IR nefulegi elithi "hlola isimo samanje", bese ilinda impumelelo ngaphambi kokuvula. Akukho lwazi olumayelana ne-app evulwayo oluthunyelwayo. Iseva idinga iskripthi sesibonelo esivela endaweni yokugcina umthombo (website_lan/send_ir.php), esisebenzisa ikilasi le-PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) ukufinyelela isokhethi ehlakaniphile ne-IR blaster nge-MQTT.

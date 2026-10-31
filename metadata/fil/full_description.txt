@@ -1,0 +1,21 @@
+Isang minimal na Google TV launcher: isang patag na grid ng mga app at wala nang iba. Mas magaang alternatibo sa mga kumpletong TV launcher, walang live-TV integration, mga hanay ng rekomendasyon, o paghahanap/boses.
+
+Mga feature:
+
+* Patag na grid na may 5, 6, o 7 column na nagpapakita ng bawat naka-install na app na mabubuksan.
+* Top bar na may orasan, icon ng status ng Wi-Fi na nagbubukas ng mga setting ng network, at mga shortcut sa mga setting ng system at launcher.
+* Tema: sundin ang system, maliwanag, o madilim, na may mga preset na background gradient.
+* Ipakita/itago at muling ayusin ang mga app gamit ang mga button na pataas/pababa, dahil walang makatwirang katumbas ang mga drag gesture sa D-pad.
+* Pindutin ang Menu sa naka-focus na icon ng app para direktang pumunta sa "Impormasyon ng app" na page ng system (mga pahintulot, storage, pag-uninstall).
+* Opsyonal na online backup at restore sa pamamagitan ng sync.odiousapps.com, na may maraming backup na may timestamp, kasama ang one-tap na pag-reset sa default (gumagana offline).
+* Opsyonal na "Paggising ng soundbar": bago magbukas ng app, tumatawag sa URL sa sarili mong server para gisingin ang soundbar mula sa standby.
+* May background service na nakaka-detect kapag nagising ang device mula sa standby at ibinabalik ang launcher kung may ibang pumalit.
+
+Hindi pinapaboran, hinihingi, o isinasama ng MX3 Launcher ang anumang third-party na app; inililista lang nito ang naka-install.
+
+Mga online service (parehong opsyonal, naka-off hanggang i-pair mo):
+
+Lahat ng iba pa ay gumagana nang buong offline. Dalawang feature ang kumokonekta sa sync.odiousapps.com, isang pairing/backup service na pinapatakbo ng developer, at pagkatapos lang na pindutin mo ang "Ipares" sa Mga Setting at aprubahan ang kahilingan sa ibang device (i-scan ang QR code o ilagay ang maikling code sa sync.odiousapps.com, kung saan ka nagsa-sign in sa account mo).
+
+* Online backup: binibigyan ng pairing ang TV ng device token. Kapag nag-back up ka, ina-upload ng TV ang tema, background gradient, bilang ng column, listahan ng mga nakatagong app, at custom na pagkakasunod-sunod ng app sa sync.odiousapps.com, kung saan iniimbak ang mga ito sa account mo. Ang listahan at pagkakasunod-sunod ay mga pangalan ng package ng mga naka-install na app (halimbawa, com.example.app). Dina-download ng pag-restore ang napiling backup mula sa parehong server. Walang ia-upload maliban kung pipindutin mo ang "I-backup ang mga setting".
+* Paggising ng soundbar: kinukuha ng pairing ang URL at secret key na na-save mo dati sa sync.odiousapps.com account mo; iniimbak ang mga ito sa TV. Kapag naka-enable, sa bawat pagbukas ng app ay nagpapadala ang TV ng kahilingan sa URL na iyon (sarili mong server, hindi sync.odiousapps.com) na may ?key=<iyong secret>, pangalan ng IR code, at flag na "suriin ang kasalukuyan", at naghihintay na magtagumpay bago magbukas. Walang ipinapadalang impormasyon kung aling app ang binubuksan. Kailangan ng server ang sample script mula sa source repository (website_lan/send_ir.php), na gumagamit ng MQTTv5Client PHP class (https://github.com/evilbunny2008/MQTTv5Client) para maabot ang smart socket at IR blaster sa pamamagitan ng MQTT.

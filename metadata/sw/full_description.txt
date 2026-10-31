@@ -1,0 +1,21 @@
+Kifungua programu rahisi cha Google TV: gridi tambarare ya programu na hakuna kingine. Mbadala mwepesi wa vifungua programu kamili vya TV, bila muunganisho wa TV ya moja kwa moja, safu za mapendekezo wala utafutaji/sauti.
+
+Vipengele:
+
+* Gridi tambarare ya safu wima 5, 6 au 7 inayoonyesha kila programu iliyosakinishwa inayoweza kufunguliwa.
+* Upau wa juu wenye saa, aikoni ya hali ya Wi-Fi inayofungua mipangilio ya mtandao, na njia za mkato za mipangilio ya mfumo na ya kifungua programu.
+* Mandhari: fuata mfumo, nyepesi au nyeusi, pamoja na gradienti za mandharinyuma zilizowekwa tayari.
+* Onyesha/ficha na upange upya programu kwa vitufe vya juu/chini, kwa kuwa miondoko ya kuburuta haina kilinganishi cha busara kwenye D-pad.
+* Bonyeza Menyu kwenye aikoni iliyochaguliwa ili kwenda moja kwa moja kwenye ukurasa wa mfumo wa "Maelezo ya programu" (ruhusa, hifadhi, kuondoa).
+* Hifadhi nakala na urejeshaji mtandaoni wa hiari kupitia sync.odiousapps.com, pamoja na nakala nyingi zenye muhuri wa muda, na kuweka upya chaguomsingi kwa mguso mmoja (hufanya kazi nje ya mtandao).
+* "Kuamsha soundbar" kwa hiari: kabla ya kufungua programu, huita URL kwenye seva yako ili kuamsha soundbar kutoka hali tuli.
+* Huduma ya chinichini hutambua kifaa kinapoamka kutoka hali tuli na kurudisha kifungua programu ikiwa kitu kingine kilichukua nafasi.
+
+MX3 Launcher haipendelei, haihitaji wala haijumuishi programu yoyote ya wahusika wengine; huorodhesha tu kilichosakinishwa.
+
+Huduma za mtandaoni (zote mbili ni za hiari, zimezimwa hadi uzioanishe):
+
+Kila kitu kingine hufanya kazi kikamilifu nje ya mtandao. Vipengele viwili huwasiliana na sync.odiousapps.com, huduma ya kuoanisha/kuhifadhi nakala inayoendeshwa na msanidi programu, na tu baada ya kubonyeza "Oanisha" kwenye Mipangilio na kuidhinisha ombi kwenye kifaa kingine (changanua msimbo wa QR au weka msimbo mfupi kwenye sync.odiousapps.com, unapoingia katika akaunti yako).
+
+* Hifadhi nakala mtandaoni: kuoanisha huipa TV tokeni ya kifaa. Unapohifadhi nakala, TV hupakia mandhari yako, gradienti ya mandharinyuma, idadi ya safu wima, orodha ya programu zilizofichwa na mpangilio wako wa programu kwenye sync.odiousapps.com, ambapo huhifadhiwa katika akaunti yako. Orodha na mpangilio ni majina ya vifurushi vya programu zilizosakinishwa (kwa mfano com.example.app). Kurejesha hupakua nakala iliyochaguliwa kutoka seva hiyo hiyo. Hakuna kinachopakiwa isipokuwa ubonyeze "Hifadhi nakala ya mipangilio".
+* Kuamsha soundbar: kuoanisha huleta URL na ufunguo wa siri uliohifadhi awali katika akaunti yako ya sync.odiousapps.com; huhifadhiwa kwenye TV. Ukishawashwa, kila programu inapofunguliwa TV hutuma ombi kwa URL hiyo (seva yako, si sync.odiousapps.com) pamoja na ?key=<siri yako>, jina la msimbo wa IR na alama ya "angalia hali ya sasa", na husubiri mafanikio kabla ya kufungua. Hakuna taarifa kuhusu programu inayofunguliwa inayotumwa. Seva inahitaji hati ya mfano kutoka hazina ya msimbo chanzo (website_lan/send_ir.php), inayotumia darasa la PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) kufikia soketi mahiri na kisambaza IR kupitia MQTT.

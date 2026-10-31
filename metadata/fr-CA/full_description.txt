@@ -1,0 +1,21 @@
+Un lanceur Google TV minimaliste : une simple grille d'applications, rien de plus. Une alternative légère aux lanceurs TV complets, sans intégration de la TV en direct, rangées de recommandations ni recherche/commande vocale.
+
+Fonctionnalités :
+
+* Grille de 5, 6 ou 7 colonnes affichant toutes les applications installées pouvant être lancées.
+* Barre supérieure avec horloge en direct, icône d'état Wi-Fi ouvrant les paramètres réseau, et raccourcis vers les paramètres du système et du lanceur.
+* Thème : selon le système, clair ou sombre, avec des dégradés d'arrière-plan prédéfinis.
+* Affichage/masquage et réorganisation des applications avec des commandes monter/descendre, les gestes de glissement n'ayant pas d'équivalent raisonnable au pavé directionnel.
+* Appuyez sur Menu sur une icône sélectionnée pour ouvrir sa page système « Infos sur l'application » (autorisations, stockage, désinstallation).
+* Sauvegarde et restauration en ligne facultatives via sync.odiousapps.com, avec plusieurs sauvegardes horodatées, et réinitialisation par défaut en une touche (fonctionne hors ligne).
+* « Réveil de la barre de son » facultatif : avant de lancer une application, appelle une URL sur votre propre serveur pour sortir une barre de son de veille.
+* Un service en arrière-plan détecte la sortie de veille de l'appareil et ramène le lanceur si autre chose a pris le relais.
+
+MX3 Launcher ne favorise, n'exige ni n'intègre aucune application tierce ; il affiche simplement ce qui est installé.
+
+Services en ligne (tous deux facultatifs, désactivés tant que vous ne les associez pas) :
+
+Tout le reste fonctionne entièrement hors ligne. Deux fonctionnalités communiquent avec sync.odiousapps.com, un service d'association et de sauvegarde géré par le développeur, et uniquement après que vous avez appuyé sur « Associer » dans les paramètres et approuvé la demande sur un autre appareil (scannez le QR code ou saisissez le code court sur sync.odiousapps.com, où vous vous connectez à votre compte).
+
+* Sauvegarde en ligne : l'association donne au téléviseur un jeton d'appareil. Lors d'une sauvegarde, le téléviseur envoie votre thème, votre dégradé d'arrière-plan, votre nombre de colonnes, la liste des applications masquées et votre ordre personnalisé à sync.odiousapps.com, où ils sont enregistrés dans votre compte. La liste et l'ordre sont des noms de paquets d'applications installées (par exemple com.example.app). La restauration télécharge la sauvegarde choisie depuis le même serveur. Rien n'est envoyé tant que vous n'appuyez pas sur « Sauvegarder les paramètres ».
+* Réveil de la barre de son : l'association récupère une URL et une clé secrète enregistrées au préalable dans votre compte sync.odiousapps.com ; elles sont stockées sur le téléviseur. Une fois la fonction activée, à chaque lancement d'application, le téléviseur envoie à cette URL (votre propre serveur, pas sync.odiousapps.com) une requête avec ?key=<votre secret>, le nom du code IR et un indicateur « vérifier l'état actuel », et attend sa réussite avant de lancer. Rien n'indique quelle application est lancée. Le serveur nécessite le script d'exemple du dépôt source (website_lan/send_ir.php), qui utilise la classe PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) pour joindre la prise connectée et l'émetteur IR via MQTT.

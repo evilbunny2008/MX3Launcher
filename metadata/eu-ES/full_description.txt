@@ -1,0 +1,21 @@
+Google TVrako abiarazle minimalista: aplikazioen sare laua eta besterik ez. TV abiarazle osoen alternatiba arina, zuzeneko telebistaren integraziorik, gomendio-ilararik eta bilaketa/ahotsik gabe.
+
+Eginbideak:
+
+* 5, 6 edo 7 zutabeko sare laua, abiarazi daitezkeen instalatutako aplikazio guztiak erakusten dituena.
+* Goiko barra erlojuarekin, sare-ezarpenak irekitzen dituen Wi-Fi egoeraren ikonoarekin eta sistemaren eta abiarazlearen ezarpenetarako lasterbideekin.
+* Gaia: sistemari jarraitu, argia edo iluna, atzeko planoko gradiente aurrezarriekin.
+* Erakutsi/ezkutatu eta berrantolatu aplikazioak gora/behera botoiekin, arrastatze-keinuek ez baitute baliokide zentzuzkorik D-padean.
+* Sakatu Menua hautatutako ikono batean sistemaren "Aplikazioaren informazioa" orrira zuzenean joateko (baimenak, biltegiratzea, desinstalatzea).
+* Sareko babeskopia eta leheneratzea aukerakoak sync.odiousapps.com bidez, denbora-markadun hainbat kopiarekin, eta balio lehenetsiak sakatze bakarrez berrezartzea (konexiorik gabe dabil).
+* "Soinu-barra esnatzea" aukerakoa: aplikazio bat abiarazi aurretik, zure zerbitzariko URL bati deitzen dio soinu-barra egonean moduan esnatzeko.
+* Atzeko planoko zerbitzu batek gailua egonean modutik esnatzea hautematen du, eta abiarazlea itzultzen du beste zerbaitek hartu badu lekua.
+
+MX3 Launcher-ek ez du hirugarrenen aplikaziorik lehenesten, eskatzen edo barneratzen; instalatuta dagoena zerrendatzen du, besterik gabe.
+
+Sareko zerbitzuak (biak aukerakoak, desaktibatuta parekatu arte):
+
+Gainerako guztia konexiorik gabe dabil guztiz. Bi eginbide sync.odiousapps.com-ekin komunikatzen dira, garatzaileak kudeatutako parekatze- eta babeskopia-zerbitzua, eta ezarpenetan "Parekatu" sakatu eta eskaera beste gailu batean onartu ondoren soilik (eskaneatu QR kodea edo idatzi kode laburra sync.odiousapps.com-en, non zure kontuan saioa hasten duzun).
+
+* Sareko babeskopia: parekatzeak gailu-token bat ematen dio telebistari. Babeskopia egitean, telebistak gaia, atzeko planoko gradientea, zutabe kopurua, ezkutuko aplikazioen zerrenda eta zure aplikazio-ordena igotzen ditu sync.odiousapps.com-era, eta zure kontuan gordetzen dira. Zerrenda eta ordena instalatutako aplikazioen pakete-izenak dira (adibidez, com.example.app). Leheneratzeak aukeratutako babeskopia zerbitzari beretik deskargatzen du. Ez da ezer igotzen "Egin ezarpenen babeskopia" sakatzen ez baduzu.
+* Soinu-barra esnatzea: parekatzeak lehenago zure sync.odiousapps.com kontuan gordetako URLa eta gako sekretua eskuratzen ditu; telebistan gordetzen dira. Aktibatuta dagoenean, aplikazio bat abiarazten den bakoitzean telebistak eskaera bat bidaltzen dio URL horri (zure zerbitzaria, ez sync.odiousapps.com) ?key=<zure sekretua>, IR kodearen izena eta "egiaztatu uneko egoera" markarekin, eta arrakastaren zain geratzen da abiarazi aurretik. Ez da ezer bidaltzen zein aplikazio abiarazten den jakiteko. Zerbitzariak iturburu-biltegiko adibide-scripta behar du (website_lan/send_ir.php), MQTTv5Client PHP klasea (https://github.com/evilbunny2008/MQTTv5Client) erabiltzen duena entxufe adimenduna eta IR igorlea MQTT bidez lortzeko.

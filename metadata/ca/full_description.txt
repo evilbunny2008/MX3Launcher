@@ -1,0 +1,21 @@
+Un llançador minimalista per a Google TV: una quadrícula plana d'aplicacions i res més. Una alternativa lleugera als llançadors de TV complets, sense integració de TV en directe, files de recomanacions ni cerca/veu.
+
+Funcions:
+
+* Quadrícula de 5, 6 o 7 columnes que mostra totes les aplicacions instal·lades que es poden obrir.
+* Barra superior amb rellotge, una icona d'estat de la Wi-Fi que obre la configuració de xarxa i dreceres a la configuració del sistema i del llançador.
+* Tema: segons el sistema, clar o fosc, amb degradats de fons predefinits.
+* Mostra/amaga i reordena aplicacions amb controls de pujar/baixar, ja que els gestos d'arrossegar no tenen un equivalent raonable al D-pad.
+* Prem Menú sobre una icona seleccionada per anar directament a la pàgina del sistema «Informació de l'aplicació» (permisos, emmagatzematge, desinstal·lació).
+* Còpia de seguretat i restauració en línia opcionals mitjançant sync.odiousapps.com, amb diverses còpies amb marca de temps, i restabliment dels valors predeterminats amb una pulsació (funciona sense connexió).
+* «Activació de la barra de so» opcional: abans d'obrir una aplicació, crida un URL del teu propi servidor per treure una barra de so del repòs.
+* Un servei en segon pla detecta quan el dispositiu surt del repòs i torna a mostrar el llançador si una altra cosa ha pres el control.
+
+MX3 Launcher no afavoreix, no requereix ni inclou cap aplicació de tercers; simplement mostra el que hi ha instal·lat.
+
+Serveis en línia (tots dos opcionals, desactivats fins que els vinculis):
+
+Tota la resta funciona completament sense connexió. Dues funcions es comuniquen amb sync.odiousapps.com, un servei de vinculació i còpies de seguretat gestionat pel desenvolupador, i només després que premis «Vincula» a la configuració i aprovis la sol·licitud en un altre dispositiu (escaneja el codi QR o introdueix el codi curt a sync.odiousapps.com, on inicies la sessió al teu compte).
+
+* Còpia de seguretat en línia: la vinculació dona al televisor un testimoni de dispositiu. En fer una còpia, el televisor puja el tema, el degradat de fons, el nombre de columnes, la llista d'aplicacions amagades i el teu ordre personalitzat a sync.odiousapps.com, on es desen al teu compte. La llista i l'ordre són noms de paquet d'aplicacions instal·lades (per exemple, com.example.app). La restauració baixa la còpia triada del mateix servidor. No es puja res tret que premis «Fes una còpia de seguretat de la configuració».
+* Activació de la barra de so: la vinculació obté un URL i una clau secreta que vas desar abans al teu compte de sync.odiousapps.com; s'emmagatzemen al televisor. Un cop activada, cada vegada que obres una aplicació el televisor envia una sol·licitud a aquest URL (el teu propi servidor, no sync.odiousapps.com) amb ?key=<el teu secret>, el nom del codi IR i un indicador «comprova l'estat actual», i espera que tingui èxit abans d'obrir-la. No s'envia res sobre quina aplicació s'obre. El servidor necessita l'script d'exemple del repositori de codi font (website_lan/send_ir.php), que usa la classe PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) per comunicar-se amb l'endoll intel·ligent i l'emissor IR mitjançant MQTT.

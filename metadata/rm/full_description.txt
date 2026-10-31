@@ -1,0 +1,21 @@
+In launcher minimal per Google TV: ina grata plata d'applicaziuns e nagut auter. Ina alternativa pli levgra als launchers da TV cumplets, senza integraziun da TV en direct, lingias da recumandaziuns u tschertga/vusch.
+
+Funcziuns:
+
+* Grata plata da 5, 6 u 7 colonnas che mussa mintga applicaziun installada che po vegnir aviada.
+* Trav sura cun ura, in icon da status da Wi-Fi che avra ils parameters da la rait e scursanidas als parameters dal sistem e dal launcher.
+* Tema: tenor il sistem, cler u stgir, cun gradients da fund predefinids.
+* Mussar/zuppentar e reordinar las applicaziuns cun buttuns ensi/engiu, perquai che moviments da trair n'han nagin equivalent raschunaivel sin il D-pad.
+* Smatga Menu sin in icon selecziunà per ir directamain a la pagina dal sistem "Infurmaziuns davart l'applicaziun" (autorisaziuns, memoria, deinstallar).
+* Copia da segirezza e restauraziun online facultativas via sync.odiousapps.com, cun pliras copias cun data ed ura, e reinizialisaziun als parameters da standard cun in clic (funcziuna offline).
+* "Sveglia da la soundbar" facultativa: avant che aviar ina applicaziun, cloma ina URL sin tes agen server per sveglier ina soundbar or dal standby.
+* In servetsch en il fund constatescha cura che l'apparat sa sveglia or dal standby e returna il launcher sch'insatge auter ha surpiglià.
+
+MX3 Launcher na favurisescha, na pretenda e na cuntegna naginas applicaziuns da terzs; el mussa simplamain quai ch'è installà.
+
+Servetschs online (omadus facultativs, deactivads fin che ti als cuppleschas):
+
+Tut il rest funcziuna cumplettamain offline. Duas funcziuns communitgeschan cun sync.odiousapps.com, in servetsch da cuppliar e far copias da segirezza manà dal sviluppader, e be suenter che ti has smatgà "Cuppliar" en ils parameters ed approbà la dumonda sin in auter apparat (scannescha il code QR u endatescha il code curt sin sync.odiousapps.com, nua che ti t'annunzias a tes conto).
+
+* Copia da segirezza online: il cuppliar dat a la televisiun in token d'apparat. Cura che ti fas ina copia, chargia la televisiun tes tema, il gradient da fund, il dumber da colonnas, la glista d'applicaziuns zuppentadas e tes urden persunal sin sync.odiousapps.com, nua ch'els vegnan memorisads en tes conto. La glista e l'urden èn nums da pachets d'applicaziuns installadas (per exempel com.example.app). La restauraziun chargia giu la copia tschernida dal medem server. Nagut na vegn chargià si, sche ti na smatgas betg "Far copia da segirezza dals parameters".
+* Sveglia da la soundbar: il cuppliar prenda ina URL ed ina clav secreta che ti has memorisà pli baud en tes conto sync.odiousapps.com; quellas vegnan memorisadas sin la televisiun. Suenter l'activaziun trametta la televisiun a mintga aviada d'ina applicaziun ina dumonda a questa URL (tes agen server, betg sync.odiousapps.com) cun ?key=<tes secret>, il num dal code IR ed ina marca "controllar il stadi actual", e spetga il success avant che aviar. Naginas infurmaziuns davart l'applicaziun aviada na vegnan tramessas. Il server dovra il script d'exempel dal repository da code (website_lan/send_ir.php), che utilisescha la classa PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) per cuntanscher la prisa intelligenta ed il trametter IR via MQTT.

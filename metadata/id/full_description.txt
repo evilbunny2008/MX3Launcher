@@ -1,0 +1,21 @@
+Launcher Google TV minimalis: kisi aplikasi datar dan tidak ada yang lain. Alternatif yang lebih ringan untuk launcher TV lengkap, tanpa integrasi TV langsung, baris rekomendasi, atau penelusuran/suara.
+
+Fitur:
+
+* Kisi datar 5, 6, atau 7 kolom yang menampilkan semua aplikasi terinstal yang bisa dibuka.
+* Bilah atas dengan jam, ikon status Wi-Fi yang membuka setelan jaringan, serta pintasan ke setelan sistem dan launcher.
+* Tema: ikuti sistem, terang, atau gelap, dengan preset gradien latar.
+* Tampilkan/sembunyikan dan urutkan ulang aplikasi dengan tombol naik/turun, karena gestur seret tidak punya padanan yang masuk akal di D-pad.
+* Tekan Menu pada ikon aplikasi yang difokuskan untuk langsung membuka halaman sistem "Info aplikasi" (izin, penyimpanan, copot pemasangan).
+* Pencadangan dan pemulihan online opsional melalui sync.odiousapps.com, dengan beberapa cadangan bertanda waktu, serta reset ke default sekali tekan (berfungsi offline).
+* "Bangunkan soundbar" opsional: sebelum membuka aplikasi, memanggil URL di server Anda sendiri untuk membangunkan soundbar dari mode siaga.
+* Layanan latar belakang mendeteksi perangkat bangun dari mode siaga dan mengembalikan launcher jika ada hal lain yang mengambil alih.
+
+MX3 Launcher tidak mengutamakan, mewajibkan, atau menyertakan aplikasi pihak ketiga mana pun; aplikasi ini hanya menampilkan apa yang terinstal.
+
+Layanan online (keduanya opsional, nonaktif sampai Anda menyambungkannya):
+
+Semua hal lain berfungsi sepenuhnya offline. Dua fitur berkomunikasi dengan sync.odiousapps.com, layanan penyambungan/pencadangan yang dikelola pengembang, dan hanya setelah Anda menekan "Sambungkan" di Setelan dan menyetujui permintaan di perangkat lain (pindai kode QR atau masukkan kode singkat di sync.odiousapps.com, tempat Anda login ke akun).
+
+* Pencadangan online: penyambungan memberi TV token perangkat. Saat mencadangkan, TV mengunggah tema, gradien latar, jumlah kolom, daftar aplikasi tersembunyi, dan urutan aplikasi kustom ke sync.odiousapps.com, tempat data disimpan di akun Anda. Daftar dan urutan berupa nama paket aplikasi terinstal (misalnya com.example.app). Pemulihan mengunduh cadangan yang dipilih dari server yang sama. Tidak ada yang diunggah kecuali Anda menekan "Cadangkan setelan".
+* Bangunkan soundbar: penyambungan mengambil URL dan kunci rahasia yang sebelumnya Anda simpan di akun sync.odiousapps.com; keduanya disimpan di TV. Setelah diaktifkan, setiap kali aplikasi dibuka, TV mengirim permintaan ke URL itu (server Anda sendiri, bukan sync.odiousapps.com) dengan ?key=<rahasia Anda>, nama kode IR, dan penanda "periksa status saat ini", lalu menunggu berhasil sebelum membuka aplikasi. Tidak ada informasi tentang aplikasi yang dibuka yang dikirim. Server memerlukan skrip contoh dari repositori sumber (website_lan/send_ir.php), yang memakai class PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) untuk menjangkau colokan pintar dan IR blaster melalui MQTT.

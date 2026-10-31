@@ -1,0 +1,21 @@
+Pelancar Google TV yang minimum: grid apl rata dan tiada yang lain. Alternatif lebih ringan kepada pelancar TV yang lengkap, tanpa integrasi TV langsung, baris cadangan atau carian/suara.
+
+Ciri:
+
+* Grid rata 5, 6 atau 7 lajur yang menunjukkan setiap apl dipasang yang boleh dilancarkan.
+* Bar atas dengan jam, ikon status Wi-Fi yang membuka tetapan rangkaian, dan pintasan ke tetapan sistem dan pelancar.
+* Tema: ikut sistem, cerah atau gelap, dengan pratetap kecerunan latar belakang.
+* Tunjuk/sembunyi dan susun semula apl dengan kawalan gerak ke atas/bawah, kerana gerak isyarat seret tiada padanan munasabah pada D-pad.
+* Tekan Menu pada ikon apl yang difokuskan untuk terus ke halaman sistem "Maklumat apl" (kebenaran, storan, nyahpasang).
+* Sandaran dan pemulihan dalam talian pilihan melalui sync.odiousapps.com, dengan beberapa sandaran bercap masa, serta tetapan semula lalai sekali tekan (berfungsi di luar talian).
+* "Bangunkan bar bunyi" pilihan: sebelum melancarkan apl, memanggil URL pada pelayan anda sendiri untuk membangunkan bar bunyi daripada mod sedia.
+* Perkhidmatan latar belakang mengesan peranti bangun daripada mod sedia dan mengembalikan pelancar jika sesuatu yang lain mengambil alih.
+
+MX3 Launcher tidak mengutamakan, memerlukan atau menyertakan mana-mana apl pihak ketiga; ia hanya menyenaraikan apa yang dipasang.
+
+Perkhidmatan dalam talian (kedua-duanya pilihan, dimatikan sehingga anda menggandingkannya):
+
+Semua yang lain berfungsi sepenuhnya di luar talian. Dua ciri berhubung dengan sync.odiousapps.com, perkhidmatan penggandingan/sandaran yang dikendalikan oleh pembangun, dan hanya selepas anda menekan "Gandingkan" dalam Tetapan dan meluluskan permintaan pada peranti lain (imbas kod QR atau masukkan kod pendek di sync.odiousapps.com, tempat anda log masuk ke akaun anda).
+
+* Sandaran dalam talian: penggandingan memberi TV token peranti. Semasa menyandarkan, TV memuat naik tema, kecerunan latar belakang, bilangan lajur, senarai apl tersembunyi dan susunan apl tersuai anda ke sync.odiousapps.com, dan disimpan dalam akaun anda. Senarai dan susunan itu ialah nama pakej apl yang dipasang (contohnya com.example.app). Pemulihan memuat turun sandaran yang dipilih daripada pelayan yang sama. Tiada apa-apa dimuat naik melainkan anda menekan "Sandarkan tetapan".
+* Bangunkan bar bunyi: penggandingan mengambil URL dan kunci rahsia yang anda simpan sebelum ini dalam akaun sync.odiousapps.com; kedua-duanya disimpan pada TV. Setelah didayakan, setiap kali apl dilancarkan TV menghantar permintaan ke URL itu (pelayan anda sendiri, bukan sync.odiousapps.com) dengan ?key=<rahsia anda>, nama kod IR dan bendera "semak keadaan semasa", dan menunggu kejayaan sebelum melancarkan. Tiada maklumat tentang apl yang dilancarkan dihantar. Pelayan memerlukan skrip contoh daripada repositori sumber (website_lan/send_ir.php), yang menggunakan kelas PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) untuk mencapai soket pintar dan pemancar IR melalui MQTT.

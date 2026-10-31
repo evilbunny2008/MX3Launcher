@@ -1,0 +1,21 @@
+Minimalistlik Google TV käivitaja: lame rakenduste ruudustik ja mitte midagi muud. Kergem alternatiiv rohkete funktsioonidega teleri käivitajatele, ilma otse-TV integratsiooni, soovitusridade ja otsingu/häälkäskudeta.
+
+Funktsioonid:
+
+* Lame 5, 6 või 7 tulbaga ruudustik, mis näitab kõiki installitud käivitatavaid rakendusi.
+* Ülemine riba kella, võrguseaded avava WiFi-oleku ikooni ning süsteemi ja käivitaja seadete otseteedega.
+* Teema: süsteemi järgi, hele või tume, koos eelseadistatud taustagradientidega.
+* Rakenduste kuvamine/peitmine ja ümberjärjestamine üles/alla nuppudega, sest lohistusžestidel pole D-padil mõistlikku vastet.
+* Vajuta valitud rakenduseikoonil nuppu Menüü, et minna otse süsteemi lehele „Rakenduse teave“ (load, salvestusruum, desinstallimine).
+* Valikuline veebivarundus ja taastamine teenuse sync.odiousapps.com kaudu, mitme ajatempliga varukoopiaga, ning vaikeväärtuste lähtestamine ühe vajutusega (töötab võrguühenduseta).
+* Valikuline „Heliriba äratamine“: enne rakenduse käivitamist kutsub sinu oma serveris URL-i, et äratada heliriba ooterežiimist.
+* Taustateenus tuvastab seadme ärkamise ooterežiimist ja toob käivitaja tagasi, kui midagi muud on vahepeal üle võtnud.
+
+MX3 Launcher ei eelista, nõua ega sisalda ühtegi kolmanda osapoole rakendust; see lihtsalt loetleb, mis on installitud.
+
+Võrguteenused (mõlemad valikulised, välja lülitatud, kuni need seod):
+
+Kõik muu töötab täielikult võrguühenduseta. Kaks funktsiooni suhtlevad arendaja hallatava sidumis- ja varundusteenusega sync.odiousapps.com, ja seda ainult pärast seda, kui oled seadetes vajutanud „Seo“ ja kinnitanud taotluse teises seadmes (skanni QR-kood või sisesta lühikood aadressil sync.odiousapps.com, kus logid oma kontole sisse).
+
+* Veebivarundus: sidumine annab telerile seadmeloa. Varundamisel laadib teler sinu teema, taustagradiendi, tulpade arvu, peidetud rakenduste loendi ja kohandatud rakenduste järjekorra teenusesse sync.odiousapps.com, kus need salvestatakse sinu kontole. Loend ja järjekord on installitud rakenduste paketinimed (näiteks com.example.app). Taastamine laadib valitud varukoopia samast serverist. Midagi ei laadita üles, kui sa ei vajuta „Varunda seaded“.
+* Heliriba äratamine: sidumine hangib URL-i ja salajase võtme, mille salvestasid varem oma sync.odiousapps.com kontole; need salvestatakse telerisse. Kui see on lubatud, saadab teler iga rakenduse käivitamisel päringu sellele URL-ile (sinu oma server, mitte sync.odiousapps.com) koos ?key=<sinu saladus>, IR-koodi nime ja lipuga „kontrolli praegust olekut“ ning ootab enne käivitamist õnnestumist. Teavet käivitatava rakenduse kohta ei saadeta. Server vajab lähtekoodihoidla näidisskripti (website_lan/send_ir.php), mis kasutab PHP-klassi MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client), et jõuda MQTT kaudu nutipistiku ja IR-saatjani.

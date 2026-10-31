@@ -1,0 +1,21 @@
+Minimalista Google TV-indító: egy lapos alkalmazásrács, semmi más. Könnyebb alternatíva a sokfunkciós TV-indítókhoz, élő TV-integráció, ajánlási sorok és keresés/hang nélkül.
+
+Funkciók:
+
+* 5, 6 vagy 7 oszlopos lapos rács, amely minden telepített, indítható alkalmazást megjelenít.
+* Felső sáv órával, a hálózati beállításokat megnyitó Wi-Fi-állapotikonnal, valamint a rendszer- és az indítóbeállítások parancsikonjaival.
+* Téma: a rendszert követi, világos vagy sötét, előre beállított háttérszínátmenetekkel.
+* Alkalmazások megjelenítése/elrejtése és átrendezése fel/le gombokkal, mivel a húzásos mozdulatoknak nincs értelmes megfelelője a D-paden.
+* Egy kijelölt alkalmazásikonon a Menü gombot megnyomva közvetlenül a rendszer „Alkalmazásinformáció” oldalára jut (engedélyek, tárhely, eltávolítás).
+* Opcionális online biztonsági mentés és visszaállítás a sync.odiousapps.com oldalon keresztül, több időbélyeges mentéssel, valamint egy gombnyomásos visszaállítás az alapértékekre (offline is működik).
+* Opcionális „Hangprojektor ébresztése”: alkalmazás indítása előtt meghív egy URL-t a saját szerverén, hogy felébressze a készenléti hangprojektort.
+* Egy háttérszolgáltatás észleli, amikor az eszköz felébred a készenlétből, és visszahozza az indítót, ha valami más vette át a helyét.
+
+Az MX3 Launcher nem részesít előnyben, nem igényel és nem tartalmaz harmadik féltől származó alkalmazást; egyszerűen felsorolja, ami telepítve van.
+
+Online szolgáltatások (mindkettő opcionális, a párosításig kikapcsolva):
+
+Minden más teljesen offline működik. Két funkció kommunikál a sync.odiousapps.com szolgáltatással, amely a fejlesztő által üzemeltetett párosítási/mentési szolgáltatás, de csak azután, hogy a Beállításokban megnyomta a „Párosítás” gombot, és jóváhagyta a kérést egy másik eszközön (olvassa be a QR-kódot, vagy adja meg a rövid kódot a sync.odiousapps.com oldalon, ahol bejelentkezik a fiókjába).
+
+* Online mentés: a párosítás eszköztokent ad a TV-nek. Mentéskor a TV feltölti a témát, a háttérszínátmenetet, az oszlopok számát, a rejtett alkalmazások listáját és az egyéni sorrendet a sync.odiousapps.com oldalra, ahol a fiókjához tárolódnak. A lista és a sorrend a telepített alkalmazások csomagneveiből áll (például com.example.app). A visszaállítás ugyanarról a szerverről tölti le a kiválasztott mentést. Semmi sem töltődik fel, amíg meg nem nyomja a „Beállítások mentése” gombot.
+* Hangprojektor ébresztése: a párosítás lekér egy URL-t és egy titkos kulcsot, amelyeket korábban a sync.odiousapps.com fiókjába mentett; ezek a TV-n tárolódnak. Bekapcsolás után a TV minden alkalmazásindításkor kérést küld arra az URL-re (a saját szerverére, nem a sync.odiousapps.com oldalra) a ?key=<az Ön titka> paraméterrel, az IR-kód nevével és egy „aktuális állapot ellenőrzése” jelzővel, majd a siker után indít. Az indított alkalmazásról semmilyen információ nem kerül elküldésre. A szerverhez szükséges a forráskódtár példaszkriptje (website_lan/send_ir.php), amely a MQTTv5Client PHP-osztály (https://github.com/evilbunny2008/MQTTv5Client) segítségével éri el az okosaljzatot és az IR-adót MQTT-n keresztül.

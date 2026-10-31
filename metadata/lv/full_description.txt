@@ -1,0 +1,21 @@
+Minimālistisks Google TV palaidējs: plakans lietotņu režģis un nekas cits. Vieglāka alternatīva daudzfunkcionāliem TV palaidējiem, bez tiešraides TV integrācijas, ieteikumu rindām un meklēšanas/balss.
+
+Funkcijas:
+
+* Plakans režģis ar 5, 6 vai 7 kolonnām, kas rāda visas instalētās palaižamās lietotnes.
+* Augšējā josla ar pulksteni, Wi-Fi statusa ikonu, kas atver tīkla iestatījumus, un saīsnēm uz sistēmas un palaidēja iestatījumiem.
+* Motīvs: pēc sistēmas, gaišs vai tumšs, ar iepriekš iestatītiem fona gradientiem.
+* Lietotņu rādīšana/slēpšana un pārkārtošana ar pogām uz augšu/leju, jo vilkšanas žestiem nav saprātīga ekvivalenta D-pad vadībā.
+* Nospiediet Izvēlne uz atlasītas lietotnes ikonas, lai pārietu tieši uz sistēmas lapu “Informācija par lietotni” (atļaujas, krātuve, atinstalēšana).
+* Neobligāta tiešsaistes dublēšana un atjaunošana, izmantojot sync.odiousapps.com, ar vairākām dublējumkopijām ar laika zīmogu, kā arī atiestatīšana uz noklusējumu ar vienu nospiedienu (darbojas bezsaistē).
+* Neobligāta “Skaņas joslas modināšana”: pirms lietotnes palaišanas izsauc URL jūsu serverī, lai pamodinātu skaņas joslu no gaidstāves.
+* Fona pakalpojums nosaka ierīces pamošanos no gaidstāves un atgriež palaidēju, ja kaut kas cits ir pārņēmis ekrānu.
+
+MX3 Launcher nedod priekšroku, nepieprasa un neietver nevienu trešās puses lietotni; tas vienkārši parāda instalēto.
+
+Tiešsaistes pakalpojumi (abi neobligāti, izslēgti, līdz tos savienojat pārī):
+
+Viss pārējais darbojas pilnībā bezsaistē. Divas funkcijas sazinās ar sync.odiousapps.com, izstrādātāja uzturētu savienošanas un dublēšanas pakalpojumu, un tikai pēc tam, kad iestatījumos esat nospiedis “Savienot pārī” un apstiprinājis pieprasījumu citā ierīcē (noskenējiet QR kodu vai ievadiet īso kodu vietnē sync.odiousapps.com, kur pierakstāties savā kontā).
+
+* Tiešsaistes dublēšana: savienošana pārī piešķir televizoram ierīces marķieri. Dublējot televizors augšupielādē motīvu, fona gradientu, kolonnu skaitu, paslēpto lietotņu sarakstu un jūsu lietotņu secību vietnē sync.odiousapps.com, kur tie tiek glabāti jūsu kontā. Saraksts un secība ir instalēto lietotņu pakotņu nosaukumi (piemēram, com.example.app). Atjaunošana lejupielādē izvēlēto dublējumu no tā paša servera. Nekas netiek augšupielādēts, ja nenospiežat “Dublēt iestatījumus”.
+* Skaņas joslas modināšana: savienošana pārī iegūst URL un slepeno atslēgu, ko iepriekš saglabājāt sava sync.odiousapps.com konta datos; tie tiek glabāti televizorā. Kad funkcija ir ieslēgta, katrā lietotnes palaišanas reizē televizors nosūta pieprasījumu uz šo URL (jūsu serveris, nevis sync.odiousapps.com) ar ?key=<jūsu noslēpums>, IR koda nosaukumu un karodziņu “pārbaudīt pašreizējo stāvokli” un pirms palaišanas gaida panākumu. Nekas par palaižamo lietotni netiek sūtīts. Serverim nepieciešams piemēra skripts no pirmkoda repozitorija (website_lan/send_ir.php), kas ar PHP klasi MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) sasniedz viedo kontaktligzdu un IR raidītāju, izmantojot MQTT.

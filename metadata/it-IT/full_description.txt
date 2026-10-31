@@ -1,0 +1,21 @@
+Un launcher minimale per Google TV: una griglia piatta di app e nient'altro. Un'alternativa leggera ai launcher TV completi, senza integrazione TV in diretta, righe di consigli o ricerca/comandi vocali.
+
+Funzionalità:
+
+* Griglia di 5, 6 o 7 colonne che mostra tutte le app installate avviabili.
+* Barra superiore con orologio in tempo reale, un'icona di stato Wi-Fi che apre le impostazioni di rete e scorciatoie alle impostazioni di sistema e del launcher.
+* Tema: come il sistema, chiaro o scuro, con sfumature di sfondo predefinite.
+* Mostra/nascondi e riordina le app con i comandi sposta su/sposta giù, perché i gesti di trascinamento non hanno un equivalente sensato sul D-pad.
+* Premi Menu su un'icona selezionata per aprire la pagina di sistema "Informazioni sull'app" (autorizzazioni, spazio di archiviazione, disinstallazione).
+* Backup e ripristino online facoltativi tramite sync.odiousapps.com, con più backup con data e ora, oltre al ripristino dei valori predefiniti con un tasto (funziona offline).
+* "Risveglio soundbar" facoltativo: prima di avviare un'app, richiama un URL sul tuo server per risvegliare una soundbar dallo standby.
+* Un servizio in background rileva il risveglio del dispositivo dallo standby e riporta in primo piano il launcher se qualcos'altro ha preso il sopravvento.
+
+MX3 Launcher non favorisce, richiede o include alcuna app di terze parti; elenca semplicemente ciò che è installato.
+
+Servizi online (entrambi facoltativi, disattivati finché non li associ):
+
+Tutto il resto funziona completamente offline. Due funzioni comunicano con sync.odiousapps.com, un servizio di associazione e backup gestito dallo sviluppatore, e solo dopo che hai premuto "Associa" nelle impostazioni e approvato la richiesta su un altro dispositivo (scansiona il codice QR o inserisci il codice breve su sync.odiousapps.com, dove accedi al tuo account).
+
+* Backup online: l'associazione fornisce al TV un token del dispositivo. Quando esegui il backup, il TV carica su sync.odiousapps.com tema, sfumatura di sfondo, numero di colonne, elenco delle app nascoste e ordine personalizzato, che vengono salvati nel tuo account. Elenco e ordine sono nomi di pacchetto delle app installate (ad esempio com.example.app). Il ripristino scarica il backup scelto dallo stesso server. Non viene caricato nulla se non premi "Esegui backup impostazioni".
+* Risveglio soundbar: l'associazione recupera un URL e una chiave segreta salvati in precedenza nel tuo account sync.odiousapps.com; vengono memorizzati sul TV. Una volta attivato, a ogni avvio di un'app il TV invia una richiesta a quell'URL (il tuo server, non sync.odiousapps.com) con ?key=<il tuo segreto>, il nome del codice IR e un flag "controlla stato attuale", e attende l'esito positivo prima di avviarla. Non viene inviata alcuna informazione sull'app avviata. Il server richiede lo script di esempio del repository sorgente (website_lan/send_ir.php), che usa la classe PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) per comunicare con la presa intelligente e il trasmettitore IR tramite MQTT.

@@ -1,0 +1,21 @@
+Einfaldur Google TV-ræsir: flatt forritanet og ekkert annað. Léttari valkostur við viðamikla sjónvarpsræsa, án samþættingar við beinar útsendingar, ráðleggingaraða eða leitar/raddstýringar.
+
+Eiginleikar:
+
+* Flatt net með 5, 6 eða 7 dálkum sem sýnir öll uppsett forrit sem hægt er að ræsa.
+* Efsta stika með klukku, Wi-Fi-stöðutákni sem opnar netstillingar og flýtileiðum í kerfis- og ræsistillingar.
+* Þema: fylgja kerfinu, ljóst eða dökkt, með forstilltum bakgrunnslitbrigðum.
+* Sýna/fela og endurraða forritum með upp/niður-hnöppum, þar sem dragbendingar eiga sér ekki skynsamlega hliðstæðu á stefnuhnappi.
+* Ýttu á Valmynd á völdu forritatákni til að fara beint á kerfissíðuna „Forritsupplýsingar“ (heimildir, geymsla, fjarlæging).
+* Valfrjáls öryggisafritun og endurheimt á netinu í gegnum sync.odiousapps.com, með mörgum tímastimpluðum afritum, auk endurstillingar á sjálfgefin gildi með einni snertingu (virkar án nets).
+* Valfrjáls „Vakning hljóðstangar“: áður en forrit er ræst er kallað á vefslóð á þínum eigin netþjóni til að vekja hljóðstöng úr biðstöðu.
+* Bakgrunnsþjónusta greinir þegar tækið vaknar úr biðstöðu og sækir ræsinn aftur ef eitthvað annað hefur tekið yfir.
+
+MX3 Launcher hyglir ekki, krefst ekki né inniheldur nein forrit frá þriðja aðila; það sýnir einfaldlega það sem er uppsett.
+
+Netþjónusta (hvort tveggja valfrjálst, slökkt þar til þú parar):
+
+Allt annað virkar að fullu án nets. Tveir eiginleikar eiga samskipti við sync.odiousapps.com, pörunar- og afritunarþjónustu sem þróunaraðilinn rekur, og aðeins eftir að þú ýtir á „Para“ í stillingum og samþykkir beiðnina í öðru tæki (skannaðu QR-kóðann eða sláðu inn stutta kóðann á sync.odiousapps.com, þar sem þú skráir þig inn á reikninginn þinn).
+
+* Öryggisafrit á netinu: pörun gefur sjónvarpinu tækjatákn. Þegar þú afritar hleður sjónvarpið þemanu, bakgrunnslitbrigðinu, dálkafjölda, lista yfir falin forrit og sérsniðinni forritaröð upp á sync.odiousapps.com, þar sem það er geymt á reikningnum þínum. Listinn og röðin eru pakkanöfn uppsettra forrita (til dæmis com.example.app). Endurheimt sækir valið afrit af sama netþjóni. Engu er hlaðið upp nema þú ýtir á „Taka öryggisafrit af stillingum“.
+* Vakning hljóðstangar: pörun sækir vefslóð og leynilykil sem þú vistaðir áður á sync.odiousapps.com-reikningnum þínum; þau eru geymd á sjónvarpinu. Þegar þetta er virkt sendir sjónvarpið beiðni á þá vefslóð (þinn eigin netþjón, ekki sync.odiousapps.com) við hverja ræsingu forrits með ?key=<leyndarmálið þitt>, heiti IR-kóðans og fánanum „athuga núverandi stöðu“ og bíður eftir árangri áður en ræst er. Engar upplýsingar um hvaða forrit er ræst eru sendar. Netþjónninn þarf sýnishornsskriftuna úr kóðageymslunni (website_lan/send_ir.php), sem notar PHP-klasann MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) til að ná í snjallinnstunguna og IR-sendinn yfir MQTT.

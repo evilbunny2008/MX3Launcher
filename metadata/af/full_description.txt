@@ -1,0 +1,21 @@
+'n Minimale Google TV-lanseerder: 'n plat programrooster en niks anders nie. 'n Ligter alternatief vir volledige TV-lanseerders, sonder regstreekse TV-integrasie, aanbevelingsrye of soek/stem.
+
+Kenmerke:
+
+* Plat rooster van 5, 6 of 7 kolomme wat elke geïnstalleerde program wat begin kan word, wys.
+* Boonste balk met 'n horlosie, 'n Wi-Fi-statusikoon wat netwerkinstellings oopmaak, en kortpaaie na stelsel- en lanseerderinstellings.
+* Tema: volg stelsel, lig of donker, met voorafgestelde agtergrondgradiënte.
+* Wys/versteek en herrangskik programme met skuif-op/skuif-af-knoppies, aangesien sleepgebare geen sinvolle ekwivalent op die D-pad het nie.
+* Druk Kieslys op 'n gekose programikoon om direk na die stelsel se "Programinligting"-bladsy te gaan (toestemmings, berging, deïnstalleer).
+* Opsionele aanlyn rugsteun en herstel via sync.odiousapps.com, met veelvuldige rugsteune met tydstempels, plus terugstel na verstek met een druk (werk vanlyn).
+* Opsionele "Klankbalk wakker maak": voordat 'n program begin, word 'n URL op jou eie bediener geroep om 'n klankbalk uit gereedheid wakker te maak.
+* 'n Agtergronddiens bespeur wanneer die toestel uit gereedheid wakker word en bring die lanseerder terug as iets anders oorgeneem het.
+
+MX3 Launcher bevoordeel, vereis of bevat geen derdepartyprogram nie; dit lys bloot wat geïnstalleer is.
+
+Aanlyn dienste (albei opsioneel, af totdat jy hulle koppel):
+
+Alles anders werk ten volle vanlyn. Twee kenmerke kommunikeer met sync.odiousapps.com, 'n koppel-/rugsteundiens wat deur die ontwikkelaar bedryf word, en slegs nadat jy "Koppel" in Instellings gedruk en die versoek op 'n ander toestel goedgekeur het (skandeer die QR-kode of voer die kort kode in by sync.odiousapps.com, waar jy by jou rekening aanmeld).
+
+* Aanlyn rugsteun: koppeling gee die TV 'n toesteltoken. Wanneer jy rugsteun, laai die TV jou tema, agtergrondgradiënt, kolomgetal, lys van versteekte programme en pasgemaakte programvolgorde op na sync.odiousapps.com, waar dit onder jou rekening gestoor word. Die lys en volgorde is pakketname van geïnstalleerde programme (byvoorbeeld com.example.app). Herstel laai 'n gekose rugsteun van dieselfde bediener af. Niks word opgelaai tensy jy "Rugsteun instellings" druk nie.
+* Klankbalk wakker maak: koppeling haal 'n URL en geheime sleutel wat jy vroeër in jou sync.odiousapps.com-rekening gestoor het; dit word op die TV gestoor. Sodra dit geaktiveer is, stuur die TV by elke programbegin 'n versoek na daardie URL (jou eie bediener, nie sync.odiousapps.com nie) met ?key=<jou geheim>, die IR-kodenaam en 'n "gaan huidige toestand na"-vlag, en wag vir sukses voordat dit begin. Niks oor watter program begin word, word gestuur nie. Die bediener benodig die voorbeeldskrip uit die bronbewaarplek (website_lan/send_ir.php), wat die MQTTv5Client PHP-klas (https://github.com/evilbunny2008/MQTTv5Client) gebruik om die slimprop en IR-sender oor MQTT te bereik.

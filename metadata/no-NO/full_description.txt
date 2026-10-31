@@ -1,0 +1,21 @@
+En minimal Google TV-launcher: et flatt apprutenett og ingenting annet. Et lettere alternativ til funksjonsrike TV-launchere, uten direkte-TV-integrasjon, anbefalingsrader eller søk/tale.
+
+Funksjoner:
+
+* Flatt rutenett med 5, 6 eller 7 kolonner som viser alle installerte apper som kan startes.
+* Toppfelt med klokke, et Wi-Fi-statusikon som åpner nettverksinnstillingene, og snarveier til system- og launcherinnstillinger.
+* Tema: følg systemet, lyst eller mørkt, med forhåndsinnstilte bakgrunnsgradienter.
+* Vis/skjul og omorganiser apper med flytt opp/ned-knapper, siden drabevegelser ikke har en fornuftig motpart på D-paden.
+* Trykk på Meny på et markert appikon for å gå rett til systemsiden «Appinfo» (tillatelser, lagring, avinstallering).
+* Valgfri sikkerhetskopiering og gjenoppretting på nett via sync.odiousapps.com, med flere tidsstemplede sikkerhetskopier, pluss tilbakestilling til standard med ett trykk (fungerer uten nett).
+* Valgfri «Vekking av lydplanke»: før en app startes, kalles en URL på din egen server for å vekke en lydplanke fra hvilemodus.
+* En bakgrunnstjeneste oppdager når enheten våkner fra hvilemodus, og henter launcheren tilbake hvis noe annet har tatt over.
+
+MX3 Launcher favoriserer, krever eller inkluderer ingen tredjepartsapper; den viser bare det som er installert.
+
+Nettjenester (begge valgfrie, av til du kobler dem til):
+
+Alt annet fungerer helt uten nett. To funksjoner kommuniserer med sync.odiousapps.com, en tilkoblings- og sikkerhetskopitjeneste drevet av utvikleren, og bare etter at du har trykket på «Koble til» i innstillingene og godkjent forespørselen på en annen enhet (skann QR-koden eller skriv inn kortkoden på sync.odiousapps.com, der du logger på kontoen din).
+
+* Sikkerhetskopiering på nett: tilkoblingen gir TV-en et enhetstoken. Når du sikkerhetskopierer, laster TV-en opp tema, bakgrunnsgradient, antall kolonner, listen over skjulte apper og din apprekkefølge til sync.odiousapps.com, der de lagres på kontoen din. Listen og rekkefølgen er pakkenavn på installerte apper (for eksempel com.example.app). Gjenoppretting laster ned valgt sikkerhetskopi fra samme server. Ingenting lastes opp med mindre du trykker på «Sikkerhetskopier innstillinger».
+* Vekking av lydplanke: tilkoblingen henter en URL og en hemmelig nøkkel du tidligere lagret på kontoen din på sync.odiousapps.com; de lagres på TV-en. Når funksjonen er aktivert, sender TV-en ved hver appstart en forespørsel til den URL-en (din egen server, ikke sync.odiousapps.com) med ?key=<din hemmelighet>, IR-kodenavnet og flagget «sjekk gjeldende tilstand», og venter på at den lykkes før appen startes. Ingenting om hvilken app som startes, sendes. Serveren trenger eksempelskriptet fra kildekodelageret (website_lan/send_ir.php), som bruker PHP-klassen MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) for å nå den smarte stikkontakten og IR-senderen via MQTT.

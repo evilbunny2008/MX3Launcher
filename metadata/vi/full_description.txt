@@ -1,0 +1,21 @@
+Launcher tối giản cho Google TV: một lưới ứng dụng phẳng và không có gì khác. Lựa chọn nhẹ hơn so với các launcher TV đầy đủ tính năng, không tích hợp TV trực tiếp, không có hàng đề xuất hay tìm kiếm/giọng nói.
+
+Tính năng:
+
+* Lưới phẳng 5, 6 hoặc 7 cột hiển thị mọi ứng dụng đã cài có thể mở.
+* Thanh trên cùng có đồng hồ, biểu tượng trạng thái Wi-Fi mở cài đặt mạng, cùng lối tắt đến cài đặt hệ thống và launcher.
+* Giao diện: theo hệ thống, sáng hoặc tối, với các dải màu nền có sẵn.
+* Hiện/ẩn và sắp xếp lại ứng dụng bằng nút lên/xuống, vì thao tác kéo không có cách tương đương hợp lý trên D-pad.
+* Nhấn Menu trên biểu tượng ứng dụng đang chọn để đến thẳng trang "Thông tin ứng dụng" của hệ thống (quyền, bộ nhớ, gỡ cài đặt).
+* Sao lưu và khôi phục trực tuyến tùy chọn qua sync.odiousapps.com, với nhiều bản sao lưu có dấu thời gian, cùng khả năng đặt lại mặc định bằng một lần nhấn (hoạt động ngoại tuyến).
+* "Đánh thức loa thanh" tùy chọn: trước khi mở ứng dụng, gọi một URL trên máy chủ của riêng bạn để đánh thức loa thanh khỏi chế độ chờ.
+* Một dịch vụ nền phát hiện thiết bị thức dậy từ chế độ chờ và đưa launcher trở lại nếu có thứ khác đã chiếm chỗ.
+
+MX3 Launcher không ưu tiên, yêu cầu hay đi kèm bất kỳ ứng dụng bên thứ ba nào; nó chỉ liệt kê những gì đã cài.
+
+Dịch vụ trực tuyến (cả hai đều tùy chọn, tắt cho đến khi bạn ghép nối):
+
+Mọi thứ khác hoạt động hoàn toàn ngoại tuyến. Hai tính năng giao tiếp với sync.odiousapps.com, dịch vụ ghép nối/sao lưu do nhà phát triển vận hành, và chỉ sau khi bạn nhấn "Ghép nối" trong Cài đặt và phê duyệt yêu cầu trên thiết bị khác (quét mã QR hoặc nhập mã ngắn tại sync.odiousapps.com, nơi bạn đăng nhập vào tài khoản).
+
+* Sao lưu trực tuyến: ghép nối cấp cho TV một mã thông báo thiết bị. Khi sao lưu, TV tải giao diện, dải màu nền, số cột, danh sách ứng dụng ẩn và thứ tự ứng dụng tùy chỉnh lên sync.odiousapps.com, nơi chúng được lưu vào tài khoản của bạn. Danh sách và thứ tự là tên gói của các ứng dụng đã cài (ví dụ com.example.app). Khôi phục tải bản sao lưu đã chọn từ cùng máy chủ. Không có gì được tải lên trừ khi bạn nhấn "Sao lưu cài đặt".
+* Đánh thức loa thanh: ghép nối lấy URL và khóa bí mật bạn đã lưu trước đó trong tài khoản sync.odiousapps.com; chúng được lưu trên TV. Sau khi bật, mỗi lần mở ứng dụng, TV gửi yêu cầu đến URL đó (máy chủ của bạn, không phải sync.odiousapps.com) kèm ?key=<bí mật của bạn>, tên mã IR và cờ "kiểm tra trạng thái hiện tại", rồi đợi thành công trước khi mở. Không có thông tin nào về ứng dụng đang mở được gửi đi. Máy chủ cần tập lệnh mẫu từ kho mã nguồn (website_lan/send_ir.php), dùng lớp PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) để kết nối ổ cắm thông minh và bộ phát IR qua MQTT.

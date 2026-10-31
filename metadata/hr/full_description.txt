@@ -1,0 +1,21 @@
+Minimalistički launcher za Google TV: ravna rešetka aplikacija i ništa drugo. Lakša alternativa bogatim TV launcherima, bez integracije TV-a uživo, redova preporuka i pretraživanja/glasa.
+
+Značajke:
+
+* Ravna rešetka s 5, 6 ili 7 stupaca koja prikazuje sve instalirane aplikacije koje se mogu pokrenuti.
+* Gornja traka sa satom, ikonom statusa Wi-Fi-ja koja otvara mrežne postavke te prečacima do postavki sustava i launchera.
+* Tema: prema sustavu, svijetla ili tamna, s unaprijed zadanim prijelazima pozadine.
+* Prikaz/skrivanje i promjena redoslijeda aplikacija gumbima gore/dolje, jer geste povlačenja nemaju razuman ekvivalent na D-padu.
+* Pritisnite Izbornik na odabranoj ikoni kako biste otišli izravno na stranicu sustava „Informacije o aplikaciji” (dopuštenja, pohrana, deinstalacija).
+* Izborno mrežno sigurnosno kopiranje i vraćanje putem sync.odiousapps.com, s više kopija s vremenskom oznakom, te vraćanje na zadano jednim pritiskom (radi izvanmrežno).
+* Izborno „Buđenje soundbara”: prije pokretanja aplikacije poziva URL na vašem poslužitelju kako bi probudio soundbar iz stanja pripravnosti.
+* Pozadinska usluga otkriva buđenje uređaja iz stanja pripravnosti i vraća launcher ako je nešto drugo preuzelo zaslon.
+
+MX3 Launcher ne daje prednost, ne zahtijeva i ne sadrži nijednu aplikaciju treće strane; samo prikazuje ono što je instalirano.
+
+Mrežne usluge (obje izborne, isključene dok ih ne uparite):
+
+Sve ostalo radi potpuno izvanmrežno. Dvije značajke komuniciraju sa sync.odiousapps.com, uslugom uparivanja i sigurnosnog kopiranja koju vodi razvojni programer, i to tek nakon što u postavkama pritisnete „Upari” i odobrite zahtjev na drugom uređaju (skenirajte QR kôd ili unesite kratki kôd na sync.odiousapps.com, gdje se prijavljujete na svoj račun).
+
+* Mrežno sigurnosno kopiranje: uparivanje daje televizoru token uređaja. Pri kopiranju televizor prenosi temu, prijelaz pozadine, broj stupaca, popis skrivenih aplikacija i vaš redoslijed aplikacija na sync.odiousapps.com, gdje se spremaju na vaš račun. Popis i redoslijed su nazivi paketa instaliranih aplikacija (na primjer com.example.app). Vraćanje preuzima odabranu kopiju s istog poslužitelja. Ništa se ne prenosi ako ne pritisnete „Sigurnosno kopiraj postavke”.
+* Buđenje soundbara: uparivanje dohvaća URL i tajni ključ koje ste ranije spremili na svoj račun sync.odiousapps.com; pohranjuju se na televizoru. Nakon uključivanja, pri svakom pokretanju aplikacije televizor šalje zahtjev na taj URL (vaš poslužitelj, ne sync.odiousapps.com) s ?key=<vaša tajna>, nazivom IR koda i oznakom „provjeri trenutačno stanje” te čeka uspjeh prije pokretanja. Ne šalje se ništa o tome koja se aplikacija pokreće. Poslužitelju je potrebna primjer-skripta iz repozitorija izvornog koda (website_lan/send_ir.php), koja pomoću PHP klase MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) putem MQTT-a pristupa pametnoj utičnici i IR odašiljaču.

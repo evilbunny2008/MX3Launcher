@@ -1,0 +1,21 @@
+Minimalistyczny launcher Google TV: płaska siatka aplikacji i nic więcej. Lżejsza alternatywa dla rozbudowanych launcherów TV, bez integracji z telewizją na żywo, rzędów rekomendacji i wyszukiwania/głosu.
+
+Funkcje:
+
+* Płaska siatka z 5, 6 lub 7 kolumnami pokazująca każdą zainstalowaną aplikację, którą można uruchomić.
+* Górny pasek z zegarem na żywo, ikoną stanu Wi-Fi otwierającą ustawienia sieci oraz skrótami do ustawień systemu i launchera.
+* Motyw: zgodnie z systemem, jasny lub ciemny, z gotowymi gradientami tła.
+* Pokazywanie/ukrywanie i zmiana kolejności aplikacji przyciskami w górę/w dół, ponieważ gesty przeciągania nie mają sensownego odpowiednika na D-padzie.
+* Naciśnij Menu na zaznaczonej ikonie aplikacji, aby przejść do systemowej strony „Informacje o aplikacji” (uprawnienia, pamięć, odinstalowanie).
+* Opcjonalna kopia zapasowa i przywracanie online przez sync.odiousapps.com, z wieloma kopiami ze znacznikiem czasu, oraz przywracanie ustawień domyślnych jednym naciśnięciem (działa offline).
+* Opcjonalne „Wybudzanie soundbara”: przed uruchomieniem aplikacji wywołuje adres URL na Twoim własnym serwerze, aby wybudzić soundbar ze stanu czuwania.
+* Usługa w tle wykrywa wybudzenie urządzenia ze stanu czuwania i przywraca launcher, jeśli coś innego przejęło ekran.
+
+MX3 Launcher nie faworyzuje, nie wymaga ani nie zawiera żadnej aplikacji innych firm; po prostu wyświetla to, co jest zainstalowane.
+
+Usługi online (obie opcjonalne, wyłączone do czasu sparowania):
+
+Wszystko inne działa w pełni offline. Dwie funkcje łączą się z sync.odiousapps.com, usługą parowania i kopii zapasowych prowadzoną przez dewelopera, i tylko po naciśnięciu „Sparuj” w ustawieniach oraz zatwierdzeniu prośby na innym urządzeniu (zeskanuj kod QR lub wpisz krótki kod na sync.odiousapps.com, gdzie logujesz się na swoje konto).
+
+* Kopia zapasowa online: parowanie daje telewizorowi token urządzenia. Podczas tworzenia kopii telewizor przesyła motyw, gradient tła, liczbę kolumn, listę ukrytych aplikacji i własną kolejność aplikacji do sync.odiousapps.com, gdzie są przechowywane na Twoim koncie. Lista i kolejność to nazwy pakietów zainstalowanych aplikacji (na przykład com.example.app). Przywracanie pobiera wybraną kopię z tego samego serwera. Nic nie jest przesyłane, dopóki nie naciśniesz „Utwórz kopię ustawień”.
+* Wybudzanie soundbara: parowanie pobiera adres URL i tajny klucz zapisane wcześniej na Twoim koncie sync.odiousapps.com; są one przechowywane na telewizorze. Po włączeniu przy każdym uruchomieniu aplikacji telewizor wysyła żądanie pod ten adres URL (Twój własny serwer, nie sync.odiousapps.com) z ?key=<Twój sekret>, nazwą kodu IR i flagą „sprawdź bieżący stan” oraz czeka na powodzenie przed uruchomieniem. Nie są wysyłane żadne informacje o uruchamianej aplikacji. Serwer wymaga przykładowego skryptu z repozytorium źródłowego (website_lan/send_ir.php), który używa klasy PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) do komunikacji z inteligentnym gniazdkiem i nadajnikiem IR przez MQTT.

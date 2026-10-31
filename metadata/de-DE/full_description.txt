@@ -1,0 +1,21 @@
+Ein minimaler Google-TV-Launcher: ein flaches App-Raster und sonst nichts. Eine schlanke Alternative zu umfangreichen TV-Launchern, ohne Live-TV-Integration, Empfehlungszeilen oder Suche/Sprachsteuerung.
+
+Funktionen:
+
+* Flaches Raster mit 5, 6 oder 7 Spalten, das jede installierte startbare App anzeigt.
+* Obere Leiste mit Live-Uhr, einem WLAN-Statussymbol, das die Netzwerkeinstellungen öffnet, und Verknüpfungen zu den System- und Launcher-Einstellungen.
+* Design: wie System, hell oder dunkel, mit voreingestellten Hintergrundverläufen.
+* Apps ein-/ausblenden und per Nach-oben-/Nach-unten-Steuerung neu anordnen, da Ziehgesten keine sinnvolle Entsprechung auf dem Steuerkreuz haben.
+* Drücke die Menütaste auf einem fokussierten App-Symbol, um direkt zur System-Seite „App-Info“ zu gelangen (Berechtigungen, Speicher, Deinstallation).
+* Optionale Online-Sicherung und -Wiederherstellung über sync.odiousapps.com mit mehreren Sicherungen mit Zeitstempel, dazu ein Zurücksetzen auf die Standardwerte mit einem Tastendruck (funktioniert offline).
+* Optionales „Soundbar aufwecken“: Vor dem Start einer App wird eine URL auf deinem eigenen Server aufgerufen, um eine Soundbar aus dem Standby zu wecken.
+* Ein Hintergrunddienst erkennt das Aufwachen des Geräts aus dem Standby und holt den Launcher zurück, falls etwas anderes übernommen hat.
+
+MX3 Launcher bevorzugt, verlangt oder enthält keine Drittanbieter-App; er listet einfach auf, was installiert ist.
+
+Online-Dienste (beide optional, inaktiv, bis du sie koppelst):
+
+Alles andere funktioniert vollständig offline. Zwei Funktionen kommunizieren mit sync.odiousapps.com, einem vom Entwickler betriebenen Kopplungs-/Sicherungsdienst, und zwar erst, nachdem du in den Einstellungen „Koppeln“ gedrückt und die Anfrage auf einem anderen Gerät bestätigt hast (QR-Code scannen oder Kurzcode auf sync.odiousapps.com eingeben, wo du dich bei deinem Konto anmeldest).
+
+* Online-Sicherung: Durch das Koppeln erhält der Fernseher ein Geräte-Token. Beim Sichern lädt der Fernseher dein Design, den Hintergrundverlauf, die Spaltenzahl, die Liste ausgeblendeter Apps und deine App-Reihenfolge auf sync.odiousapps.com hoch, wo sie in deinem Konto gespeichert werden. Liste und Reihenfolge bestehen aus Paketnamen installierter Apps (zum Beispiel com.example.app). Beim Wiederherstellen wird eine gewählte Sicherung vom selben Server geladen. Nichts wird hochgeladen, solange du nicht „Einstellungen sichern“ drückst.
+* Soundbar aufwecken: Beim Koppeln werden eine URL und ein geheimer Schlüssel abgerufen, die du zuvor in deinem Konto auf sync.odiousapps.com gespeichert hast; sie werden auf dem Fernseher gespeichert. Wenn aktiviert, sendet der Fernseher bei jedem App-Start eine Anfrage an diese URL (dein eigener Server, nicht sync.odiousapps.com) mit ?key=<dein Geheimnis>, dem IR-Codenamen und einem „Aktuellen Zustand prüfen“-Flag und wartet vor dem Start auf den Erfolg. Es wird nichts darüber gesendet, welche App gestartet wird. Der Server benötigt das Beispielskript aus dem Quellcode-Repository (website_lan/send_ir.php), das die PHP-Klasse MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) nutzt, um die smarte Steckdose und den IR-Blaster per MQTT anzusprechen.

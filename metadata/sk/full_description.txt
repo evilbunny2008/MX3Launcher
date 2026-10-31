@@ -1,0 +1,21 @@
+Minimalistický launcher pre Google TV: plochá mriežka aplikácií a nič iné. Ľahšia alternatíva k rozsiahlym TV launcherom, bez integrácie živého vysielania, radov odporúčaní a vyhľadávania/hlasu.
+
+Funkcie:
+
+* Plochá mriežka s 5, 6 alebo 7 stĺpcami, ktorá zobrazuje všetky nainštalované spustiteľné aplikácie.
+* Horná lišta s hodinami, ikonou stavu Wi-Fi, ktorá otvára nastavenia siete, a skratkami do nastavení systému a launchera.
+* Motív: podľa systému, svetlý alebo tmavý, s prednastavenými prechodmi pozadia.
+* Zobrazenie/skrytie a zmena poradia aplikácií tlačidlami hore/dole, pretože gestá ťahania nemajú na D-pade rozumný ekvivalent.
+* Stlačením tlačidla Menu na vybranej ikone prejdete priamo na systémovú stránku „Informácie o aplikácii“ (povolenia, úložisko, odinštalovanie).
+* Voliteľné online zálohovanie a obnovenie cez sync.odiousapps.com, s viacerými zálohami s časovou pečiatkou, a obnovenie predvolených hodnôt jedným stlačením (funguje offline).
+* Voliteľné „Prebudenie soundbaru“: pred spustením aplikácie zavolá URL na vašom vlastnom serveri, aby prebudilo soundbar z pohotovostného režimu.
+* Služba na pozadí zistí prebudenie zariadenia z pohotovostného režimu a vráti launcher späť, ak prevzalo niečo iné.
+
+MX3 Launcher neuprednostňuje, nevyžaduje ani neobsahuje žiadne aplikácie tretích strán; len zobrazuje, čo je nainštalované.
+
+Online služby (obe voliteľné, vypnuté, kým ich nespárujete):
+
+Všetko ostatné funguje úplne offline. Dve funkcie komunikujú so sync.odiousapps.com, službou na párovanie a zálohovanie prevádzkovanou vývojárom, a to až potom, čo v nastaveniach stlačíte „Spárovať“ a schválite požiadavku na inom zariadení (naskenujte QR kód alebo zadajte krátky kód na sync.odiousapps.com, kde sa prihlásite do svojho účtu).
+
+* Online záloha: párovaním získa televízor token zariadenia. Pri zálohovaní televízor nahrá motív, prechod pozadia, počet stĺpcov, zoznam skrytých aplikácií a vlastné poradie aplikácií na sync.odiousapps.com, kde sa uložia k vášmu účtu. Zoznam a poradie sú názvy balíkov nainštalovaných aplikácií (napríklad com.example.app). Obnovenie stiahne vybranú zálohu z toho istého servera. Nič sa nenahrá, kým nestlačíte „Zálohovať nastavenia“.
+* Prebudenie soundbaru: párovanie načíta URL a tajný kľúč, ktoré ste predtým uložili vo svojom účte sync.odiousapps.com; uložia sa do televízora. Po zapnutí televízor pri každom spustení aplikácie odošle požiadavku na túto URL (váš vlastný server, nie sync.odiousapps.com) s ?key=<váš tajný kľúč>, názvom IR kódu a príznakom „skontrolovať aktuálny stav“ a pred spustením počká na úspech. Neodosiela sa nič o tom, ktorá aplikácia sa spúšťa. Server potrebuje ukážkový skript zo zdrojového repozitára (website_lan/send_ir.php), ktorý pomocou PHP triedy MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) komunikuje s inteligentnou zásuvkou a IR vysielačom cez MQTT.

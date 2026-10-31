@@ -1,0 +1,21 @@
+Minimaalinen Google TV -käynnistin: tasainen sovellusruudukko eikä mitään muuta. Kevyempi vaihtoehto monipuolisille TV-käynnistimille ilman suoran TV:n integraatiota, suosituksia tai hakua/puhetta.
+
+Ominaisuudet:
+
+* Tasainen 5, 6 tai 7 sarakkeen ruudukko, joka näyttää kaikki asennetut käynnistettävät sovellukset.
+* Yläpalkki, jossa on kello, verkkoasetukset avaava Wi-Fi-tilakuvake sekä pikakuvakkeet järjestelmän ja käynnistimen asetuksiin.
+* Teema: järjestelmän mukaan, vaalea tai tumma, valmiilla taustaliukuvärjäyksillä.
+* Näytä/piilota ja järjestä sovelluksia siirrä ylös/alas -painikkeilla, koska vetoeleillä ei ole järkevää vastinetta suuntaohjaimella.
+* Paina Valikko-painiketta valitun sovelluskuvakkeen kohdalla siirtyäksesi suoraan järjestelmän Sovelluksen tiedot -sivulle (käyttöoikeudet, tallennustila, poisto).
+* Valinnainen varmuuskopiointi ja palautus verkossa sync.odiousapps.comin kautta, useita aikaleimattuja varmuuskopioita, sekä oletusten palautus yhdellä painalluksella (toimii offline-tilassa).
+* Valinnainen "Soundbarin herätys": ennen sovelluksen käynnistystä kutsutaan omalla palvelimellasi olevaa URL-osoitetta soundbarin herättämiseksi valmiustilasta.
+* Taustapalvelu havaitsee laitteen heräämisen valmiustilasta ja palauttaa käynnistimen, jos jokin muu on ottanut sen paikan.
+
+MX3 Launcher ei suosi, vaadi tai sisällä kolmannen osapuolen sovelluksia; se vain listaa asennetun sisällön.
+
+Verkkopalvelut (molemmat valinnaisia, pois päältä, kunnes muodostat parin):
+
+Kaikki muu toimii täysin offline-tilassa. Kaksi ominaisuutta on yhteydessä kehittäjän ylläpitämään paritus- ja varmuuskopiopalveluun sync.odiousapps.com, ja vain sen jälkeen, kun olet painanut asetuksissa "Muodosta pari" ja hyväksynyt pyynnön toisella laitteella (skannaa QR-koodi tai anna lyhyt koodi osoitteessa sync.odiousapps.com, jossa kirjaudut tilillesi).
+
+* Verkkovarmuuskopiointi: paritus antaa televisiolle laitetunnuksen. Varmuuskopioitaessa televisio lähettää teeman, taustaliukuvärjäyksen, sarakemäärän, piilotettujen sovellusten luettelon ja oman sovellusjärjestyksesi palveluun sync.odiousapps.com, jossa ne tallennetaan tilillesi. Luettelo ja järjestys ovat asennettujen sovellusten pakettinimiä (esimerkiksi com.example.app). Palautus lataa valitun varmuuskopion samalta palvelimelta. Mitään ei lähetetä, ellet paina "Varmuuskopioi asetukset".
+* Soundbarin herätys: paritus hakee URL-osoitteen ja salaisen avaimen, jotka olet aiemmin tallentanut sync.odiousapps.com-tilillesi; ne tallennetaan televisioon. Kun toiminto on käytössä, televisio lähettää jokaisen sovelluskäynnistyksen yhteydessä pyynnön kyseiseen URL-osoitteeseen (omalle palvelimellesi, ei sync.odiousapps.comiin) tiedoilla ?key=<salaisuutesi>, IR-koodin nimi ja "tarkista nykyinen tila" -lippu, ja odottaa onnistumista ennen käynnistystä. Käynnistettävästä sovelluksesta ei lähetetä mitään tietoa. Palvelin tarvitsee lähdekoodivaraston esimerkkiskriptin (website_lan/send_ir.php), joka käyttää PHP-luokkaa MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) älypistorasian ja IR-lähettimen tavoittamiseen MQTT:n kautta.

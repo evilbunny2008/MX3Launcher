@@ -1,0 +1,21 @@
+En minimal Google TV-launcher: ett platt apprutnät och inget annat. Ett lättare alternativ till funktionsrika TV-launchers, utan live-TV-integration, rekommendationsrader eller sökning/röststyrning.
+
+Funktioner:
+
+* Platt rutnät med 5, 6 eller 7 kolumner som visar alla installerade appar som kan startas.
+* Toppfält med klocka, en Wi-Fi-statusikon som öppnar nätverksinställningarna samt genvägar till system- och launcherinställningar.
+* Tema: följ systemet, ljust eller mörkt, med förinställda bakgrundstoningar.
+* Visa/dölj och ordna om appar med flytta upp/ned-knappar, eftersom draggester saknar en vettig motsvarighet på styrknappen.
+* Tryck på Meny på en markerad appikon för att gå direkt till systemsidan "Appinformation" (behörigheter, lagring, avinstallation).
+* Valfri säkerhetskopiering och återställning online via sync.odiousapps.com, med flera tidsstämplade säkerhetskopior, samt återställning till standard med ett tryck (fungerar offline).
+* Valfri "Väckning av soundbar": innan en app startas anropas en URL på din egen server för att väcka en soundbar ur viloläge.
+* En bakgrundstjänst upptäcker när enheten vaknar ur viloläge och tar tillbaka launchern om något annat har tagit över.
+
+MX3 Launcher gynnar, kräver eller inkluderar inga tredjepartsappar; den listar bara det som är installerat.
+
+Onlinetjänster (båda valfria, avstängda tills du parkopplar dem):
+
+Allt annat fungerar helt offline. Två funktioner kommunicerar med sync.odiousapps.com, en parkopplings- och säkerhetskopieringstjänst som drivs av utvecklaren, och bara efter att du tryckt på "Parkoppla" i inställningarna och godkänt begäran på en annan enhet (skanna QR-koden eller ange kortkoden på sync.odiousapps.com, där du loggar in på ditt konto).
+
+* Säkerhetskopiering online: parkopplingen ger TV:n en enhetstoken. När du säkerhetskopierar laddar TV:n upp ditt tema, bakgrundstoning, antal kolumner, listan över dolda appar och din appordning till sync.odiousapps.com, där de sparas på ditt konto. Listan och ordningen är paketnamn för installerade appar (till exempel com.example.app). Vid återställning hämtas vald säkerhetskopia från samma server. Inget laddas upp om du inte trycker på "Säkerhetskopiera inställningar".
+* Väckning av soundbar: parkopplingen hämtar en URL och en hemlig nyckel som du tidigare sparat på ditt konto på sync.odiousapps.com; de lagras på TV:n. När funktionen är aktiverad skickar TV:n vid varje appstart en begäran till den URL:en (din egen server, inte sync.odiousapps.com) med ?key=<din hemlighet>, IR-kodens namn och flaggan "kontrollera aktuell status", och väntar på att den lyckas innan appen startas. Ingen information om vilken app som startas skickas. Servern behöver exempelskriptet från källkodsarkivet (website_lan/send_ir.php), som använder PHP-klassen MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) för att nå det smarta uttaget och IR-sändaren via MQTT.

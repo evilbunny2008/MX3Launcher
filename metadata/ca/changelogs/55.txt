@@ -1,0 +1,1 @@
+* S'han actualitzat les eines de compilació i les biblioteques.

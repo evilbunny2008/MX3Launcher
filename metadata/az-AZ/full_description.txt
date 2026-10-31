@@ -1,0 +1,21 @@
+Minimal Google TV launcher-i: düz tətbiq şəbəkəsi və başqa heç nə. Çoxfunksiyalı TV launcher-lərinə daha yüngül alternativ; canlı TV inteqrasiyası, tövsiyə sıraları və ya axtarış/səs yoxdur.
+
+Xüsusiyyətlər:
+
+* Quraşdırılmış və işə salına bilən bütün tətbiqləri göstərən 5, 6 və ya 7 sütunlu düz şəbəkə.
+* Saat, şəbəkə ayarlarını açan Wi-Fi status nişanı, sistem və launcher ayarlarına qısayollar olan üst panel.
+* Tema: sistemə uyğun, açıq və ya tünd, hazır fon qradiyentləri ilə.
+* Tətbiqləri yuxarı/aşağı düymələri ilə göstərin/gizlədin və yenidən sıralayın, çünki sürükləmə jestlərinin D-pad-də ağlabatan qarşılığı yoxdur.
+* Fokuslanmış nişanda Menyu düyməsini basaraq sistemin "Tətbiq məlumatı" səhifəsinə keçin (icazələr, yaddaş, silmə).
+* sync.odiousapps.com vasitəsilə isteğe bağlı onlayn ehtiyat nüsxə və bərpa, vaxt damğalı bir neçə nüsxə ilə, üstəlik bir toxunuşla defolta sıfırlama (oflayn işləyir).
+* İsteğe bağlı "Səs panelini oyatma": tətbiqi işə salmazdan əvvəl gözləmə rejimindəki səs panelini oyatmaq üçün öz serverinizdəki URL-i çağırır.
+* Fon xidməti cihazın gözləmə rejimindən oyanmasını aşkarlayır və başqa bir şey yeri tutubsa, launcher-i geri qaytarır.
+
+MX3 Launcher heç bir üçüncü tərəf tətbiqinə üstünlük vermir, onu tələb etmir və daxil etmir; sadəcə quraşdırılanları siyahıya alır.
+
+Onlayn xidmətlər (hər ikisi isteğe bağlıdır, cütləşdirənə qədər söndürülüb):
+
+Qalan hər şey tam oflayn işləyir. İki funksiya tərtibatçının idarə etdiyi cütləşdirmə/ehtiyat nüsxə xidməti olan sync.odiousapps.com ilə əlaqə saxlayır və yalnız siz Ayarlarda "Cütləşdir" düyməsini basıb sorğunu başqa cihazda təsdiqlədikdən sonra (QR kodu skan edin və ya hesabınıza daxil olduğunuz sync.odiousapps.com-da qısa kodu daxil edin).
+
+* Onlayn ehtiyat nüsxə: cütləşdirmə TV-yə cihaz tokeni verir. Ehtiyat nüsxə çıxaranda TV temanı, fon qradiyentini, sütun sayını, gizli tətbiqlər siyahısını və fərdi tətbiq sıranızı sync.odiousapps.com-a yükləyir və onlar hesabınızda saxlanılır. Siyahı və sıra quraşdırılmış tətbiqlərin paket adlarıdır (məsələn, com.example.app). Bərpa seçilmiş nüsxəni həmin serverdən endirir. "Ayarların ehtiyat nüsxəsini çıxar" düyməsini basmasanız, heç nə yüklənmir.
+* Səs panelini oyatma: cütləşdirmə əvvəlcədən sync.odiousapps.com hesabınızda saxladığınız URL-i və gizli açarı alır; onlar TV-də saxlanılır. Aktivləşdirildikdən sonra hər tətbiq işə salınanda TV həmin URL-ə (sync.odiousapps.com yox, öz serveriniz) ?key=<sizin sirriniz>, IR kod adı və "cari vəziyyəti yoxla" bayrağı ilə sorğu göndərir və işə salmazdan əvvəl uğuru gözləyir. Hansı tətbiqin işə salındığı barədə heç bir məlumat göndərilmir. Server üçün mənbə deposundakı nümunə skript lazımdır (website_lan/send_ir.php); o, MQTT üzərindən ağıllı rozetkaya və IR ötürücüyə çatmaq üçün MQTTv5Client PHP sinfindən (https://github.com/evilbunny2008/MQTTv5Client) istifadə edir.

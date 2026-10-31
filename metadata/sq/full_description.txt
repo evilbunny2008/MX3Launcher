@@ -1,0 +1,21 @@
+Një launcher minimal për Google TV: një rrjetë e sheshtë aplikacionesh dhe asgjë tjetër. Një alternativë më e lehtë ndaj launcher-ave të plotë për TV, pa integrim të TV-së live, rreshta rekomandimesh ose kërkim/zë.
+
+Veçoritë:
+
+* Rrjetë e sheshtë me 5, 6 ose 7 kolona që shfaq çdo aplikacion të instaluar që mund të hapet.
+* Shirit i sipërm me orë, ikonë statusi Wi-Fi që hap cilësimet e rrjetit dhe shkurtore për cilësimet e sistemit dhe të launcher-it.
+* Tema: sipas sistemit, e çelët ose e errët, me gradientë sfondi të paracaktuar.
+* Shfaq/fshih dhe rirendit aplikacionet me butonat lart/poshtë, sepse gjestet e tërheqjes nuk kanë ekuivalent të arsyeshëm në D-pad.
+* Shtyp Menu mbi një ikonë të zgjedhur për të shkuar drejtpërdrejt te faqja e sistemit "Informacione për aplikacionin" (lejet, hapësira ruajtëse, çinstalimi).
+* Rezervim dhe rikthim online opsional përmes sync.odiousapps.com, me disa kopje me vulë kohore, plus rivendosje te parazgjedhjet me një shtypje (funksionon offline).
+* "Zgjimi i soundbar-it" opsional: para hapjes së një aplikacioni, thërret një URL në serverin tënd për të zgjuar një soundbar nga gatishmëria.
+* Një shërbim në sfond zbulon zgjimin e pajisjes nga gatishmëria dhe e rikthen launcher-in nëse diçka tjetër ka marrë kontrollin.
+
+MX3 Launcher nuk favorizon, nuk kërkon dhe nuk përfshin asnjë aplikacion të palëve të treta; thjesht liston atë që është i instaluar.
+
+Shërbimet online (të dyja opsionale, të fikura derisa t'i çiftosh):
+
+Gjithçka tjetër funksionon plotësisht offline. Dy veçori komunikojnë me sync.odiousapps.com, një shërbim çiftimi dhe rezervimi i administruar nga zhvilluesi, dhe vetëm pasi të shtypësh "Çifto" te cilësimet dhe të miratosh kërkesën në një pajisje tjetër (skano kodin QR ose fut kodin e shkurtër në sync.odiousapps.com, ku identifikohesh në llogarinë tënde).
+
+* Rezervimi online: çiftimi i jep televizorit një token pajisjeje. Kur rezervon, televizori ngarkon temën, gradientin e sfondit, numrin e kolonave, listën e aplikacioneve të fshehura dhe rendin tënd të aplikacioneve në sync.odiousapps.com, ku ruhen në llogarinë tënde. Lista dhe rendi janë emra paketash të aplikacioneve të instaluara (për shembull com.example.app). Rikthimi shkarkon kopjen e zgjedhur nga i njëjti server. Asgjë nuk ngarkohet nëse nuk shtyp "Rezervo cilësimet".
+* Zgjimi i soundbar-it: çiftimi merr një URL dhe një çelës sekret që ke ruajtur më parë në llogarinë tënde sync.odiousapps.com; ato ruhen në televizor. Pasi aktivizohet, në çdo hapje aplikacioni televizori dërgon një kërkesë te ai URL (serveri yt, jo sync.odiousapps.com) me ?key=<sekreti yt>, emrin e kodit IR dhe një flamur "kontrollo gjendjen aktuale" dhe pret suksesin para hapjes. Asgjë nuk dërgohet për aplikacionin që hapet. Serveri ka nevojë për skriptin shembull nga depoja e kodit burimor (website_lan/send_ir.php), i cili përdor klasën PHP MQTTv5Client (https://github.com/evilbunny2008/MQTTv5Client) për të arritur prizën inteligjente dhe transmetuesin IR përmes MQTT.

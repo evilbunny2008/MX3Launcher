@@ -1,0 +1,21 @@
+Minimal bir Google TV launcher'ı: düz bir uygulama ızgarası ve başka hiçbir şey. Özellik dolu TV launcher'larına daha hafif bir alternatif; canlı TV entegrasyonu, öneri satırları veya arama/ses yok.
+
+Özellikler:
+
+* Yüklü ve başlatılabilir tüm uygulamaları gösteren 5, 6 veya 7 sütunlu düz ızgara.
+* Canlı saat, ağ ayarlarını açan Wi-Fi durum simgesi ve sistem ile launcher ayarlarına kısayollar içeren üst çubuk.
+* Tema: sistemi izle, açık veya koyu, hazır arka plan gradyanlarıyla.
+* Uygulamaları yukarı/aşağı taşıma düğmeleriyle gösterin/gizleyin ve sıralayın; çünkü sürükleme hareketlerinin D-pad'de makul bir karşılığı yoktur.
+* Odaklanılan bir uygulama simgesinde Menü'ye basarak sistemin "Uygulama bilgileri" sayfasına (izinler, depolama, kaldırma) gidin.
+* sync.odiousapps.com üzerinden isteğe bağlı çevrimiçi yedekleme ve geri yükleme, zaman damgalı birden çok yedek ve tek dokunuşla varsayılanlara sıfırlama (çevrimdışı çalışır).
+* İsteğe bağlı "Soundbar uyandırma": bir uygulamayı başlatmadan önce bekleme modundaki soundbar'ı uyandırmak için kendi sunucunuzdaki bir URL'yi çağırır.
+* Bir arka plan hizmeti cihazın bekleme modundan uyanmasını algılar ve başka bir şey devraldıysa launcher'ı geri getirir.
+
+MX3 Launcher hiçbir üçüncü taraf uygulamayı kayırmaz, gerektirmez veya içermez; yalnızca yüklü olanları listeler.
+
+Çevrimiçi hizmetler (ikisi de isteğe bağlı, eşleyene kadar kapalı):
+
+Geri kalan her şey tamamen çevrimdışı çalışır. İki özellik, geliştirici tarafından işletilen eşleme/yedekleme hizmeti sync.odiousapps.com ile iletişim kurar ve bunu yalnızca Ayarlar'da "Eşle"ye basıp isteği başka bir cihazda onayladıktan sonra yapar (QR kodunu tarayın veya hesabınızda oturum açtığınız sync.odiousapps.com'da kısa kodu girin).
+
+* Çevrimiçi yedekleme: eşleme TV'ye bir cihaz jetonu verir. Yedekleme yaptığınızda TV temanızı, arka plan gradyanını, sütun sayısını, gizli uygulamalar listesini ve özel uygulama sıranızı sync.odiousapps.com'a yükler; bunlar hesabınızda saklanır. Liste ve sıra, yüklü uygulamaların paket adlarıdır (örneğin com.example.app). Geri yükleme, seçilen yedeği aynı sunucudan indirir. "Ayarları yedekle"ye basmadığınız sürece hiçbir şey yüklenmez.
+* Soundbar uyandırma: eşleme, daha önce sync.odiousapps.com hesabınıza kaydettiğiniz URL'yi ve gizli anahtarı alır; bunlar TV'de saklanır. Etkinleştirildiğinde TV, her uygulama başlatmada bu URL'ye (sync.odiousapps.com'a değil, kendi sunucunuza) ?key=<gizli anahtarınız>, IR kod adı ve "mevcut durumu kontrol et" işaretiyle bir istek gönderir ve başlatmadan önce başarılı olmasını bekler. Hangi uygulamanın başlatıldığına dair hiçbir bilgi gönderilmez. Sunucu, kaynak deposundaki örnek betiğe (website_lan/send_ir.php) ihtiyaç duyar; bu betik akıllı prize ve IR vericiye MQTT üzerinden ulaşmak için MQTTv5Client PHP sınıfını (https://github.com/evilbunny2008/MQTTv5Client) kullanır.
